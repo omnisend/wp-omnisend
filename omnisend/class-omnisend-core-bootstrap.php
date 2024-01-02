@@ -22,5 +22,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Omnisend_Bootstrap {
+class Omnisend_Core_Bootstrap {
 }
