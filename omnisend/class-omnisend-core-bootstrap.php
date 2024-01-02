@@ -21,12 +21,23 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'OMNISEND_CORE_SETTINGS_PAGE', 'omnisend' );
+define( 'OMNISEND_CORE_PLUGIN_NAME', 'Omnisend Core' );
+define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME', 'Email Marketing for WooCommerce by Omnisend' );
 
 require_once 'module/class-omnisend-core-connection.php';
 
-add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
+add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
+add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 
 class Omnisend_Core_Bootstrap {
+
+	public static function load() {
+		if ( self::is_omnisend_woocommerce_plugin_active() || self::is_woocommerce_plugin_activate() ) {
+			return; // Do not load if "Omnisend for WooCommerce" or "WooCommerce" plugins are active.
+		}
+
+		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
+	}
 
 	public static function add_admin_menu() {
 		$page_title    = 'Omnisend Core';
@@ -38,5 +49,21 @@ class Omnisend_Core_Bootstrap {
 		$position      = 2;
 
 		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
+	}
+
+	public static function admin_notices() {
+		if ( self::is_omnisend_woocommerce_plugin_active() ) {
+			echo '<div class="notice notice-error"><strong>' . esc_html( OMNISEND_CORE_PLUGIN_NAME ) . '</strong> plugin is not compatible with <strong>' . esc_html( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME ) . '</strong> plugin. Please use <strong>' . esc_html( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME ) . '</strong> plugin to connect to Omnisend.</p></div>';
+		} elseif ( self::is_woocommerce_plugin_activate() ) {
+			echo '<div class="notice notice-error"><strong>WooCommerce</strong> plugin is active. Please use <strong>' . esc_html( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME ) . '</strong> plugin instead of <strong>' . esc_html( OMNISEND_CORE_PLUGIN_NAME ) . '</strong> plugin.</p></div>';
+		}
+	}
+
+	public static function is_omnisend_woocommerce_plugin_active(): bool {
+		return in_array( 'omnisend-connect/omnisend-woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) );
+	}
+
+	public static function is_woocommerce_plugin_activate() {
+		return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) );
 	}
 }
