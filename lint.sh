@@ -8,12 +8,12 @@ case $action in
 "check")
   composer update
   composer install
-  ./vendor/bin/phpcs -s omnisend-for-contact-form-7
+  ./vendor/bin/phpcs -s omnisend
   ;;
 "fix")
   composer update
   composer install
-  ./vendor/bin/phpcbf omnisend-for-contact-form-7
+  ./vendor/bin/phpcbf omnisend
   ;;
 *)
   echo "pass one of these argument: check,fix"
