@@ -9,7 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 class Omnisend_Core_Options {
 
-	private const OPTION_API_KEY = 'omnisend_core_api_key';
+	private const OPTION_API_KEY  = 'omnisend_core_api_key';
+	private const OPTION_BRAND_ID = 'omnisend_core_brand_id';
 
 	public static function get_api_key(): string {
 		$api_key = get_option( self::OPTION_API_KEY );
@@ -18,14 +19,9 @@ class Omnisend_Core_Options {
 	}
 
 	public static function get_brand_id(): string {
-		$api_key = get_option( self::OPTION_API_KEY );
-		if ( ! is_string( $api_key ) ) {
-			return '';
-		}
+		$brand_id = get_option( self::OPTION_BRAND_ID );
 
-		$exploded = explode( '-', $api_key );
-
-		return count( $exploded ) == 2 ? $exploded[0] : '';
+		return is_string( $brand_id ) ? $brand_id : '';
 	}
 
 	public static function set_api_key( $api_key ): bool {
@@ -34,5 +30,13 @@ class Omnisend_Core_Options {
 		}
 
 		return update_option( self::OPTION_API_KEY, $api_key );
+	}
+
+	public static function set_brand_id( $brand_id ): bool {
+		if ( ! is_string( $brand_id ) ) {
+			return false;
+		}
+
+		return update_option( self::OPTION_BRAND_ID, $brand_id );
 	}
 }
