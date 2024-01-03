@@ -23,8 +23,10 @@ defined( 'ABSPATH' ) || exit;
 define( 'OMNISEND_CORE_SETTINGS_PAGE', 'omnisend' );
 define( 'OMNISEND_CORE_PLUGIN_NAME', 'Omnisend Core' );
 define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME', 'Email Marketing for WooCommerce by Omnisend' );
+define( 'OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3' );
 
 require_once 'module/class-omnisend-core-connection.php';
+require_once 'module/class-omnisend-core-options.php';
 
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
