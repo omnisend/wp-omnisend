@@ -17,6 +17,17 @@ class Omnisend_Core_Options {
 		return is_string( $api_key ) ? $api_key : '';
 	}
 
+	public static function get_brand_id(): string {
+		$api_key = get_option( self::OPTION_API_KEY );
+		if ( ! is_string( $api_key ) ) {
+			return '';
+		}
+
+		$exploded = explode( '-', $api_key );
+
+		return count( $exploded ) == 2 ? $exploded[0] : '';
+	}
+
 	public static function set_api_key( $api_key ): bool {
 		if ( ! is_string( $api_key ) ) {
 			return false;

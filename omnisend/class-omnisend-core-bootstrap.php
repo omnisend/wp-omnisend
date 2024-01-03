@@ -27,6 +27,7 @@ define( 'OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3' );
 
 require_once 'module/class-omnisend-core-connection.php';
 require_once 'module/class-omnisend-core-options.php';
+require_once 'module/class-omnisend-core-snippet.php';
 
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
@@ -39,6 +40,7 @@ class Omnisend_Core_Bootstrap {
 		}
 
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
+		add_action( 'wp_footer', 'Omnisend_Core_Snippet::add' );
 	}
 
 	public static function add_admin_menu() {
