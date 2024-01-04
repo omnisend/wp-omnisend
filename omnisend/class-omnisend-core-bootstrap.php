@@ -20,10 +20,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
+define( 'OMNISEND_CORE_PLUGIN_VERSION', '1.0.0' );
 define( 'OMNISEND_CORE_SETTINGS_PAGE', 'omnisend' );
 define( 'OMNISEND_CORE_PLUGIN_NAME', 'Omnisend Core' );
 define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME', 'Email Marketing for WooCommerce by Omnisend' );
+
+// Change for different environment.
 define( 'OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3' );
+define( 'OMNISEND_CORE_SNIPPET_URL', 'https://omnisnippet1.com/inshop/launcher-v2.js' );
 
 require_once 'module/class-omnisend-core-connection.php';
 require_once 'module/class-omnisend-core-options.php';
