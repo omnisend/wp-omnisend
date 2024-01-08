@@ -66,7 +66,7 @@ class Omnisend_Core_Connection {
 	private static function connect_store( $api_key ): bool {
 		$data = array(
 			'website'         => site_url(),
-			'platform'        => 'api',
+			'platform'        => 'wordpress',
 			'version'         => OMNISEND_CORE_PLUGIN_VERSION,
 			'phpVersion'      => phpversion(),
 			'platformVersion' => get_bloginfo( 'version' ),
