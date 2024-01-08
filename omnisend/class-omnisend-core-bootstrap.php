@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'OMNISEND_CORE_PLUGIN_VERSION', '1.0.0' );
 define( 'OMNISEND_CORE_SETTINGS_PAGE', 'omnisend' );
-define( 'OMNISEND_CORE_PLUGIN_NAME', 'Omnisend Core' );
+define( 'OMNISEND_CORE_PLUGIN_NAME', 'Omnisend' );
 define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME', 'Email Marketing for WooCommerce by Omnisend' );
 
 // Change for different environment.
@@ -48,8 +48,8 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function add_admin_menu() {
-		$page_title    = 'Omnisend Core';
-		$menu_title    = 'Omnisend Core';
+		$page_title    = 'Omnisend';
+		$menu_title    = 'Omnisend';
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend_Core_Connection::display';
