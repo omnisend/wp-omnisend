@@ -29,7 +29,7 @@ class Omnisend_Core_Connection {
 
 			if ( ! $connected ) {
 				Omnisend_Core_Options::disconnect(); // Store was not connected, clean up.
-				echo '<div class="notice notice-error"><p>API key is not valid</p></div>';
+				echo '<div class="notice notice-error"><p>API key is not valid.</p></div>';
 			}
 		}
 
