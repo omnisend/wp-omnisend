@@ -68,7 +68,6 @@ class Omnisend_Core_Connection {
 			'website'         => site_url(),
 			'platform'        => 'api',
 			'version'         => OMNISEND_CORE_PLUGIN_VERSION,
-			'webserver'       => 'Wordpress: Omnisend Core Plugin',
 			'phpVersion'      => phpversion(),
 			'platformVersion' => get_bloginfo( 'version' ),
 		);
