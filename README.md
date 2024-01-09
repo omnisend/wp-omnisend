@@ -1,5 +1,7 @@
 # Omnisend Core Plugin
 
+More about plugin and use cases please read in [slite](https://omnisend.slite.com/app/docs/8xkrs-u8rHvu8r).
+
 ## PHP Linting
 
 WordPress.org team mandates our plugin to be linted
