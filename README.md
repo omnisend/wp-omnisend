@@ -1,6 +1,11 @@
 # Omnisend Core Plugin
 
-More about plugin and use cases please read in [slite](https://omnisend.slite.com/app/docs/8xkrs-u8rHvu8r).
+[Omnisend](https://wordpress.org/plugins/omnisend/) is WordPress plugin that enables to use different [Omnisend marketing automation tool](https://www.omnisend.com/) features
+for WordPress website.
+
+## Plugin features
+
+* Website connection to Omnisend (this enables to use different Omnisend [features](https://www.omnisend.com/features/))
 
 ## PHP Linting
 
