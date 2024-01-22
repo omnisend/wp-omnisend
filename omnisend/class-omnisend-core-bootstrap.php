@@ -51,6 +51,12 @@ class Omnisend_Core_Bootstrap {
 					array(),
 					'1.0.0',
 				);
+				wp_enqueue_style(
+					'styles.css',
+					plugin_dir_url( __FILE__ ) . 'module/styles/styles.css?' . time(),
+					array(),
+					'1.0.0',
+				);
 			}
 		}
 
