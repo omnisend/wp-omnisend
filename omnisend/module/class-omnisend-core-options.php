@@ -49,6 +49,10 @@ class Omnisend_Core_Options {
 		return boolval( get_option( self::OPTION_STORE_CONNECTED ) );
 	}
 
+	public static function is_connected(): bool {
+		return self::is_store_connected() && self::get_api_key();
+	}
+
 	public static function disconnect() {
 		delete_option( self::OPTION_API_KEY );
 		delete_option( self::OPTION_BRAND_ID );
