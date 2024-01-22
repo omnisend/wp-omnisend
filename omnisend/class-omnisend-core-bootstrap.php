@@ -43,7 +43,7 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'admin_init', 'Omnisend_Core_Bootstrap::rename_omnisend_for_woo_menu' );
 		add_action( 'admin_init', 'Omnisend_Core_Connection::connect_with_omnisend_for_woo_plugin' );
 
-		if ( self::is_omnisend_woocommerce_plugin_active() && self::is_omnisend_woocommerce_plugin_connected() ) {
+		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend_Core_Snippet::add' );
 		}
 	}
