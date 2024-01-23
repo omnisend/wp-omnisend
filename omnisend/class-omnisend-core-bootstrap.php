@@ -43,6 +43,7 @@ class Omnisend_Core_Bootstrap {
 			return; // Do not load if "Omnisend for WooCommerce" or "WooCommerce" plugins are active.
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification
 		if ( isset( $_GET['page'] ) ) {
 			if ( in_array( $_GET['page'], array( 'omnisend' ), true ) ) {
 				wp_enqueue_style(

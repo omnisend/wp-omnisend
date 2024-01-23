@@ -35,7 +35,7 @@ class Omnisend_Core_Connection {
 		}
 
 		if ( $connected ) {
-			require_once 'view/connection-success.php';
+			require_once 'view/connection-success.html';
 			return;
 		}
 
