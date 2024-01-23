@@ -23,11 +23,14 @@ defined( 'ABSPATH' ) || exit;
 define( 'OMNISEND_CORE_PLUGIN_VERSION', '1.0.0' );
 define( 'OMNISEND_CORE_SETTINGS_PAGE', 'omnisend' );
 define( 'OMNISEND_CORE_PLUGIN_NAME', 'Omnisend' );
-define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME', 'Email Marketing for WooCommerce by Omnisend' );
 
 // Change for different environment.
 define( 'OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3' );
 define( 'OMNISEND_CORE_SNIPPET_URL', 'https://omnisnippet1.com/inshop/launcher-v2.js' );
+
+// Omnisend for Woo plugin.
+define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME', 'Email Marketing for WooCommerce by Omnisend' );
+define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION', 'omnisend_api_key' );
 
 require_once 'module/class-omnisend-core-connection.php';
 require_once 'module/class-omnisend-core-options.php';
@@ -80,7 +83,7 @@ class Omnisend_Core_Bootstrap {
 
 
 	public static function admin_notices() {
-		if ( Omnisend_Core_Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( 'omnisend_api_key' ) ) {
+		if ( Omnisend_Core_Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
 			echo '<div class="notice notice-error">If you want to use <strong>Omnisend for Woo</strong> plugin please contact customer support.</p></div>';
 		}
 	}

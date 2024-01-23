@@ -113,7 +113,7 @@ class Omnisend_Core_Connection {
 			return;
 		}
 
-		$api_key = get_option( 'omnisend_api_key' );
+		$api_key = get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION );
 		if ( ! $api_key ) {
 			return;
 		}
