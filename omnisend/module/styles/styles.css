@@ -116,6 +116,7 @@
   display: flex;
 }
 
+
 .omnisend-row-input-button {
   box-sizing: border-box;
   display: flex;
@@ -126,6 +127,36 @@
   width: 100%;
   gap: 16px;
   align-items: flex-end;
+}
+
+.omnisend-link-button {
+  background: none;
+  font: inherit;
+  align-items: center;
+  border-radius: 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: nowrap;
+  font-family: Roboto;
+  font-size: 14px;
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: 400;
+  gap: 8px;
+  height: 40px;
+  justify-content: center;
+  letter-spacing: normal;
+  line-height: 24px;
+  outline: none;
+  padding: 8px 16px;
+  position: relative;
+  text-decoration: none;
+  transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+  white-space: nowrap;
+  border: 1px solid #35938f;
+  color: #35938f;
+  width: fit-content;
 }
 
 .omnisend-link-button {
@@ -222,7 +253,7 @@
   padding: 0;
 }
 
-.omnisend-form-submit-button {
+.omnisend-form-button-primary{
   background: none;
   font: inherit;
   align-items: center;
@@ -274,7 +305,7 @@
   vertical-align: middle;
 }
 
-.omnisend-connect-form {
+.omnisend-connect {
   margin-top: 70px;
   margin-left: 70px;
   margin-right: 70px;

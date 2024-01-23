@@ -1,5 +1,6 @@
-<div class="omnisend-connect-form">
+<div class="omnisend-connect">
   <form method="post">
+    <?php wp_nonce_field('connect'); ?>
     <div class="omnisend-spacing-mb-8">
       <div class="omnisend-icon-wrapper">
         <svg
@@ -136,14 +137,15 @@
               </div>
               <div class="omnisend-form-field-button">
                 <button
+                  type="submit"
                   value="Connect to Omnisend"
-                  class="omnisend-form-submit-button"
+                  class="omnisend-form-button-primary"
                 >
                   Connect Omnisend
                 </button>
               </div>
             </div>
-          </div>
+          </div>`
         </div>
       </div>
     </div>

@@ -16,6 +16,8 @@ class Omnisend_Core_Connection {
 			check_admin_referer( 'connect' );
 			$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ) );
 			$brand_id = self::get_brand_id( $api_key );
+
+
 			if ( $brand_id ) {
 				// Set credentials so snippet can be added for snippet verification.
 				Omnisend_Core_Options::set_api_key( $api_key );
@@ -34,7 +36,7 @@ class Omnisend_Core_Connection {
 		}
 
 		if ( $connected ) {
-			echo 'You are connected to Omnisend!';
+			require_once 'view/connection-success.php';
 			return;
 		}
 
