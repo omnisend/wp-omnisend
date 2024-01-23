@@ -88,6 +88,6 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function is_omnisend_woocommerce_plugin_connected(): bool {
-		return get_option( 'omnisend_account_id', null ) !== null;
+		return self::is_omnisend_woocommerce_plugin_active() && get_option( 'omnisend_account_id', null ) !== null;
 	}
 }
