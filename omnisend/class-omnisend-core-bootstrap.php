@@ -39,6 +39,24 @@ add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 class Omnisend_Core_Bootstrap {
 
 	public static function load() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( isset( $_GET['page'] ) ) {
+			if ( in_array( $_GET['page'], array( 'omnisend' ), true ) ) {
+				wp_enqueue_style(
+					'roboto.css',
+					plugin_dir_url( __FILE__ ) . 'module/assets/fonts/roboto/roboto.css?' . time(),
+					array(),
+					'1.0.0',
+				);
+				wp_enqueue_style(
+					'styles.css',
+					plugin_dir_url( __FILE__ ) . 'module/styles/styles.css?' . time(),
+					array(),
+					'1.0.0',
+				);
+			}
+		}
+
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
 		add_action( 'admin_init', 'Omnisend_Core_Connection::connect_with_omnisend_for_woo_plugin' );
 
