@@ -1,0 +1,59 @@
+=== Omnisend ===
+Plugin Name: Omnisend
+Contributors: Omnisend
+Tags: form, email marketing, web tracking, subscriber collection
+Requires at least: 4.7.0
+Tested up to: 6.4
+Requires PHP: 7.1
+Stable tag: 1.0.0
+License: GPLv3 or later
+URI: http://www.gnu.org/licenses/gpl-3.0.html
+
+Email Marketing, Newsletter, Email Automation, Forms, Pop Up, SMS by Omnisend
+
+== DESCRIPTION ==
+
+The Omnisend plugin connects to Omnisend email marketing tool, allows other plugins automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.
+
+You are also able to:
+
+* Connect your WordPress site to Omnisend email marketing tool
+* Customize your integration settings to your store needs.
+* Integrate with additional add-ons.
+
+== REQUIREMENTS ==
+
+None.
+
+== FAQ ==
+
+= Installation instructions =
+
+Will be updated support article here.
+
+= What are the technical requirements for the plugin installation? =
+* PHP 7.1+
+* WordPress 4.0.1+
+* Omnisend account
+
+= How can I reach Omnisend support? =
+Every Omnisend customer gets our award-winning support, 24/7—even on the free plan. Email support@omnisend.com or use the live chat option within your account. We also have a comprehensive  [Knowledge Base](https://support.omnisend.com/).
+
+= Where can I find Omnisend Terms? =
+Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
+
+== Screenshots ==
+
+1. Build beautiful campaigns using our email templates
+2. Drive revenue round the clock and recover sales with pre-built automated workflows
+3. Send emails, newsletters & SMS campaigns
+4. Access all features on the generous free-forever plan
+5. Grow your audience with popups incl exit-intent, signup forms & spin-to-win
+6. Fast support, available 24/77. Actionable insights to help create more personalized messages
+7. Convert more visitors with highly-targeted landing pages
+
+== Changelog ==
+
+= 1.0.0 =
+
+* Initial release.
