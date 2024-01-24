@@ -10,7 +10,6 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-
 class Omnisend_Core_Contact
 {
 
@@ -39,7 +38,6 @@ class Omnisend_Core_Contact
 	private array $errors = array();
 
 
-	// TODO add logic to validate main properties
 	public function is_valid(): bool
 	{
 		$string_properties = array(
@@ -58,7 +56,10 @@ class Omnisend_Core_Contact
 			$this->errors['email'] = 'Not a valid email.';
 		}
 
-		// todo update validation for phone number
+		if ($this->send_welcome_email != null && !is_bool($this->send_welcome_email)) {
+			$this->errors['send_welcome_email'] = 'Not a valid boolean.';
+		}
+
 		if ($this->phone != null && !is_numeric($this->phone) && $this->errors['phone'] == null) {
 			$this->errors['phone'] = 'Not a valid phone number.';
 		}
@@ -70,7 +71,6 @@ class Omnisend_Core_Contact
 		if ($this->gender != null && ($this->gender != 'f' ||  $this->gender != 'm')) {
 			$this->errors['gender'] = 'Gender must be "f" or "m".';
 		}
-
 
 		foreach ($this->tags as $tag) {
 			if (!Omnisend_Core_Client_Utils::is_valid_tag($tag)) {
@@ -85,8 +85,6 @@ class Omnisend_Core_Contact
 				break;
 			}
 		}
-
-
 
 		return count($this->errors) === 0;
 	}
@@ -203,7 +201,6 @@ class Omnisend_Core_Contact
 	}
 
 
-	// TODO change setters to simple so either way we would set them.
 	public function set_email($email): void
 	{
 		if ($email && is_string($email)) {
@@ -266,7 +263,6 @@ class Omnisend_Core_Contact
 		$this->send_welcome_email = $send_welcome_email;
 	}
 
-	// todo split into two functions to also allow full concent management and provide more properties
 	public function set_email_opt_in($opt_in_text): void
 	{
 		$this->email_opt_in_source = $opt_in_text;
@@ -298,32 +294,3 @@ class Omnisend_Core_Contact
 		$this->tags[] = $tag;
 	}
 }
-
-
-
-// // Usage:
-
-// $person = new Contact();
-// $person->name = 'John';
-// $person->birth_date = '1930-01-01';
-// $person->birth_date = '1930-01-01';
-
-// this will be auto set for opt in && consent
-// $person->creation_source = 'form';
-// $person->email = 'john@example';
-// $person->phone = '123456789';
-// $person->add_tag('tag1');
-// $person->add_tag('tag2');
-// $person->add_custom_property('custom1', 'value1');
-// $person->add_custom_property('custom2', 'value2');
-
-
-// $person->set_email_consent('contact form');
-// $person->set_phone_consent('contact form');
-
-// if (!$person->is_valid())
-// {
-// Handle errors with $person->errors()
-// }
-
-// omnisend.save_contact($person) // also call to is_valid() inside

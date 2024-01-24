@@ -11,9 +11,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Omnisend_Core_Client {
+	public static function create_contact( $contact ): mixed {
 
+		$errors = new WP_Error();
 
-	public static function create_contact( $contact ): string {
+		if ( ! $contact instanceof Omnisend_Core_Contact ) {
+			$errors->add( "contact", 'Contact is not instance of Omnisend_Core_Contact' );
+			return $errors;
+		}
+
+		if ( ! Omnisend_Core_Options::get_api_key() ) {
+			if ( ! $contact instanceof Omnisend_Core_Contact ) {
+				$errors->add( "api_key", 'API key is not set' );
+				return $errors;
+			}
+		}
+
+		if ( ! $contact->is_valid() ) {
+				foreach ($contact->errors() as $key => $value) {
+					$errors->add( $key, $value );
+				}
+				return $errors;
+			}
+		
 
 		$response = wp_remote_post(
 			'https://api.omnisend.com/v3/contacts',
@@ -29,7 +49,6 @@ class Omnisend_Core_Client {
 
 		if ( is_wp_error( $response ) ) {
 
-			// TODO throw error
 			error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
 			return '';
 		}
