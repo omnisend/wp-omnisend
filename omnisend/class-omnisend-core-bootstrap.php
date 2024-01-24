@@ -36,6 +36,10 @@ require_once 'module/class-omnisend-core-connection.php';
 require_once 'module/class-omnisend-core-options.php';
 require_once 'module/class-omnisend-core-snippet.php';
 
+require_once 'module/client/class-omnisend-core-client-contact.php';
+require_once 'module/client/class-omnisend-core-omnisend-utils.php';
+require_once 'module/client/class-omnisend-core-omnisend.php';
+
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 
