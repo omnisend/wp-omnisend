@@ -39,7 +39,7 @@ class Omnisend_Core_Connection {
 
 			$contact = new Omnisend_Core_Contact();
 
-			$contact->set_first_name( 123 );
+			$contact->set_first_name( "Asdf" );
 			$contact->set_last_name( 'Doe' );
 			$contact->set_email( 'lokalus@lokalus.lt' );
 			$contact->set_address( 'Address' );
@@ -47,19 +47,25 @@ class Omnisend_Core_Connection {
 			$contact->set_state( 'State' );
 			$contact->set_country( 'Country' );
 			$contact->set_postal_code( 'Postal Code' );
-			$contact->set_phone( 'Phone' );
+			$contact->set_phone( '12323' );
 			$contact->set_birthday( '1990-01-01' );
 			$contact->set_welcome_email(true);
 			$contact->set_email_opt_in("test-mail");
 
 			$contact->set_email_consent("abc");
 
-
 			$res = Omnisend_Core_Client::create_contact( $contact );
 
-			echo '<pre>';
-			var_dump($res);
-			echo '</pre>';
+			/// check if wp error is returned
+			if ( is_wp_error( $res ) ) {
+				// handle error
+				$error_message = $res->get_error_message();
+				echo "Something went wrong: $error_message";
+			} else {
+				// handle success
+				echo 'Contact created successfully';
+			}
+
 
 			require_once 'view/connection-success.html';
 			return;

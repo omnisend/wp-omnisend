@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Omnisend Contact form 7 plugin
+ * Omnisend Contact Utils
  *
  * @package OmnisendClient
  */
@@ -24,5 +24,12 @@ class Omnisend_Core_Client_Utils {
 	public static function clean_up_tag( $tag ): string {
 		$tag = preg_replace( '/[^A-Za-z0-9_\- ]/', '', $tag );
 		return mb_strimwidth( $tag, 0, 128 );
+	}
+
+	public static function clean_up_tags( $tags ): array {
+		$tags = array_map( 'self::clean_up_tag', $tags );
+		$tags = array_filter( $tags, 'self::is_valid_tag' );
+		$tags = array_unique( $tags );
+		return $tags;
 	}
 }
