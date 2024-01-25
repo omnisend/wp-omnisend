@@ -5,9 +5,11 @@
  * @package OmnisendPlugin
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Omnisend\Internal;
 
-class Omnisend_Core_Snippet {
+defined( 'ABSPATH' ) || die( 'no direct access' );
+
+class Snippet {
 
 	public static function add() {
 		$brand_id = Omnisend_Core_Options::get_brand_id();

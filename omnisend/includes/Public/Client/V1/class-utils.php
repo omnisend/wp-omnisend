@@ -1,17 +1,15 @@
 <?php
-
 /**
  * Omnisend Contact Utils
  *
  * @package OmnisendClient
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace Omnisend\Public\Client\V1;
 
-class Omnisend_Core_Client_Utils {
+! defined( 'ABSPATH' ) && die( 'no direct access' );
 
+class Utils {
 
 	public static function is_valid_custom_property_name( $name ): bool {
 		return preg_match( '/^[a-zA-Z0-9_]{1,128}$/', $name );

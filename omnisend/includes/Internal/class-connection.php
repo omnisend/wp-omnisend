@@ -5,12 +5,18 @@
  * @package OmnisendPlugin
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Omnisend\Internal;
 
-class Omnisend_Core_Connection {
+use Omnisend\Public\Client\V1\Client;
+use Omnisend\Public\Client\V1\Contact;
+use Omnisend_Core_Bootstrap;
 
-	public static function display() {
-		$connected = Omnisend_Core_Options::is_store_connected();
+defined( 'ABSPATH' ) || die( 'no direct access' );
+
+class Connection {
+
+	public static function display(): void {
+		$connected = Options::is_store_connected();
 
 		if ( ! $connected && ! empty( $_POST['action'] ) && 'connect' == $_POST['action'] && ! empty( $_POST['api_key'] ) ) {
 			check_admin_referer( 'connect' );
@@ -19,27 +25,26 @@ class Omnisend_Core_Connection {
 
 			if ( $brand_id ) {
 				// Set credentials so snippet can be added for snippet verification.
-				Omnisend_Core_Options::set_api_key( $api_key );
-				Omnisend_Core_Options::set_brand_id( $brand_id );
+				Options::set_api_key( $api_key );
+				Options::set_brand_id( $brand_id );
 
 				$connected = self::connect_store( $api_key );
 				if ( $connected ) {
-					Omnisend_Core_Options::set_store_connected();
+					Options::set_store_connected();
 				}
 			}
 
 			if ( ! $connected ) {
-				Omnisend_Core_Options::disconnect(); // Store was not connected, clean up.
+				Options::disconnect(); // Store was not connected, clean up.
 				echo '<div class="notice notice-error"><p>API key is not valid.</p></div>';
 			}
 		}
 
-		if ( $connected ) {
+		if ( $connected ) { // todo remove.
 
+			$contact = new Contact();
 
-			$contact = new Omnisend_Core_Contact();
-
-			$contact->set_first_name( "Asdf" );
+			$contact->set_first_name( 'Asdf' );
 			$contact->set_last_name( 'Doe' );
 			$contact->set_email( 'lokalus@lokalus.lt' );
 			$contact->set_address( 'Address' );
@@ -49,29 +54,28 @@ class Omnisend_Core_Connection {
 			$contact->set_postal_code( 'Postal Code' );
 			$contact->set_phone( '12323' );
 			$contact->set_birthday( '1990-01-01' );
-			$contact->set_welcome_email(true);
-			$contact->set_email_opt_in("test-mail");
+			$contact->set_welcome_email( true );
+			$contact->set_email_opt_in( 'test-mail' );
 
-			$contact->set_email_consent("abc");
+			$contact->set_email_consent( 'abc' );
 
-			$res = Omnisend_Core_Client::create_contact( $contact );
+			$res = Client::create_contact( $contact );
 
-			/// check if wp error is returned
+			// Check if wp error is returned.
 			if ( is_wp_error( $res ) ) {
-				// handle error
+				// handle error.
 				$error_message = $res->get_error_message();
-				echo "Something went wrong: $error_message";
+				echo "Something went wrong: $error_message"; // phpcs:ignore
 			} else {
-				// handle success
+				// handle success.
 				echo 'Contact created successfully';
 			}
 
-
-			require_once 'view/connection-success.html';
+			require_once __DIR__ . '/../../view/connection-success.html';
 			return;
 		}
 
-		require_once 'view/connection-form.html';
+		require_once __DIR__ . '/../../view/connection-success.html';
 	}
 
 	private static function get_brand_id( $api_key ): string {
@@ -136,8 +140,8 @@ class Omnisend_Core_Connection {
 		return ! empty( $arr['verified'] );
 	}
 
-	public static function connect_with_omnisend_for_woo_plugin() {
-		if ( Omnisend_Core_Options::is_connected() ) {
+	public static function connect_with_omnisend_for_woo_plugin(): void {
+		if ( Options::is_connected() ) {
 			return; // Already connected.
 		}
 
@@ -155,8 +159,8 @@ class Omnisend_Core_Connection {
 			return;
 		}
 
-		Omnisend_Core_Options::set_api_key( $api_key );
-		Omnisend_Core_Options::set_brand_id( $brand_id );
-		Omnisend_Core_Options::set_store_connected();
+		Options::set_api_key( $api_key );
+		Options::set_brand_id( $brand_id );
+		Options::set_store_connected();
 	}
 }

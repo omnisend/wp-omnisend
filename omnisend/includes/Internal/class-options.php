@@ -5,9 +5,11 @@
  * @package OmnisendPlugin
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Omnisend\Internal;
 
-class Omnisend_Core_Options {
+defined( 'ABSPATH' ) || die( 'no direct access' );
+
+class Options {
 
 	private const OPTION_API_KEY         = 'omnisend_core_api_key';
 	private const OPTION_BRAND_ID        = 'omnisend_core_brand_id';
