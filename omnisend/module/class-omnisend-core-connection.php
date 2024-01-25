@@ -103,4 +103,28 @@ class Omnisend_Core_Connection {
 
 		return ! empty( $arr['verified'] );
 	}
+
+	public static function connect_with_omnisend_for_woo_plugin() {
+		if ( Omnisend_Core_Options::is_connected() ) {
+			return; // Already connected.
+		}
+
+		if ( ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_active() ) {
+			return;
+		}
+
+		$api_key = get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION );
+		if ( ! $api_key ) {
+			return;
+		}
+
+		$brand_id = self::get_brand_id( $api_key );
+		if ( ! $brand_id ) {
+			return;
+		}
+
+		Omnisend_Core_Options::set_api_key( $api_key );
+		Omnisend_Core_Options::set_brand_id( $brand_id );
+		Omnisend_Core_Options::set_store_connected();
+	}
 }
