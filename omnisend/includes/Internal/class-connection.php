@@ -40,41 +40,6 @@ class Connection {
 			}
 		}
 
-		if ( $connected ) { // todo remove.
-
-			$contact = new Contact();
-
-			$contact->set_first_name( 'Asdf' );
-			$contact->set_last_name( 'Doe' );
-			$contact->set_email( 'lokalus@lokalus.lt' );
-			$contact->set_address( 'Address' );
-			$contact->set_city( 'City' );
-			$contact->set_state( 'State' );
-			$contact->set_country( 'Country' );
-			$contact->set_postal_code( 'Postal Code' );
-			$contact->set_phone( '12323' );
-			$contact->set_birthday( '1990-01-01' );
-			$contact->set_welcome_email( true );
-			$contact->set_email_opt_in( 'test-mail' );
-
-			$contact->set_email_consent( 'abc' );
-
-			$res = Client::create_contact( $contact );
-
-			// Check if wp error is returned.
-			if ( is_wp_error( $res ) ) {
-				// handle error.
-				$error_message = $res->get_error_message();
-				echo "Something went wrong: $error_message"; // phpcs:ignore
-			} else {
-				// handle success.
-				echo 'Contact created successfully';
-			}
-
-			require_once __DIR__ . '/../../view/connection-success.html';
-			return;
-		}
-
 		require_once __DIR__ . '/../../view/connection-success.html';
 	}
 

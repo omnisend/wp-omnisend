@@ -12,25 +12,25 @@ use WP_Error;
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Contact {
-	private $first_name;
-	private $last_name;
-	private $email;
-	private $address;
-	private $city;
-	private $state;
-	private $country;
-	private $postal_code;
-	private $phone;
-	private $birthday;
-	private $gender;
-	private $send_welcome_email;
+	private $first_name         = null;
+	private $last_name          = null;
+	private $email              = null;
+	private $address            = null;
+	private $city               = null;
+	private $state              = null;
+	private $country            = null;
+	private $postal_code        = null;
+	private $phone              = null;
+	private $birthday           = null;
+	private $gender             = null;
+	private $send_welcome_email = null;
 
-	private array $tags = array();
-	private ?string $email_consent;
-	private ?string $phone_consent;
+	private array $tags    = array();
+	private $email_consent = null;
+	private $phone_consent = null;
 
-	private ?string $email_opt_in_source;
-	private ?string $phone_opt_in_source;
+	private $email_opt_in_source = null;
+	private $phone_opt_in_source = null;
 
 	private array $custom_properties = array();
 
@@ -80,7 +80,7 @@ class Contact {
 			$error->add( 'identifier', 'Phone or email must be set.' );
 		}
 
-		if ( $this->gender != null && ( $this->gender != 'f' || $this->gender != 'm' ) ) {
+		if ( $this->gender != null && ! in_array( $this->gender, array( 'm', 'f' ) ) ) {
 			$error->add( 'gender', 'Gender must be "f" or "m".' );
 		}
 
@@ -100,7 +100,7 @@ class Contact {
 	}
 
 	public function to_array(): array {
-		if ( ! $this->is_valid() ) {
+		if ( $this->validate()->has_errors() ) {
 			return array();
 		}
 
@@ -109,31 +109,33 @@ class Contact {
 		$user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? 'user agent not found' ) );
 		$ip         = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'ip not found' ) );
 
-		$email_identifier = array(
-			'type'     => 'email',
-			'id'       => $this->email,
-			'channels' => array(
-				'email' => array(
-					'status'     => $this->email_opt_in_source || $this->email_consent ? 'subscribed' : 'nonSubscribed',
-					'statusDate' => $time_now,
-				),
-			),
-		);
-		if ( $this->email_consent ) {
-			$email_identifier['consent'] = array(
-				'source'    => $this->email_consent,
-				'createdAt' => $time_now,
-				'ip'        => $ip,
-				'userAgent' => $user_agent,
-			);
-		}
-
 		$arr = array(
-			'identifiers' => array(
-				$email_identifier,
-			),
-			'tags'        => $this->tags,
+			'identifiers' => array(),
+			'tags'        => array_values( array_unique( $this->tags ) ),
 		);
+
+		if ( $this->email ) {
+			$email_identifier = array(
+				'type'     => 'email',
+				'id'       => $this->email,
+				'channels' => array(
+					'email' => array(
+						'status'     => $this->email_opt_in_source || $this->email_consent ? 'subscribed' : 'nonSubscribed',
+						'statusDate' => $time_now,
+					),
+				),
+			);
+			if ( $this->email_consent ) {
+				$email_identifier['consent'] = array(
+					'source'    => $this->email_consent,
+					'createdAt' => $time_now,
+					'ip'        => $ip,
+					'userAgent' => $user_agent,
+				);
+			}
+
+			$arr['identifiers'][] = $email_identifier;
+		}
 
 		if ( $this->custom_properties ) {
 			$arr['customProperties'] = $this->custom_properties;

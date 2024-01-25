@@ -31,7 +31,6 @@ const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
 const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
 
 // Omnisend for Woo plugin.
-const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_NAME           = 'Email Marketing for WooCommerce by Omnisend';
 const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION = 'omnisend_api_key';
 
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
