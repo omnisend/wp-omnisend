@@ -33,13 +33,13 @@ const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.j
 // Omnisend for Woo plugin.
 const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION = 'omnisend_api_key';
 
+spl_autoload_register( array( 'Omnisend_Core_Bootstrap', 'autoloader' ) );
+register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 
 class Omnisend_Core_Bootstrap {
 
-	public static function load() {
-		spl_autoload_register( array( 'Omnisend_Core_Bootstrap', 'autoloader' ) );
-
+	public static function load(): void {
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
@@ -63,7 +63,7 @@ class Omnisend_Core_Bootstrap {
 		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
 	}
 
-	public static function load_omnisend_admin_styles() {
+	public static function load_omnisend_admin_styles(): void {
         // phpcs:disable WordPress.Security.NonceVerification
 		if ( isset( $_GET['page'] ) ) {
 			if ( in_array( $_GET['page'], array( 'omnisend' ), true ) ) {
@@ -83,7 +83,7 @@ class Omnisend_Core_Bootstrap {
 		}
 	}
 
-	public static function admin_notices() {
+	public static function admin_notices(): void {
 		if ( Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
 			echo '<div class="notice notice-error">If you want to use <strong>Omnisend for Woo</strong> plugin please contact customer support.</p></div>';
 		}
@@ -119,5 +119,9 @@ class Omnisend_Core_Bootstrap {
 		if ( file_exists( $path ) ) {
 			require_once $path;
 		}
+	}
+
+	public static function uninstall(): void {
+		Options::delete_all();
 	}
 }

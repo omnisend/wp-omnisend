@@ -7,8 +7,6 @@
 
 namespace Omnisend\Internal;
 
-use Omnisend\Public\Client\V1\Client;
-use Omnisend\Public\Client\V1\Contact;
 use Omnisend_Core_Bootstrap;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
