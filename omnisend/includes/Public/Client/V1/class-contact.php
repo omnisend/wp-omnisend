@@ -329,9 +329,9 @@ class Contact {
 	}
 
 	/**
-	 * Sets contact postal_code.
+	 * Sets contact set_phone.
 	 *
-	 * @param $postal_code
+	 * @param $set_phone
 	 *
 	 * @return void
 	 */
