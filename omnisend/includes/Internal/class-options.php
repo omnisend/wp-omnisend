@@ -10,10 +10,10 @@ namespace Omnisend\Internal;
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Options {
-
-	private const OPTION_API_KEY         = 'omnisend_core_api_key';
-	private const OPTION_BRAND_ID        = 'omnisend_core_brand_id';
-	private const OPTION_STORE_CONNECTED = 'omnisend_core_store_connected';
+	// omni_send instead of omnisend used to distinct and not interfere with Omnisend for Woo plugin.
+	private const OPTION_API_KEY         = 'omni_send_core_api_key';
+	private const OPTION_BRAND_ID        = 'omni_send_core_brand_id';
+	private const OPTION_STORE_CONNECTED = 'omni_send_core_store_connected';
 
 	public static function get_api_key(): string {
 		$api_key = get_option( self::OPTION_API_KEY );
@@ -55,9 +55,13 @@ class Options {
 		return self::is_store_connected() && self::get_api_key();
 	}
 
-	public static function disconnect() {
+	public static function disconnect(): void {
 		delete_option( self::OPTION_API_KEY );
 		delete_option( self::OPTION_BRAND_ID );
 		delete_option( self::OPTION_STORE_CONNECTED );
+	}
+
+	public static function delete_all(): void {
+		self::disconnect();
 	}
 }
