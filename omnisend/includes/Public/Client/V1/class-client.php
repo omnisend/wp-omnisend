@@ -20,8 +20,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Client {
 
 	/**
-	 * Check if plugin is connected to Omnisend account.
-	 *
 	 * Check and return if plugin connected to Omnisend account. If connection does not exist, it will not be possible
 	 * to send data to Omnisend.
 	 *
@@ -32,8 +30,6 @@ class Client {
 	}
 
 	/**
-	 * Create contact in Omnisend
-	 *
 	 * Create a contact in Omnisend. For it to succeed ensure that provided contact at least have email or phone number.
 	 *
 	 * @param Contact $contact

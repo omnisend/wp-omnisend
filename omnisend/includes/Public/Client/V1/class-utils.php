@@ -23,9 +23,9 @@ class Utils {
 	}
 
 	/**
-	 * Validate custom property tag.
+	 * Validate tag.
 	 *
-	 * @param $tags
+	 * @param $tag
 	 *
 	 * @return bool
 	 */
@@ -34,9 +34,9 @@ class Utils {
 	}
 
 	/**
-	 * Clean up custom property name.
+	 * Clean up tag name.
 	 *
-	 * @param $tags
+	 * @param $tag
 	 *
 	 * @return string
 	 */

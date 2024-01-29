@@ -1,11 +1,33 @@
 # Omnisend Core Plugin
 
-[Omnisend](https://wordpress.org/plugins/omnisend/) is WordPress plugin that enables to use different [Omnisend marketing automation tool](https://www.omnisend.com/) features
+[Omnisend](https://wordpress.org/plugins/omnisend/) is WordPress plugin that enables to use [Omnisend marketing automation tool](https://www.omnisend.com/) features
 for WordPress website.
 
 ## Plugin features
 
-* Website connection to Omnisend (this enables to use different Omnisend [features](https://www.omnisend.com/features/))
+* Website connection to Omnisend [features](https://www.omnisend.com/features/))
+* SDK Client to connect other plugins to Omnisend.
+
+
+## SDK Client
+
+The plugin provides an SDK client to easily integrate with Omnisend API.
+
+> [!IMPORTANT]  
+> To use this SDK the user must install [wp-omnisend plugin](https://wordpress.org/plugins/wp-omnisend) and connect it to the omnisend.
+
+You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/Public/Client/V1).
+
+### Examples
+
+To create a contact:
+
+```php
+TBD check if plugin is activated
+TBD create client
+TBD create contact
+TBD send contact
+```
 
 ## PHP Linting
 
@@ -18,7 +40,7 @@ After each push to any branch `PHP Standards` action will run and all the PHP co
 
 Tools needed:
 
--   php (7.4 version is recommended because at the time of writing WordPress coding standards supports only up to 7.4 version);
+-   php (7.4 version is recommended because at the time of writing WordPress coding standards support only up to 7.4 version);
 -   composer (can be installed as described in https://getcomposer.org/doc/00-intro.md#installation-linux-unix-macos);
 
 After installing those tools one can run in local plugin dir (plugin_woocommerce_api) helper script:
@@ -35,7 +57,7 @@ composer update
 composer install
 ```
 
-install linting tool and standards. And then actual linting `phpcs` script can be initiated with
+install linting tool and standards. Then actual linting `phpcs` script can be initiated with
 
 ```shell
 ./vendor/squizlabs/php_codesniffer/bin/phpcs --ignore=.js --standard=WordPress omnisend-connect
