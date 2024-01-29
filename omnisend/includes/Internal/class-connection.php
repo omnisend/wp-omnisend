@@ -5,40 +5,40 @@
  * @package OmnisendPlugin
  */
 
-defined( 'ABSPATH' ) || exit;
+namespace Omnisend\Internal;
 
-class Omnisend_Core_Connection {
+use Omnisend_Core_Bootstrap;
 
-	public static function display() {
-		$connected = Omnisend_Core_Options::is_store_connected();
+defined( 'ABSPATH' ) || die( 'no direct access' );
+
+class Connection {
+
+	public static function display(): void {
+		$connected = Options::is_store_connected();
 
 		if ( ! $connected && ! empty( $_POST['action'] ) && 'connect' == $_POST['action'] && ! empty( $_POST['api_key'] ) ) {
 			check_admin_referer( 'connect' );
 			$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ) );
 			$brand_id = self::get_brand_id( $api_key );
+
 			if ( $brand_id ) {
 				// Set credentials so snippet can be added for snippet verification.
-				Omnisend_Core_Options::set_api_key( $api_key );
-				Omnisend_Core_Options::set_brand_id( $brand_id );
+				Options::set_api_key( $api_key );
+				Options::set_brand_id( $brand_id );
 
 				$connected = self::connect_store( $api_key );
 				if ( $connected ) {
-					Omnisend_Core_Options::set_store_connected();
+					Options::set_store_connected();
 				}
 			}
 
 			if ( ! $connected ) {
-				Omnisend_Core_Options::disconnect(); // Store was not connected, clean up.
+				Options::disconnect(); // Store was not connected, clean up.
 				echo '<div class="notice notice-error"><p>API key is not valid.</p></div>';
 			}
 		}
 
-		if ( $connected ) {
-			echo 'You are connected to Omnisend!';
-			return;
-		}
-
-		require_once 'view/connection-form.html';
+		require_once __DIR__ . '/../../view/connection-success.html';
 	}
 
 	private static function get_brand_id( $api_key ): string {
@@ -101,5 +101,29 @@ class Omnisend_Core_Connection {
 		$arr = json_decode( $body, true );
 
 		return ! empty( $arr['verified'] );
+	}
+
+	public static function connect_with_omnisend_for_woo_plugin(): void {
+		if ( Options::is_connected() ) {
+			return; // Already connected.
+		}
+
+		if ( ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_active() ) {
+			return;
+		}
+
+		$api_key = get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION );
+		if ( ! $api_key ) {
+			return;
+		}
+
+		$brand_id = self::get_brand_id( $api_key );
+		if ( ! $brand_id ) {
+			return;
+		}
+
+		Options::set_api_key( $api_key );
+		Options::set_brand_id( $brand_id );
+		Options::set_store_connected();
 	}
 }
