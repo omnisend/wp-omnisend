@@ -33,10 +33,10 @@ class Client implements \Omnisend\Public\V1\Client {
 	public function create_contact( $contact ): mixed {
 		$error = new WP_Error();
 
-		if ( ! $contact instanceof Contact ) {
-			$error->add( 'contact', 'Contact is not instance of Omnisend\Public\V1\Contact' );
-		} else {
+		if ( $contact instanceof Contact ) {
 			$error->merge_from( $contact->validate() );
+		} else {
+			$error->add( 'contact', 'Contact is not instance of Omnisend\Public\V1\Contact' );
 		}
 
 		$error->merge_from( $this->check_setup() );
