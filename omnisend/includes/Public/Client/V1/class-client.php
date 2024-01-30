@@ -12,6 +12,11 @@ use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
+
+/**
+ * Client class to interact with Omnisend.
+ *
+ */
 class Client {
 
 	/**
@@ -25,6 +30,8 @@ class Client {
 	}
 
 	/**
+	 * Create a contact in Omnisend. For it to succeed ensure that provided contact at least have email or phone number.
+	 *
 	 * @param Contact $contact
 	 *
 	 * @return string|WP_Error
