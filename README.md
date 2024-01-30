@@ -6,15 +6,16 @@ for WordPress website.
 ## Plugin features
 
 * Website connection to Omnisend [features](https://www.omnisend.com/features/))
-* SDK Client to connect other plugins to Omnisend.
+* Client to connect other plugins to Omnisend.
 
 
-## SDK Client
+## Client
 
 The plugin provides an SDK client to easily integrate with Omnisend API.
 
 > [!IMPORTANT]  
-> To use this SDK the user must install [wp-omnisend plugin](https://wordpress.org/plugins/wp-omnisend) and connect it to the omnisend.
+> To use in your plugin you must check if wp-omnisend plugin is installed.
+> Provided client will send data to Omnisend if it is connected.
 
 You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/Public/Client/V1).
 
