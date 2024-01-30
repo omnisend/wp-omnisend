@@ -5,7 +5,7 @@
  * @package OmnisendClient
  */
 
-namespace Omnisend\Public\Client\V1;
+namespace Omnisend\Internal;
 
 ! defined( 'ABSPATH' ) && die( 'no direct access' );
 
