@@ -5,8 +5,9 @@
  * @package OmnisendClient
  */
 
-namespace Omnisend\Public\Client\V1;
+namespace Omnisend\Public\V1;
 
+use Omnisend\Internal\Utils;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );

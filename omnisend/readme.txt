@@ -1,5 +1,5 @@
 === Omnisend ===
-Plugin Name: Omnisend
+Plugin Name: Email Marketing by Omnisend
 Contributors: Omnisend
 Tags: form, email marketing, web tracking, subscriber collection
 Requires at least: 4.7.0
