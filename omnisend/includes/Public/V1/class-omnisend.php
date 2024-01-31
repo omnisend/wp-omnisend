@@ -14,6 +14,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Omnisend {
 
 	/**
+	 * Factory to create Omnisend client.
+	 *
 	 * @param $plugin string plugin using client name
 	 * @param $version string plugin using client version
 	 * @return Client
