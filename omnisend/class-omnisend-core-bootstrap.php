@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 const OMNISEND_CORE_PLUGIN_VERSION = '1.0.0';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
-const OMNISEND_CORE_PLUGIN_NAME    = 'Omnisend';
+const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 
 // Change for different environment.
 const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
@@ -53,7 +53,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
-		$menu_title    = OMNISEND_CORE_PLUGIN_NAME;
+		$menu_title    = 'Omnisend';
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend\Internal\Connection::display';
