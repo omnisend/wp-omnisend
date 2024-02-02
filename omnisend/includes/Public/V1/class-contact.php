@@ -73,16 +73,12 @@ class Contact {
 			}
 		}
 
-		if ( $this->email != null && ! is_email( $this->email ) && $error['email'] == null ) {
+		if ( $this->email != null && ! is_email( $this->email ) ) {
 			$error->add( 'email', 'Not a email.' );
 		}
 
 		if ( $this->send_welcome_email != null && ! is_bool( $this->send_welcome_email ) ) {
 			$error->add( 'send_welcome_email', 'Not a valid boolean.' );
-		}
-
-		if ( $this->phone != null && ! is_numeric( $this->phone ) && $error['phone'] == null ) {
-			$error->add( 'phone', 'Not a valid phone number.' );
 		}
 
 		if ( $this->phone == null && $this->email == null ) {
