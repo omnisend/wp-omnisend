@@ -38,6 +38,11 @@ class Connection {
 			}
 		}
 
+		if ( ! $connected ) {
+			require_once __DIR__ . '/../../view/connection-form.html';
+			return;
+		}
+
 		require_once __DIR__ . '/../../view/connection-success.html';
 	}
 
