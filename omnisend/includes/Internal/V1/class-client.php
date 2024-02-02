@@ -36,7 +36,7 @@ class Client implements \Omnisend\Public\V1\Client {
 		if ( $contact instanceof Contact ) {
 			$error->merge_from( $contact->validate() );
 		} else {
-			$error->add( 'contact', 'Contact is not instance of Omnisend\Public\V1\Contact' );
+			$error->add( 'contact', 'Contact is not instance of Omnisend\Public\V1\Contact.' );
 		}
 
 		$error->merge_from( $this->check_setup() );
@@ -81,7 +81,7 @@ class Client implements \Omnisend\Public\V1\Client {
 		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['contactID'] ) ) {
-			$error->add( 'omnisend_api', 'contactID not found in response' );
+			$error->add( 'omnisend_api', 'contactID not found in response.' );
 			return $error;
 		}
 
@@ -95,15 +95,15 @@ class Client implements \Omnisend\Public\V1\Client {
 		$error = new WP_Error();
 
 		if ( ! $this->plugin_name ) {
-			$error->add( 'initialisation', 'Client is created with empty plugin name' );
+			$error->add( 'initialisation', 'Client is created with empty plugin name.' );
 		}
 
 		if ( ! $this->plugin_version ) {
-			$error->add( 'initialisation', 'Client is created with empty plugin version' );
+			$error->add( 'initialisation', 'Client is created with empty plugin version.' );
 		}
 
 		if ( ! $this->api_key ) {
-			$error->add( 'api_key', 'Omnisend plugin is not connected' );
+			$error->add( 'api_key', 'Omnisend plugin is not connected.' );
 		}
 
 		return $error;
