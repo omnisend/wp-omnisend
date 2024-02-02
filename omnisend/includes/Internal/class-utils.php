@@ -19,7 +19,7 @@ class Utils {
 	 * @return bool
 	 */
 	public static function is_valid_custom_property_name( $name ): bool {
-		return preg_match( '/^[a-zA-Z0-9_]{1,128}$/', $name );
+		return is_string( $name ) && preg_match( '/^[a-zA-Z0-9_]{1,128}$/', $name );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class Utils {
 	 * @return bool
 	 */
 	public static function is_valid_tag( $tag ): bool {
-		return preg_match( '/^[a-zA-Z0-9_\- ]{1,128}$/', $tag );
+		return is_string( $tag ) && preg_match( '/^[a-zA-Z0-9_\- ]{1,128}$/', $tag );
 	}
 
 	/**

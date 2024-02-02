@@ -95,9 +95,9 @@ class Contact {
 			}
 		}
 
-		foreach ( $this->custom_properties as $custom_property ) {
-			if ( ! Utils::is_valid_custom_property_name( $custom_property ) ) {
-				$error->add( 'custom_properties', 'Custom property "' . $custom_property . '" is not valid. Please cleanup it before setting it.' );
+		foreach ( $this->custom_properties as $custom_property_name => $custom_property_value ) {
+			if ( ! Utils::is_valid_custom_property_name( $custom_property_name ) ) {
+				$error->add( 'custom_properties', 'Custom property "' . $custom_property_name . '" is not valid. Please cleanup it before setting it.' );
 			}
 		}
 
