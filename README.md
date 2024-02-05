@@ -75,17 +75,6 @@ Will return `errors` in `WP_Error`. Depending on your integration logic you shou
     }
 ```
 
-
-```php
-! is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' ) )
-```
-
-To create a contact:
-TBD create client
-TBD create contact
-TBD send contact
-```
-
 ## PHP Linting
 
 WordPress.org team mandates our plugin to be linted
