@@ -5,7 +5,7 @@ Tags: form, email marketing, web tracking, subscriber collection
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,6 +53,10 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.1.1 =
+
+* Minor bug fixes.
 
 = 1.1.0 =
 
