@@ -24,11 +24,22 @@ You can find function references in the [client folder](https://github.com/omnis
 #### Ensuring that you can use Client 
 
 Before using Omnisend Client you need to ensure the following conditions:
-* Omnisend Plugin is installed `class_exists( 'Omnisend\Public\V1\Omnisend'`
+* Omnisend Plugin is installed `is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' )`
 * Omnisend Plugin is up to date   `class_exists( 'Omnisend\Public\V1\Omnisend' )`
 * Omnisend is connected to the wordpress  `Omnisend\Public\V1\Omnisend::is_connected()`
 
 If any of these conditions are false you should ask to resolve them.
+
+#### Client Initialization
+
+To send contact to the Omnisend you need to provide your integration name & version. 
+
+This is done by getting an actual client
+
+` $client = \Omnisend\Public\V1\Omnisend::get_client( 'integration name', 'integration version' );`
+
+'integration name' - should be your integration name
+'integration version' - should be your integration version
 
 #### Contact Creation
 Here is how you can create a basic client & submit contact.
