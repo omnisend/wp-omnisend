@@ -73,16 +73,12 @@ class Contact {
 			}
 		}
 
-		if ( $this->email != null && ! is_email( $this->email ) && $error['email'] == null ) {
+		if ( $this->email != null && ! is_email( $this->email ) ) {
 			$error->add( 'email', 'Not a email.' );
 		}
 
 		if ( $this->send_welcome_email != null && ! is_bool( $this->send_welcome_email ) ) {
 			$error->add( 'send_welcome_email', 'Not a valid boolean.' );
-		}
-
-		if ( $this->phone != null && ! is_numeric( $this->phone ) && $error['phone'] == null ) {
-			$error->add( 'phone', 'Not a valid phone number.' );
 		}
 
 		if ( $this->phone == null && $this->email == null ) {
@@ -99,9 +95,9 @@ class Contact {
 			}
 		}
 
-		foreach ( $this->custom_properties as $custom_property ) {
-			if ( ! Utils::is_valid_custom_property_name( $custom_property ) ) {
-				$error->add( 'custom_properties', 'Custom property "' . $custom_property . '" is not valid. Please cleanup it before setting it.' );
+		foreach ( $this->custom_properties as $custom_property_name => $custom_property_value ) {
+			if ( ! Utils::is_valid_custom_property_name( $custom_property_name ) ) {
+				$error->add( 'custom_properties', 'Custom property "' . $custom_property_name . '" is not valid. Please cleanup it before setting it.' );
 			}
 		}
 
