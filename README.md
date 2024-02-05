@@ -26,7 +26,7 @@ You can find function references in the [client folder](https://github.com/omnis
 Before using Omnisend Client you need to ensure the following conditions:
 * Omnisend Plugin is installed `class_exists( 'Omnisend\Public\V1\Omnisend'`
 * Omnisend Plugin is up to date   `class_exists( 'Omnisend\Public\V1\Omnisend' )`
-* Omnisend is connected to the wordpress  `Omnisend\Public\V1\Omnisend::is_connected()`
+* Omnisend is connected to the WordPress  `Omnisend\Public\V1\Omnisend::is_connected()`
 
 If any of these conditions are false you should ask to resolve them.
 
