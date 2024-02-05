@@ -17,14 +17,70 @@ The plugin provides an SDK client to easily integrate with Omnisend API.
 > To use in your plugin you must check if wp-omnisend plugin is installed.
 > Provided client will send data to Omnisend if it is connected.
 
-You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/Public/Client/V1).
+You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/Public/V1).
 
 ### Examples
 
-To create a contact:
+#### Ensuring that you can use Client 
+
+Before using Omnisend Client you need to ensure the following conditions:
+* Omnisend Plugin is installed `class_exists( 'Omnisend\Public\V1\Omnisend'`
+* Omnisend Plugin is up to date   `class_exists( 'Omnisend\Public\V1\Omnisend' )`
+* Omnisend is connected to the wordpress  `Omnisend\Public\V1\Omnisend::is_connected()`
+
+If any of these conditions are false you should ask to resolve them.
+
+#### Contact Creation
+Here is how you can create a basic client & submit contact.
 
 ```php
-TBD check if plugin is activated
+		$contact  = new Contact();
+
+		$contact->set_email( $email );
+		if ( $phone_number != '' ) {
+			$contact->set_phone( $phone_number );
+		}
+		$contact->set_first_name( $first_name );
+		$contact->set_last_name( $last_name );
+		$contact->set_birthday( $birthday );
+		$contact->set_postal_code( $postal_code );
+		$contact->set_address( $address );
+		$contact->set_state( $state );
+		$contact->set_country( $country );
+		$contact->set_city( $city );
+		if ( $email_consent ) {
+			$contact->set_email_consent( 'actual_email_consent_for_gdrp' );
+			$contact->set_email_opt_in( 'where user opted to become subscriber' );
+		}
+
+        $client = \Omnisend\Public\V1\Omnisend::get_client( 'integration name', 'integration version' );
+                    
+        $response = $client->create_contact( $contact );
+```
+
+#### Error handling
+
+If data provided is invalid or creation fails, then
+
+```php
+$client->create_contact($contact)
+```
+
+Will return `errors` in `WP_Error`. Depending on your integration logic you should handle the error i.e
+
+```php
+	if ( is_wp_error( $response ) ) {
+		error_log( 'Error in after_submission: ' . $response->get_error_message());
+		return;
+    }
+```
+
+
+```php
+! is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' ) )
+```
+
+To create a contact:
 TBD create client
 TBD create contact
 TBD send contact
