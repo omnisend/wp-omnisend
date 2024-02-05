@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -71,13 +71,13 @@ class Omnisend_Core_Bootstrap {
 					'roboto.css',
 					plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
 					array(),
-					'1.0.0',
+					'1.1.0',
 				);
 				wp_enqueue_style(
 					'styles.css',
 					plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
 					array(),
-					'1.0.0',
+					'1.1.0',
 				);
 			}
 		}
