@@ -1,4 +1,4 @@
-=== Omnisend ===
+=== Email Marketing by Omnisend ===
 Plugin Name: Email Marketing by Omnisend
 Contributors: Omnisend
 Tags: form, email marketing, web tracking, subscriber collection
