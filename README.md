@@ -25,8 +25,8 @@ You can find function references in the [client folder](https://github.com/omnis
 
 Before using Omnisend Client you need to ensure the following conditions:
 * Omnisend Plugin is installed `is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' )`
-* Omnisend Plugin is up to date   `class_exists( 'Omnisend\Public\V1\Omnisend' )`
-* Omnisend is connected to the WordPress  `Omnisend\Public\V1\Omnisend::is_connected()`
+* Omnisend Plugin is up to date `class_exists( 'Omnisend\Sdk\V1\Omnisend' )`
+* Omnisend is connected to account `Omnisend\Sdk\V1\Omnisend::is_connected()`
 
 If any of these conditions are false you should ask to resolve them.
 
@@ -36,7 +36,7 @@ To send contact to the Omnisend you need to provide your integration name & vers
 
 This is done by getting an actual client
 
-` $client = \Omnisend\Public\V1\Omnisend::get_client( 'integration name', 'integration version' );`
+` $client = \Omnisend\Sdk\V1\Omnisend::get_client( 'integration name', 'integration version' );`
 
 'integration name' - should be your integration name
 'integration version' - should be your integration version
@@ -64,7 +64,7 @@ Here is how you can create a basic client & submit contact.
 			$contact->set_email_opt_in( 'where user opted to become subscriber' );
 		}
 
-        $client = \Omnisend\Public\V1\Omnisend::get_client( 'integration name', 'integration version' );
+        $client = \Omnisend\Sdk\V1\Omnisend::get_client( 'integration name', 'integration version' );
                     
         $response = $client->create_contact( $contact );
 ```
@@ -74,15 +74,15 @@ Here is how you can create a basic client & submit contact.
 If data provided is invalid or creation fails, then
 
 ```php
-$client->create_contact($contact)
+$response = $client->create_contact($contact)
 ```
 
-Will return `errors` in `WP_Error`. Depending on your integration logic you should handle the error i.e
+Will return `CreateContactResponse`. Depending on your integration logic you may handle the error i.e
 
 ```php
-	if ( is_wp_error( $response ) ) {
-		error_log( 'Error in after_submission: ' . $response->get_error_message());
-		return;
+    if ( $response->get_wp_error()->has_errors() ) {
+        error_log( 'Error in after_submission: ' . $response->get_wp_error()->get_error_message());
+        return;
     }
 ```
 
