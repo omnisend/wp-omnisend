@@ -36,7 +36,7 @@ class Connection {
 			}
 
 			$connected = false;
-			if ( $response['platform'] === 'WordPress' ) {
+			if ( $response['platform'] === 'wordpress' ) {
 				$connected = true;
 			}
 
