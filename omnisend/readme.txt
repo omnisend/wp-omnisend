@@ -1,7 +1,7 @@
 === Email Marketing by Omnisend ===
 Plugin Name: Email Marketing by Omnisend
 Contributors: Omnisend
-Tags: form, email marketing, web tracking, subscriber collection
+Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
