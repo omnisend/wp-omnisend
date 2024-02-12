@@ -22,7 +22,7 @@ interface Client {
 	 *
 	 * @param Contact $contact
 	 *
-	 * @return string|WP_Error Created/updated contact identifier (ID) or WP_Error
+	 * @return CreateContactResponse
 	 */
-	public function create_contact( $contact ): mixed;
+	public function create_contact( $contact ): CreateContactResponse;
 }
