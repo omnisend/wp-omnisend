@@ -15,26 +15,46 @@ class Connection {
 
 	public static function display(): void {
 		$connected = Options::is_store_connected();
+		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
+		$wordpress_platform = 'wordpress';
 
 		if ( ! $connected && ! empty( $_POST['action'] ) && 'connect' == $_POST['action'] && ! empty( $_POST['api_key'] ) ) {
 			check_admin_referer( 'connect' );
 			$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ) );
-			$brand_id = self::get_brand_id( $api_key );
+			$response = self::get_account_data( $api_key );
+			$brand_id = $response['brandID'];
 
-			if ( $brand_id ) {
-				// Set credentials so snippet can be added for snippet verification.
+			if ( ! $brand_id ) {
+				echo '<div class="notice notice-error"><p>The connection didn’t go through. Check if the API key is correct.</p></div>';
+				require_once __DIR__ . '/../../view/connection-form.html';
+				return;
+			}
+
+			if ( $response['verified'] === true && $response['platform'] !== wordpress_platform ) {
+				echo '<div class="notice notice-error"><p>This Omnisend account is already connected to non-WordPress site. Log in to access it.
+				<a target="_blank" href="https://www.omnisend.com/customer-support/">Contact our support</a> if you have other issues.</p></div>';
+				require_once __DIR__ . '/../../view/connection-form.html';
+				return;
+			}
+
+			$connected = false;
+			if ( $response['platform'] === wordpress_platform ) {
+				$connected = true;
+			}
+
+			if ( $response['platform'] === '' ) {
+				$connected = self::connect_store( $api_key );
+			}
+
+			if ( $connected ) {
 				Options::set_api_key( $api_key );
 				Options::set_brand_id( $brand_id );
-
-				$connected = self::connect_store( $api_key );
-				if ( $connected ) {
-					Options::set_store_connected();
-				}
+				Options::set_store_connected();
 			}
 
 			if ( ! $connected ) {
 				Options::disconnect(); // Store was not connected, clean up.
-				echo '<div class="notice notice-error"><p>API key is not valid.</p></div>';
+				echo '<div class="notice notice-error"><p>The connection didn’t go through. Check if the API key is correct.</p></div>';
 			}
 		}
 
@@ -46,7 +66,7 @@ class Connection {
 		require_once __DIR__ . '/../../view/connection-success.html';
 	}
 
-	private static function get_brand_id( $api_key ): string {
+	private static function get_account_data( $api_key ): array {
 		$response = wp_remote_get(
 			OMNISEND_CORE_API_V3 . '/accounts',
 			array(
@@ -65,7 +85,7 @@ class Connection {
 
 		$arr = json_decode( $body, true );
 
-		return is_array( $arr ) && ! empty( $arr['brandID'] ) && is_string( $arr['brandID'] ) ? $arr['brandID'] : '';
+		return is_array( $arr ) ? $arr : array();
 	}
 
 	private static function connect_store( $api_key ): bool {
@@ -122,13 +142,13 @@ class Connection {
 			return;
 		}
 
-		$brand_id = self::get_brand_id( $api_key );
-		if ( ! $brand_id ) {
+		$response = self::get_account_data( $api_key );
+		if ( ! $response['brandID'] ) {
 			return;
 		}
 
 		Options::set_api_key( $api_key );
-		Options::set_brand_id( $brand_id );
+		Options::set_brand_id( $response['brandID'] );
 		Options::set_store_connected();
 	}
 }
