@@ -28,7 +28,7 @@ class Connection {
 				return;
 			}
 
-			if ( $response['platform'] !== '' && $response['platform'] !== 'WordPress' ) {
+			if ( $response['verified'] === true && $response['platform'] !== 'wordpress' ) {
 				echo '<div class="notice notice-error"><p>This Omnisend account is already connected to non-WordPress site. Log in to access it.
 				<a target="_blank" href="https://www.omnisend.com/customer-support/">Contact our support</a> if you have other issues.</p></div>';
 				require_once __DIR__ . '/../../view/connection-form.html';
