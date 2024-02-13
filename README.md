@@ -77,7 +77,7 @@ If data provided is invalid or creation fails, then
 $response = $client->create_contact($contact)
 ```
 
-Will return `CreateContactResponse`. Depending on your integration logic you may handle the error i.e
+Will return `CreateContactResponse`. Depending on your integration logic you should handle the error i.e
 
 ```php
     if ( $response->get_wp_error()->has_errors() ) {
