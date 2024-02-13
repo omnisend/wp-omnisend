@@ -125,3 +125,11 @@ A second `phpcbf` script can be run to automatically correct coding standard vio
 ```shell
 ./vendor/squizlabs/php_codesniffer/bin/phpcbf --ignore=.js --standard=WordPress omnisend-connect
 ```
+
+## Testing
+
+Run test locally:
+
+```shell
+./vendor/bin/phpunit 
+```

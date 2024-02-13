@@ -423,7 +423,7 @@ class Contact {
 	 */
 	public function add_custom_property( $key, $value, $clean_up_key = true ): void {
 		if ( $clean_up_key ) {
-			$key = Utils::clean_up_tag( $key );
+			$key = Utils::clean_up_custom_property_name( $key );
 		}
 
 		if ( $key == '' ) {
