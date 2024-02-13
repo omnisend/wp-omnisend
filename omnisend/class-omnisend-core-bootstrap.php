@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -22,7 +22,7 @@ use Omnisend\Internal\Options;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.2.0';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.2.1';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 
