@@ -56,7 +56,7 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
 = 1.2.0 =
 
-* Improve Sdk client
+* Improve SDK client
 
 = 1.1.4 =
 

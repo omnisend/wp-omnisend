@@ -25,8 +25,8 @@ You can find function references in the [client folder](https://github.com/omnis
 
 Before using Omnisend Client you need to ensure the following conditions:
 * Omnisend Plugin is installed `is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' )`
-* Omnisend Plugin is up to date `class_exists( 'Omnisend\Sdk\V1\Omnisend' )`
-* Omnisend is connected to account `Omnisend\Sdk\V1\Omnisend::is_connected()`
+* Omnisend Plugin is up to date `class_exists( 'Omnisend\SDK\V1\Omnisend' )`
+* Omnisend is connected to account `Omnisend\SDK\V1\Omnisend::is_connected()`
 
 If any of these conditions are false you should ask to resolve them.
 
@@ -36,7 +36,7 @@ To send contact to the Omnisend you need to provide your integration name & vers
 
 This is done by getting an actual client
 
-` $client = \Omnisend\Sdk\V1\Omnisend::get_client( 'integration name', 'integration version' );`
+` $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );`
 
 'integration name' - should be your integration name
 'integration version' - should be your integration version
@@ -64,7 +64,7 @@ Here is how you can create a basic client & submit contact.
 			$contact->set_email_opt_in( 'where user opted to become subscriber' );
 		}
 
-        $client = \Omnisend\Sdk\V1\Omnisend::get_client( 'integration name', 'integration version' );
+        $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
                     
         $response = $client->create_contact( $contact );
 ```
