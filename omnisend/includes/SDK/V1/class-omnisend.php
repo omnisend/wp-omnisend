@@ -5,7 +5,7 @@
  * @package OmnisendClient
  */
 
-namespace Omnisend\Public\V1;
+namespace Omnisend\SDK\V1;
 
 use Omnisend\Internal\Options;
 

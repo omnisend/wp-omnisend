@@ -5,7 +5,7 @@
  * @package OmnisendClient
  */
 
-namespace Omnisend\Public\V1;
+namespace Omnisend\SDK\V1;
 
 use WP_Error;
 
@@ -22,7 +22,7 @@ interface Client {
 	 *
 	 * @param Contact $contact
 	 *
-	 * @return string|WP_Error Created/updated contact identifier (ID) or WP_Error
+	 * @return CreateContactResponse
 	 */
-	public function create_contact( $contact ): mixed;
+	public function create_contact( $contact ): CreateContactResponse;
 }

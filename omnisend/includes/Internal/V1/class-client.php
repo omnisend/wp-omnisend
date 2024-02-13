@@ -7,12 +7,13 @@
 
 namespace Omnisend\Internal\V1;
 
-use Omnisend\Public\V1\Contact;
+use Omnisend\SDK\V1\Contact;
+use Omnisend\SDK\V1\CreateContactResponse;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-class Client implements \Omnisend\Public\V1\Client {
+class Client implements \Omnisend\SDK\V1\Client {
 
 	private string $api_key;
 	private string $plugin_name;
@@ -30,19 +31,19 @@ class Client implements \Omnisend\Public\V1\Client {
 	}
 
 
-	public function create_contact( $contact ): mixed {
+	public function create_contact( $contact ): CreateContactResponse {
 		$error = new WP_Error();
 
 		if ( $contact instanceof Contact ) {
 			$error->merge_from( $contact->validate() );
 		} else {
-			$error->add( 'contact', 'Contact is not instance of Omnisend\Public\V1\Contact.' );
+			$error->add( 'contact', 'Contact is not instance of Omnisend\SDK\V1\Contact.' );
 		}
 
 		$error->merge_from( $this->check_setup() );
 
 		if ( $error->has_errors() ) {
-			return $error;
+			return new CreateContactResponse( '', $error );
 		}
 
 		$response = wp_remote_post(
@@ -61,7 +62,7 @@ class Client implements \Omnisend\Public\V1\Client {
 
 		if ( is_wp_error( $response ) ) {
 			error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
-			return $response;
+			return new CreateContactResponse( '', $response );
 		}
 
 		$http_code = wp_remote_retrieve_response_code( $response );
@@ -69,23 +70,23 @@ class Client implements \Omnisend\Public\V1\Client {
 			$body    = wp_remote_retrieve_body( $response );
 			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
 			$error->add( 'omnisend_api', $err_msg );
-			return $error;
+			return new CreateContactResponse( '', $error );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
 		if ( ! $body ) {
 			$error->add( 'omnisend_api', 'empty response' );
-			return $error;
+			return new CreateContactResponse( '', $error );
 		}
 
 		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['contactID'] ) ) {
 			$error->add( 'omnisend_api', 'contactID not found in response.' );
-			return $error;
+			return new CreateContactResponse( '', $error );
 		}
 
-		return (string) $arr['contactID'];
+		return new CreateContactResponse( (string) $arr['contactID'], $error );
 	}
 
 	/**
