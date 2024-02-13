@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
-Stable tag: 1.1.5
+Stable tag: 1.2.0
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -54,7 +54,7 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
 == Changelog ==
 
-= 1.1.5 =
+= 1.2.0 =
 
 * Improve Sdk client
 
