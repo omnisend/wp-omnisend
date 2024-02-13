@@ -7,13 +7,13 @@
 
 namespace Omnisend\Internal\V1;
 
-use Omnisend\Sdk\V1\Contact;
-use Omnisend\Sdk\V1\CreateContactResponse;
+use Omnisend\SDK\V1\Contact;
+use Omnisend\SDK\V1\CreateContactResponse;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-class Client implements \Omnisend\Sdk\V1\Client {
+class Client implements \Omnisend\SDK\V1\Client {
 
 	private string $api_key;
 	private string $plugin_name;
@@ -37,7 +37,7 @@ class Client implements \Omnisend\Sdk\V1\Client {
 		if ( $contact instanceof Contact ) {
 			$error->merge_from( $contact->validate() );
 		} else {
-			$error->add( 'contact', 'Contact is not instance of Omnisend\Sdk\V1\Contact.' );
+			$error->add( 'contact', 'Contact is not instance of Omnisend\SDK\V1\Contact.' );
 		}
 
 		$error->merge_from( $this->check_setup() );

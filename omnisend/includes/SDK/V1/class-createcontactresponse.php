@@ -5,7 +5,7 @@
  * @package OmnisendClient
  */
 
-namespace Omnisend\Sdk\V1;
+namespace Omnisend\SDK\V1;
 
 use WP_Error;
 
