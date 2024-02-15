@@ -14,6 +14,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Connection {
 
 	public static function display(): void {
+		Sync::sync_contacts(); // todo remove.
+
 		$connected = Options::is_store_connected();
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
 		$wordpress_platform = 'wordpress';
