@@ -14,14 +14,19 @@ use Omnisend\SDK\V1\Omnisend;
 
 class Sync {
 
-	public static function sync_contacts(): void {
+	/**
+	 * @param int $limit number of users to sync
+	 *
+	 * @return int processed users (synced, skipped, error)
+	 */
+	public static function sync_contacts( int $limit = 100 ): int {
 		$wp_user_query = new \WP_User_Query(
 			array(
-				'number'     => 1000,
+				'number'     => $limit,
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'OR',
 					array(
-						'key'     => MetaData::LAST_SYNC,
+						'key'     => UserMetaData::LAST_SYNC,
 						'compare' => 'NOT EXISTS',
 						'value'   => '',
 					),
@@ -31,8 +36,7 @@ class Sync {
 		$users         = $wp_user_query->get_results();
 
 		if ( empty( $users ) ) {
-			// todo stop cron.
-			echo '<pre>' . __FILE__ . ':' . __LINE__ . '<br />' . print_r( 'no user to sync', 1 ) . '</pre>'; // phpcs:ignore
+			return 0;
 		}
 
 		foreach ( $users as $user ) {
@@ -40,8 +44,8 @@ class Sync {
 			$contact->add_tag( 'WordPress' );
 
 			if ( ! filter_var( $user->user_email, FILTER_VALIDATE_EMAIL ) ) {
-				// todo no valid email.
-				echo '<pre>' . __FILE__ . ':' .__LINE__. '<br />' . print_r( 'no valid email', 1 ) . '</pre>'; // phpcs:ignore
+				UserMetaData::mark_sync_skipped( $user->ID );
+				continue;
 			}
 
 			$contact->set_email( $user->user_email );
@@ -70,16 +74,14 @@ class Sync {
 				}
 			}
 
-			$response = Omnisend::get_client( 'nerijus', '666' )->create_contact( $contact );
-
-			echo '<pre>' . __FILE__ . ':' . __LINE__ . '<br />' . print_r( $contact, 1 ) . '</pre>'; // phpcs:ignore
-			echo '<pre>' . __FILE__ . ':' . __LINE__ . '<br />' . print_r( $response, 1 ) . '</pre>'; // phpcs:ignore
-
+			$response = Omnisend::get_client( OMNISEND_CORE_PLUGIN_NAME, OMNISEND_CORE_PLUGIN_VERSION )->create_contact( $contact );
 			if ( $response->get_contact_id() ) {
-				MetaData::mark_user_synced( $user->ID );
+				UserMetaData::mark_synced( $user->ID );
 			} else {
-				MetaData::mark_user_sync_error( $user->ID );
+				UserMetaData::mark_sync_error( $user->ID );
 			}
 		}
+
+		return count( $users );
 	}
 }
