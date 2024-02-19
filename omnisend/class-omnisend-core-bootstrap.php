@@ -26,6 +26,10 @@ const OMNISEND_CORE_PLUGIN_VERSION = '1.2.1';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 
+const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omnisend_core_every_minute';
+
+const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
+
 // Change for different environment.
 const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
 const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
@@ -40,6 +44,8 @@ add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 class Omnisend_Core_Bootstrap {
 
 	public static function load(): void {
+		add_filter( 'cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules' ); // phpcs:ignore
+
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
@@ -49,6 +55,8 @@ class Omnisend_Core_Bootstrap {
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
 		}
+
+		add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 	}
 
 	public static function add_admin_menu() {
@@ -61,6 +69,15 @@ class Omnisend_Core_Bootstrap {
 		$position      = 2;
 
 		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
+	}
+
+	public static function cron_schedules( $schedules ) {
+		$schedules[ OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE ] = array(
+			'interval' => 60,
+			'display'  => __( 'Every minute', 'omnisend' ),
+		);
+
+		return $schedules;
 	}
 
 	public static function load_omnisend_admin_styles(): void {

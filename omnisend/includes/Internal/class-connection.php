@@ -14,8 +14,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Connection {
 
 	public static function display(): void {
-		Sync::sync_contacts(); // todo remove.
-
 		$connected = Options::is_store_connected();
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
 		$wordpress_platform = 'wordpress';
@@ -52,6 +50,10 @@ class Connection {
 				Options::set_api_key( $api_key );
 				Options::set_brand_id( $brand_id );
 				Options::set_store_connected();
+
+				if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
+					wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
+				}
 			}
 
 			if ( ! $connected ) {

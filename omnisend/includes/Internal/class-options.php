@@ -59,6 +59,7 @@ class Options {
 		delete_option( self::OPTION_API_KEY );
 		delete_option( self::OPTION_BRAND_ID );
 		delete_option( self::OPTION_STORE_CONNECTED );
+		delete_metadata( 'user', '0', UserMetaData::LAST_SYNC, '', true );
 	}
 
 	public static function delete_all(): void {

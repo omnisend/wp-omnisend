@@ -16,10 +16,8 @@ class Sync {
 
 	/**
 	 * @param int $limit number of users to sync
-	 *
-	 * @return int processed users (synced, skipped, error)
 	 */
-	public static function sync_contacts( int $limit = 100 ): int {
+	public static function sync_contacts( int $limit = 100 ) {
 		$wp_user_query = new \WP_User_Query(
 			array(
 				'number'     => $limit,
@@ -36,7 +34,8 @@ class Sync {
 		$users         = $wp_user_query->get_results();
 
 		if ( empty( $users ) ) {
-			return 0;
+			wp_clear_scheduled_hook( OMNISEND_CORE_CRON_SYNC_CONTACT );
+			return;
 		}
 
 		foreach ( $users as $user ) {
@@ -81,7 +80,5 @@ class Sync {
 				UserMetaData::mark_sync_error( $user->ID );
 			}
 		}
-
-		return count( $users );
 	}
 }
