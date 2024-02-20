@@ -21,6 +21,10 @@ class Sync {
 	 * @return void
 	 */
 	public static function hook_user_register( $user_id ): void {
+		if ( \Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
+			return; // do not sync if omni woo plugin is active.
+		}
+
 		$user = get_userdata( $user_id );
 		if ( $user ) {
 			self::sync_contact( $user );
