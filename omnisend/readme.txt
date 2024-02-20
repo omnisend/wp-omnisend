@@ -13,7 +13,7 @@ Email Marketing, Newsletter, Email Automation, Forms, Pop Up, SMS by Omnisend
 
 == DESCRIPTION ==
 
-The Omnisend plugin connects to Omnisend email marketing tool, automatically import all your WordPress contacts to Omnisend, allows other plugins automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.
+The Omnisend plugin connects to Omnisend email marketing tool, automatically import all your WordPress users to Omnisend, allows other plugins automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.
 
 You are also able to:
 
