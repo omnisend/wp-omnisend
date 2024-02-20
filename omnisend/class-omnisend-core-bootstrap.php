@@ -26,7 +26,7 @@ const OMNISEND_CORE_PLUGIN_VERSION = '1.3.0';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 
-const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omnisend_core_every_minute';
+const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 
 const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
