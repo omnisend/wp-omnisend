@@ -15,9 +15,22 @@ use Omnisend\SDK\V1\Omnisend;
 class Sync {
 
 	/**
+	 * Listens for 'user_register' hook https://developer.wordpress.org/reference/hooks/user_register/
+	 *
+	 * @param $user_id
+	 * @return void
+	 */
+	public static function hook_user_register( $user_id ): void {
+		$user = get_userdata( $user_id );
+		if ( $user ) {
+			self::sync_contact( $user );
+		}
+	}
+
+	/**
 	 * @param int $limit number of users to sync
 	 */
-	public static function sync_contacts( int $limit = 100 ) {
+	public static function sync_contacts( int $limit = 100 ): void {
 		$wp_user_query = new \WP_User_Query(
 			array(
 				'number'     => $limit,
@@ -39,46 +52,54 @@ class Sync {
 		}
 
 		foreach ( $users as $user ) {
-			$contact = new Contact();
-			$contact->add_tag( 'WordPress' );
+			self::sync_contact( $user );
+		}
+	}
 
-			if ( ! filter_var( $user->user_email, FILTER_VALIDATE_EMAIL ) ) {
-				UserMetaData::mark_sync_skipped( $user->ID );
-				continue;
-			}
+	/**
+	 * @param \WP_User $user
+	 * @return void
+	 */
+	private static function sync_contact( $user ): void {
+		$contact = new Contact();
+		$contact->add_tag( 'WordPress' );
 
-			$contact->set_email( $user->user_email );
+		if ( ! filter_var( $user->user_email, FILTER_VALIDATE_EMAIL ) ) {
+			UserMetaData::mark_sync_skipped( $user->ID );
+			return;
+		}
 
-			$first_name = get_user_meta( $user->ID, 'first_name', true );
-			if ( $first_name ) {
-				$contact->set_first_name( $first_name );
-			}
+		$contact->set_email( $user->user_email );
 
-			$last_name = get_user_meta( $user->ID, 'last_name', true );
-			if ( $last_name ) {
-				$contact->set_last_name( $last_name );
-			}
+		$first_name = get_user_meta( $user->ID, 'first_name', true );
+		if ( $first_name ) {
+			$contact->set_first_name( $first_name );
+		}
 
-			$roles        = get_user_meta( $user->ID, 'wp_capabilities', true );
-			$parsed_roles = array();
-			if ( is_array( $roles ) ) {
-				foreach ( $roles as $role => $active ) {
-					if ( $active ) {
-						$parsed_roles[] = $role;
-					}
+		$last_name = get_user_meta( $user->ID, 'last_name', true );
+		if ( $last_name ) {
+			$contact->set_last_name( $last_name );
+		}
+
+		$roles        = get_user_meta( $user->ID, 'wp_capabilities', true );
+		$parsed_roles = array();
+		if ( is_array( $roles ) ) {
+			foreach ( $roles as $role => $active ) {
+				if ( $active ) {
+					$parsed_roles[] = $role;
 				}
-
-				if ( ! empty( $parsed_roles ) ) {
-					$contact->add_custom_property( 'wordpress_roles', array_unique( $parsed_roles ) );
-				}
 			}
 
-			$response = Omnisend::get_client( OMNISEND_CORE_PLUGIN_NAME, OMNISEND_CORE_PLUGIN_VERSION )->create_contact( $contact );
-			if ( $response->get_contact_id() ) {
-				UserMetaData::mark_synced( $user->ID );
-			} else {
-				UserMetaData::mark_sync_error( $user->ID );
+			if ( ! empty( $parsed_roles ) ) {
+				$contact->add_custom_property( 'wordpress_roles', array_unique( $parsed_roles ) );
 			}
+		}
+
+		$response = Omnisend::get_client( OMNISEND_CORE_PLUGIN_NAME, OMNISEND_CORE_PLUGIN_VERSION )->create_contact( $contact );
+		if ( $response->get_contact_id() ) {
+			UserMetaData::mark_synced( $user->ID );
+		} else {
+			UserMetaData::mark_sync_error( $user->ID );
 		}
 	}
 }

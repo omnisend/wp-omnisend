@@ -58,6 +58,7 @@ class Omnisend_Core_Bootstrap {
 		}
 
 		add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
+		add_action( 'user_register', 'Omnisend\Internal\Sync::hook_user_register' );
 	}
 
 	public static function add_admin_menu() {
