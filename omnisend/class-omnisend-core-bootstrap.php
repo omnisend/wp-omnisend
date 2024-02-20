@@ -44,6 +44,7 @@ add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 class Omnisend_Core_Bootstrap {
 
 	public static function load(): void {
+		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter( 'cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules' ); // phpcs:ignore
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
