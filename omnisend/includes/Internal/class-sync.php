@@ -32,6 +32,23 @@ class Sync {
 	}
 
 	/**
+	 * Listens for 'profile_update' hook https://developer.wordpress.org/reference/hooks/profile_update/
+	 *
+	 * @param $user_id
+	 * @return void
+	 */
+	public static function hook_profile_update( $user_id ): void {
+		if ( \Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
+			return; // do not sync if omni woo plugin is active.
+		}
+
+		$user = get_userdata( $user_id );
+		if ( $user ) {
+			self::sync_contact( $user );
+		}
+	}
+
+	/**
 	 * @param int $limit number of users to sync
 	 */
 	public static function sync_contacts( int $limit = 100 ): void {
