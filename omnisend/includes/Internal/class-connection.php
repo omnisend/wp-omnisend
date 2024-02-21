@@ -22,7 +22,7 @@ class Connection {
 			check_admin_referer( 'connect' );
 			$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ) );
 			$response = self::get_account_data( $api_key );
-			$brand_id = $response['brandID'];
+			$brand_id = ! empty( $response['brandID'] ) ? $response['brandID'] : '';
 
 			if ( ! $brand_id ) {
 				echo '<div class="notice notice-error"><p>The connection didn’t go through. Check if the API key is correct.</p></div>';
@@ -50,6 +50,10 @@ class Connection {
 				Options::set_api_key( $api_key );
 				Options::set_brand_id( $brand_id );
 				Options::set_store_connected();
+
+				if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
+					wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
+				}
 			}
 
 			if ( ! $connected ) {

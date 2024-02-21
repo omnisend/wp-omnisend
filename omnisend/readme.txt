@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,7 +13,7 @@ Email Marketing, Newsletter, Email Automation, Forms, Pop Up, SMS by Omnisend
 
 == DESCRIPTION ==
 
-The Omnisend plugin connects to Omnisend email marketing tool, allows other plugins automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.
+The Omnisend plugin connects to Omnisend email marketing tool, automatically import all your WordPress users to Omnisend, allows other plugins automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.
 
 You are also able to:
 
@@ -53,6 +53,10 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.3.0 =
+
+* Sync WordPress users as contacts to Omnisend.
 
 = 1.2.1 =
 
