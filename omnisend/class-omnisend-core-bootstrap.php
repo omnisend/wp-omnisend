@@ -106,8 +106,8 @@ class Omnisend_Core_Bootstrap {
 	public static function admin_notices(): void {
 		if ( Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
 			echo '<div class="notice notice-error"><p>If you want to use <strong>Omnisend for Woocommerce</strong> plugin please contact customer support.</p></div>';
-		} elseif ( ! Options::is_connected() && is_plugin_active( 'woocommerce/woocommerce.php' ) && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
-			echo '<div class="notice notice-error"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for Woocommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
+		} elseif ( ! Options::is_connected() && ( is_plugin_active( 'woocommerce/woocommerce.php' ) || self::is_omnisend_woocommerce_plugin_active() ) && ! self::is_omnisend_woocommerce_plugin_connected() ) {
+			echo '<div class="notice notice-error"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for WooCommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
 		}
 	}
 
