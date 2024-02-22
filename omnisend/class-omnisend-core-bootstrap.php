@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -22,7 +22,7 @@ use Omnisend\Internal\Options;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.3.0';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.3.1';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 
@@ -105,7 +105,9 @@ class Omnisend_Core_Bootstrap {
 
 	public static function admin_notices(): void {
 		if ( Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
-			echo '<div class="notice notice-error">If you want to use <strong>Omnisend for Woo</strong> plugin please contact customer support.</p></div>';
+			echo '<div class="notice notice-error"><p>If you want to use <strong>Omnisend for Woocommerce</strong> plugin please contact customer support.</p></div>';
+		} elseif ( ! Options::is_connected() && is_plugin_active( 'woocommerce/woocommerce.php' ) && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
+			echo '<div class="notice notice-error"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for Woocommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
 		}
 	}
 
