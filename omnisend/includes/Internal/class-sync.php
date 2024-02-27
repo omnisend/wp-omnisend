@@ -23,9 +23,9 @@ class Sync {
 	public static function hook_identify_user_by_id( $user_id ): void {
 		$user = get_userdata( $user_id );
 		if ( $user ) {
-			$omnisendContactID = self::sync_contact( $user );
-			if ( $omnisendContactID ) {
-				Snippet::set_contact_cookie_id( $omnisendContactID );
+			$omnisend_contact_id = self::sync_contact( $user );
+			if ( $omnisend_contact_id ) {
+				Snippet::set_contact_cookie_id( $omnisend_contact_id );
 			}
 		}
 	}
