@@ -15,7 +15,7 @@ use Omnisend\SDK\V1\Omnisend;
 class Sync {
 
 	/**
-	 * Listens for 'user_register' hook https://developer.wordpress.org/reference/hooks/user_register/
+	 * Sync and sets omnisend contact id for user
 	 *
 	 * @param $user_id
 	 * @return void
