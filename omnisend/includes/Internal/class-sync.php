@@ -20,31 +20,13 @@ class Sync {
 	 * @param $user_id
 	 * @return void
 	 */
-	public static function hook_user_register( $user_id ): void {
-		if ( \Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
-			return; // do not sync if omni woo plugin is active.
-		}
-
+	public static function hook_identify_user_by_id( $user_id ): void {
 		$user = get_userdata( $user_id );
 		if ( $user ) {
-			self::sync_contact( $user );
-		}
-	}
-
-	/**
-	 * Listens for 'profile_update' hook https://developer.wordpress.org/reference/hooks/profile_update/
-	 *
-	 * @param $user_id
-	 * @return void
-	 */
-	public static function hook_profile_update( $user_id ): void {
-		if ( \Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
-			return; // do not sync if omni woo plugin is active.
-		}
-
-		$user = get_userdata( $user_id );
-		if ( $user ) {
-			self::sync_contact( $user );
+			$omnisendContactID = self::sync_contact( $user );
+			if ( $omnisendContactID ) {
+				Snippet::set_contact_cookie_id( $omnisendContactID );
+			}
 		}
 	}
 
@@ -79,15 +61,15 @@ class Sync {
 
 	/**
 	 * @param \WP_User $user
-	 * @return void
+	 * @return string
 	 */
-	private static function sync_contact( $user ): void {
+	private static function sync_contact( $user ): string {
 		$contact = new Contact();
 		$contact->add_tag( 'WordPress' );
 
 		if ( ! filter_var( $user->user_email, FILTER_VALIDATE_EMAIL ) ) {
 			UserMetaData::mark_sync_skipped( $user->ID );
-			return;
+			return '';
 		}
 
 		$contact->set_email( $user->user_email );
@@ -122,5 +104,7 @@ class Sync {
 		} else {
 			UserMetaData::mark_sync_error( $user->ID );
 		}
+
+		return $response->get_contact_id();
 	}
 }

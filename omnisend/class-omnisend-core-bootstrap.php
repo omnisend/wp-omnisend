@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Omnisend plugin
  *
@@ -43,9 +44,10 @@ add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 
 class Omnisend_Core_Bootstrap {
 
+
 	public static function load(): void {
 		// phpcs:ignore because linter could not detect internal, but it is fine
-		add_filter( 'cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules' ); // phpcs:ignore
+		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
@@ -55,11 +57,20 @@ class Omnisend_Core_Bootstrap {
 
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
-		}
 
-		add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
-		add_action( 'user_register', 'Omnisend\Internal\Sync::hook_user_register' );
-		add_action( 'profile_update', 'Omnisend\Internal\Sync::hook_profile_update' );
+			add_action( 'user_register', 'Omnisend\Internal\Sync::hook_identify_user_by_id' );
+			add_action(
+				'wp_login',
+				function ( $user_login, $user ) {
+					Omnisend\Internal\Sync::hook_identify_user_by_id( $user->ID );
+				},
+				10,
+				2
+			);
+			add_action( 'profile_update', 'Omnisend\Internal\Sync::hook_identify_user_by_id' );
+
+			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
+		}
 	}
 
 	public static function add_admin_menu() {
@@ -84,7 +95,7 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function load_omnisend_admin_styles(): void {
-        // phpcs:disable WordPress.Security.NonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification
 		if ( isset( $_GET['page'] ) ) {
 			if ( in_array( $_GET['page'], array( 'omnisend' ), true ) ) {
 				wp_enqueue_style(
