@@ -58,16 +58,16 @@ class Omnisend_Core_Bootstrap {
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
 
-			add_action( 'user_register', 'Omnisend\Internal\Sync::hook_identify_user_by_id' );
+			add_action( 'user_register', 'Omnisend\Internal\Sync::identify_user_by_id' );
 			add_action(
 				'wp_login',
 				function ( $user_login, $user ) {
-					Omnisend\Internal\Sync::hook_identify_user_by_id( $user->ID );
+					Omnisend\Internal\Sync::identify_user_by_id( $user->ID );
 				},
 				10,
 				2
 			);
-			add_action( 'profile_update', 'Omnisend\Internal\Sync::hook_identify_user_by_id' );
+			add_action( 'profile_update', 'Omnisend\Internal\Sync::identify_user_by_id' );
 
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}

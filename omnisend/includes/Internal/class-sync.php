@@ -20,7 +20,7 @@ class Sync {
 	 * @param $user_id
 	 * @return void
 	 */
-	public static function hook_identify_user_by_id( $user_id ): void {
+	public static function identify_user_by_id( $user_id ): void {
 		$user = get_userdata( $user_id );
 		if ( $user ) {
 			$omnisend_contact_id = self::sync_contact( $user );
