@@ -1,46 +1,48 @@
 name: Update Plugin
 
 on:
-    workflow_dispatch:
-        inputs:
-            version:
-                description: 'Enter the new version'
-                required: true
-            changelog:
-                description: 'Changelog message'
-                required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: 'Enter the new version'
+        required: true
+      changelog:
+        type: string
+        description: 'Changelog message'
+        required: true
 
 jobs:
-    update:
-        runs-on: ubuntu-latest
+  update:
+    name: Update Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v2
+      - name: Update version and changelog
+        run: |
+          sed -i "s/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g" omnisend/readme.txt
 
-            - name: Update version and changelog
-              run: |
-                  sed -i "s/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g" omnisend/readme.txt
+          changelog_line=$(grep -n "== Changelog ==" omnisend/readme.txt | cut -d: -f1)
 
-                  changelog_line=$(grep -n "== Changelog ==" omnisend/readme.txt | cut -d: -f1)
+          sed -i "${changelog_line}a \\= ${github.event.inputs.version} =" omnisend/readme.txt
+          sed -i "${changelog_line}a \\* ${github.event.inputs.changelog}" omnisend/readme.txt
 
-                  sed -i "${changelog_line}a \\= ${github.event.inputs.version} =" omnisend/readme.txt
-                  sed -i "${changelog_line}a \\* ${github.event.inputs.changelog}" omnisend/readme.txt
+          sed -i "s/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g" omnisend/class-omnisend-core-bootstrap.php
 
-                  sed -i "s/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g" omnisend/class-omnisend-core-bootstrap.php
+      - name: Create new branch
+        run: |
+          git checkout -b update-plugin-${{ github.event.inputs.version }}
 
-              - name: Create new branch
-                run: |
-                  git checkout -b update-plugin-${{ github.event.inputs.version }}
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md CHANGELOG.md
+          git commit -m "Update plugin version and changelog"
+          git push https://github.com/omnisend/wp-omnisend.git HEAD:main
 
-            - name: Commit changes
-              run: |
-                  git config --local user.email "action@github.com"
-                  git config --local user.name "GitHub Action"
-                  git add README.md CHANGELOG.md
-                  git commit -m "Update plugin version and changelog"
-                  git push https://github.com/omnisend/wp-omnisend.git HEAD:main
-            - name: Create Pull Request
-              run: gh pr create --title "Update plugin to version ${{ github.event.inputs.version }}" --body "Update plugin to version ${{ github.event.inputs.version }}"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request
+        run: gh pr create --title "Update plugin to version ${{ github.event.inputs.version }}" --body "Update plugin to version ${{ github.event.inputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
