@@ -14,7 +14,7 @@ on:
 
 jobs:
   update:
-    name: Update Plugin
+    name: Update Plugin Version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,9 +23,8 @@ jobs:
         run: |
           sed -i "s/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g" omnisend/readme.txt
 
-
-          sed '/== Changelog ==/a = ${github.event.inputs.version} =" omnisend/readme.txt
-          sed '/= ${github.event.inputs.version} =/a * ${github.event.inputs.changelog}" omnisend/readme.txt
+          sed "/== Changelog ==/a = ${github.event.inputs.version} =" omnisend/readme.txt
+          sed "/= ${github.event.inputs.version} =/a * ${github.event.inputs.changelog}" omnisend/readme.txt
 
           sed -i "s/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g" omnisend/class-omnisend-core-bootstrap.php
       - name: Create new branch
