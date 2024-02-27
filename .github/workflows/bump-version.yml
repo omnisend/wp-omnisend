@@ -21,12 +21,12 @@ jobs:
 
       - name: Update version and changelog
         run: |
-          sed -i "s/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g" omnisend/readme.txt
+          sed -i 's/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g' omnisend/readme.txt
 
-          sed -i "/== Changelog ==/a\\= ${github.event.inputs.version} =" omnisend/readme.txt
-          sed -i "/= ${github.event.inputs.version} =/a\\* ${github.event.inputs.changelog} *" omnisend/readme.txt
+          sed -i '/== Changelog ==/a\\=  ${{ github.event.inputs.version }} ='' omnisend/readme.txt
+          sed -i '/= ${{github.event.inputs.version}} =/a\\* ${{github.event.inputs.changelog}} *' omnisend/readme.txt
 
-          sed -i "s/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g" omnisend/class-omnisend-core-bootstrap.php
+          sed -i 's/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g' omnisend/class-omnisend-core-bootstrap.php
       - name: Create new branch
         run: |
           git checkout -b update-plugin-${{ github.event.inputs.version }}
