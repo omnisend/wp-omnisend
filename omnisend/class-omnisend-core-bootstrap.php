@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.3.1
+ * Version: 1.3.4
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
