@@ -15,6 +15,8 @@ on:
 jobs:
   update:
     name: Update Plugin Version
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -35,9 +37,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add README.md CHANGELOG.md
+          git add .
           git commit -m "Update plugin version and changelog"
-          git push https://github.com/omnisend/wp-omnisend.git HEAD:main
+          git push 
 
       - name: Create Pull Request
         run: gh pr create --title "Update plugin to version ${{ github.event.inputs.version }}" --body "Update plugin to version ${{ github.event.inputs.version }}"
