@@ -56,7 +56,7 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
 = 1.3.2 =
 
-* Update link to Omnisend WP store connection flow
+* Update link to Omnisend WP store connection flow, update banner
 
 = 1.3.1 =
 
