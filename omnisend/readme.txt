@@ -56,7 +56,7 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
 = 1.3.3 =
 
-* Update plugin tag
+* Update plugin name and tag
 
 = 1.3.2 =
 
