@@ -1,25 +1,89 @@
-=== Newsletter, Email Marketing, SMS and Popups by Omnisend ===
-Plugin Name: Newsletter, Email Marketing, SMS and Popups by Omnisend
+=== Newsletters, Email Marketing, SMS and Popups by Omnisend ===
+Plugin Name: Newsletters, Email Marketing, SMS and Popups by Omnisend
 Contributors: Omnisend
 Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Email Marketing, Newsletter, Email Automation, Forms, Pop Up, SMS by Omnisend
+Newsletters, Email Marketing, Email Automation, Forms, Pop Up, SMS by Omnisend
 
 == DESCRIPTION ==
 
-The Omnisend plugin connects to Omnisend email marketing tool, automatically import all your WordPress users to Omnisend, allows other plugins automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.
+= THE EASIEST, MOST SIMPLE TO USE EMAIL MARKETING, NEWSLETTER, SMS MARKETING & AUTOMATION PLUGIN FOR YOUR WORDPRESS WEBSITE. =
+= IF YOU USE WOOCOMMERCE TO SELL STUFF ONLINE, CLICK <a href="https://wordpress.org/plugins/omnisend">HERE</a> TO DOWNLOAD OUR PLUGIN BUILT SPECIFICALLY FOR WOOCOMMERCE. =
 
-You are also able to:
+Email Marketing by Omnisend lets you use the power of email marketing and newsletters to connect with your audience like never before.
 
-* Connect your WordPress site to Omnisend email marketing tool
-* Customize your integration settings to your store needs.
-* Integrate with additional add-ons.
+More than 100,000 brands worldwide trust Omnisend to turn visitors into subscribers with signup forms and landing pages, send beautifully designed emails, manage customer relationships, and more.
+
+With its powerful integration capabilities, Email Marketing by Omnisend works seamlessly with popular WordPress form plugins, letting you make your messages even more relevant and engaging.
+
+Whether you're a blogger, an event organizer, or a small business owner, Omnisend offers everything you need to capture your audience's attention and keep them coming back for more—all directly from your WordPress dashboard.
+
+Best of all, it’s completely free to get started!
+
+Some of the features of Omnisend include:
+
+**Email campaigns & newsletters**
+
+* Build beautiful emails and newsletters using our easy-to-use drag-and-drop editor.
+* Send or schedule emails at a future date and time, and track your results in real time.
+* Use customer data to segment and target your campaigns to the right audience at the right time. Create segments based on behavior, demographics, purchase history, and more.
+* Test different subject lines, content, and designs to see what works best for your audience.
+* Get insights into your campaigns with detailed reporting and analytics. See how many people opened, clicked, and converted from your emails.
+* Set up automated campaigns that trigger based on customer behavior. Welcome new subscribers, congratulate your subscribers on their birthdays, send browse abandonment emails, and more.
+
+**Integrated opt-in forms**
+
+* Create and use opt-in forms right from Omnisend, and for more advanced forms, use our integrations with popular form builders, such as Contact Form 7, Formidable Forms, Gravity Forms, and Ninja Forms.
+* Segment your users based on different form submissions or submitted data.
+
+**SMS marketing**
+
+* Collect phone numbers and consent to send SMS messages with our customizable opt-in forms.
+* Set up and send SMS campaigns to engage customers with mobile messaging.
+* Get insights into your SMS campaigns – see how many people read, clicked, and converted from your texts.
+
+**Built-in analytics & dashboards**
+
+* See how your signup forms perform right from the Omnisend dashboard with graphs, charts, and data widgets.
+* Track every marketing email and signup for to get in-detail metrics.
+
+**Even more features**
+
+* Turn your website visitors into subscribers with our website signup forms.
+* Double opt-in feature for getting quality leads.
+* Find out which contacts are becoming unengaged and optimize your email campaigns accordingly.
+
+**Fully GDPR ready**
+
+Omnisend is a self-hosted WordPress plugin. You own your data, and it is protected with the latest security standards. Our platform is fully GDPR compliant, so you can be confident that your customers’ data is being collected and used in a responsible way.
+
+**Drive engagement with Omnisend**
+
+Omnisend is an email marketing platform designed to help you drive engagement. Built by a team of experienced developers with a passion for email, Omnisend has been a top choice for marketers across the globe for nearly 10 years. Omnisend started in 2014 as an email marketing platform called Soundest. From day one, we made it our priority to put marketers at the center of every decision we’d make — and that hasn’t changed at all.
+Join thousands of happy customers and start driving engagement with Omnisend today.
+
+
+**Form integration**
+
+Easily add Omnisend’s signup forms to your WordPress website and automatically add new subscribers to your Omnisend account. You can also integrate Omnisend with apps like Contact Form 7, Formidable Forms, Gravity Forms, and Ninja Forms to power up your signup forms even more.
+
+**Easy to use**
+
+Omnisend’s plugin is easy to use, with a user-friendly interface that allows you to create and manage email campaigns in minutes. With Omnisend’s plugin, you can take your email marketing to the next level.
+
+* Discover apps that’ll help you turn more visitors into loyal subscribers.
+* Ninja forms
+* Gravity forms
+* Formidable forms
+* Contact form 7
+* WS Form
+* WP Fusion
 
 == REQUIREMENTS ==
 
@@ -53,6 +117,10 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.3.5 =
+
+* Update description
 
 = 1.3.4 =
 
