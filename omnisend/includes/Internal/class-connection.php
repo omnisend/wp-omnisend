@@ -25,6 +25,11 @@ class Connection {
 			$brand_id = ! empty( $response['brandID'] ) ? $response['brandID'] : '';
 
 			if ( ! $brand_id ) {
+				require_once __DIR__ . '/../../view/landing-page.html';
+				return;
+			}
+
+			if ( ! $brand_id ) {
 				echo '<div class="notice notice-error"><p>The connection didn’t go through. Check if the API key is correct.</p></div>';
 				require_once __DIR__ . '/../../view/connection-form.html';
 				return;
@@ -66,7 +71,6 @@ class Connection {
 			require_once __DIR__ . '/../../view/landing-page.html';
 			return;
 		}
-
 
 		require_once __DIR__ . '/../../view/connection-success.html';
 	}
