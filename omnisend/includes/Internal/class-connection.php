@@ -14,6 +14,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Connection {
 
 	public static function display(): void {
+		Options::set_landing_page_visited();
+
 		$connected = Options::is_store_connected();
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
 		$wordpress_platform = 'wordpress';
@@ -62,13 +64,17 @@ class Connection {
 			}
 		}
 
-		if ( ! $connected ) {
-			require_once __DIR__ . '/../../view/landing-page.html';
+		if ( $connected ) {
+			require_once __DIR__ . '/../../view/connection-success.html';
 			return;
 		}
 
+		if ( ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
+			require_once __DIR__ . '/../../view/connection-form.html';
+			return;
+		}
 
-		require_once __DIR__ . '/../../view/connection-success.html';
+		require_once __DIR__ . '/../../view/landing-page.html';
 	}
 
 	private static function get_account_data( $api_key ): array {

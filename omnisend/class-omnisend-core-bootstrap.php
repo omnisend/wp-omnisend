@@ -74,7 +74,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
-		$menu_title    = 'Omnisend';
+		$menu_title    = 'Omnisend' . ( ! Options::is_landing_page_visited() ? '<span class="awaiting-mod">1</span>' : '' );
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend\Internal\Connection::display';
