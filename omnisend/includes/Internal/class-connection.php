@@ -63,9 +63,10 @@ class Connection {
 		}
 
 		if ( ! $connected ) {
-			require_once __DIR__ . '/../../view/connection-form.html';
+			require_once __DIR__ . '/../../view/landing-page.html';
 			return;
 		}
+
 
 		require_once __DIR__ . '/../../view/connection-success.html';
 	}
