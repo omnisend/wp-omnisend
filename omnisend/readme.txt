@@ -120,7 +120,9 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
 = 1.3.7 =
 
-* Update link to Omnisend for Woocommerce link
+
+* Update Omnisend for Woocommerce link
+* Update registration link
 
 = 1.3.6 =
 
