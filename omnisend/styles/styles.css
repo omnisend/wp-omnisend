@@ -5,9 +5,29 @@
 	margin-top: 32px;
 }
 
+.omnisend-spacing-mb-2 {
+	box-sizing: border-box;
+	margin-bottom: 8px;
+}
+
+.omnisend-spacing-mb-4 {
+	box-sizing: border-box;
+	margin-bottom: 16px;
+}
+
+.omnisend-spacing-mb-30 {
+	box-sizing: border-box;
+	margin-bottom: 120px;
+}
+
 .omnisend-spacing-mb-8 {
 	box-sizing: border-box;
 	margin-bottom: 32px;
+}
+
+.omnisend-spacing-mb-25 {
+	box-sizing: border-box;
+	margin-bottom: 100px;
 }
 
 .omnisend-spacing-mh-8 {
@@ -37,6 +57,12 @@
 	margin-top: 56px;
 }
 
+.omnisend-spacing-mv-20 {
+	box-sizing: border-box;
+	margin-bottom: 80px;
+	margin-top: 80px;
+}
+
 .omnisend-spacing-mv-1 {
 	box-sizing: border-box;
 	margin-bottom: 4px;
@@ -64,6 +90,43 @@
 	font-style: normal;
 	letter-spacing: normal;
 	line-height: 24px;
+}
+
+.omnisend-landing-h1 {
+	margin: 0;
+	color: #1e2423;
+	font-family: Roboto;
+	font-stretch: normal;
+	font-style: normal;
+	font-weight: 800;
+	letter-spacing: normal;
+	font-size: 48px;
+	line-height: 56px;
+	max-width: 880px;
+}
+
+.omnisend-landing-h2 {
+	margin: 0;
+	color: #1e2423;
+	font-family: Roboto;
+	font-stretch: normal;
+	font-style: normal;
+	font-weight: 800;
+	letter-spacing: normal;
+	font-size: 40px;
+	line-height: 56px;
+}
+
+.omnisend-h1 {
+	margin: 0;
+	color: #1e2423;
+	font-family: Roboto;
+	font-stretch: normal;
+	font-style: normal;
+	font-weight: 500;
+	letter-spacing: normal;
+	font-size: 32px;
+	line-height: 40px;
 }
 
 .omnisend-h2 {
@@ -116,7 +179,6 @@
 	display: flex;
 }
 
-
 .omnisend-row-input-button {
 	box-sizing: border-box;
 	display: flex;
@@ -157,6 +219,69 @@
 	border: 1px solid #35938f;
 	color: #35938f;
 	width: fit-content;
+}
+
+.omnisend-text-body {
+	font-family: Roboto;
+	font-size: 22px;
+	font-stretch: normal;
+	font-style: normal;
+	font-weight: 300;
+	letter-spacing: normal;
+	line-height: 36px;
+	color: #1e2423;
+}
+
+.omnisend-button-green {
+	text-decoration: none;
+
+	font-family: Roboto;
+
+	display: inline-block;
+	padding: 12px 32px;
+	background: #a6f41c;
+	border: 2px solid #a6f41c;
+	border-radius: 8px;
+	text-align: center;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 24px;
+	transition: ease all 0.3s;
+	margin-bottom: 24px;
+	color: #1e2423;
+}
+
+.omnisend-button-green:hover {
+	background-color: #1e2423;
+	color: #a6f41c;
+}
+
+.omnisend-landing-page {
+	margin: 80px 70px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.omnisend-landing-page-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	width: 100%;
+	max-width: 1080px;
+}
+
+.omnisend-features-images {
+	max-width: 100%;
+	display: flex;
+}
+
+.omnisend-plugins-list-image {
+	width: 100%;
+	max-width: 100%;
+	height: auto;
 }
 
 .omnisend-link-button {
@@ -253,7 +378,7 @@
 	padding: 0;
 }
 
-.omnisend-form-button-primary{
+.omnisend-form-button-primary {
 	background: none;
 	font: inherit;
 	align-items: center;
@@ -282,6 +407,14 @@
 	color: #fff;
 }
 
+.omnisend-landing-text-microcopy {
+	font-family: Roboto;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 21px;
+	color: #1e2423;
+}
+
 .omnisend-bullet-list li {
 	margin-bottom: 8px;
 	font-weight: 300;
@@ -295,7 +428,7 @@
 }
 
 .omnisend-bullet-list li:before {
-	content: "";
+	content: '';
 	width: 5px;
 	height: 5px;
 	border-radius: 50%;
@@ -337,7 +470,6 @@
 	text-decoration: none;
 	transition: color 0.1s;
 	align-items: center;
-	/* display: flex; */
 	gap: 8px;
 	color: #35938f;
 	font-family: Roboto;
@@ -347,4 +479,57 @@
 	line-height: 24px;
 	font-size: 14px;
 	font-weight: 400;
+}
+
+.omnisend-landing-page-text {
+	max-width: 880px;
+}
+
+.omnisend-landing-page-banner {
+	width: inherit;
+	max-width: 1000px;
+	background-color: #1e2423;
+	border-radius: 24px;
+	padding: 48px;
+	position: relative;
+}
+
+.omnisend-landing-page-banner-sticker {
+	height: 100px;
+	position: absolute;
+	left: 80px;
+	top: 42px;
+	display: block;
+}
+
+@media only screen and (max-width: 1300px) {
+	.omnisend-landing-page-banner-sticker {
+		display: none;
+	}
+}
+
+.omnisend-landing-page-banner-header {
+	font-family: Roboto;
+	font-weight: 800;
+	font-size: 48px;
+	line-height: 56px;
+	color: #fff;
+	margin: auto;
+	max-width: 640px;
+}
+
+.omnisend-landing-page-banner-text {
+	font-family: Roboto;
+	font-weight: 600;
+	font-size: 22px;
+	line-height: 36px;
+	color: #fff;
+	max-width: 780px;
+	margin: auto;
+}
+
+.omnisend-landing-page-banner-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }

@@ -11,9 +11,10 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Options {
 	// omni_send instead of omnisend used to distinct and not interfere with Omnisend for Woo plugin.
-	private const OPTION_API_KEY         = 'omni_send_core_api_key';
-	private const OPTION_BRAND_ID        = 'omni_send_core_brand_id';
-	private const OPTION_STORE_CONNECTED = 'omni_send_core_store_connected';
+	private const OPTION_API_KEY              = 'omni_send_core_api_key';
+	private const OPTION_BRAND_ID             = 'omni_send_core_brand_id';
+	private const OPTION_STORE_CONNECTED      = 'omni_send_core_store_connected';
+	private const OPTION_LANDING_PAGE_VISITED = 'omni_send_core_landing_page_visited';
 
 	public static function get_api_key(): string {
 		$api_key = get_option( self::OPTION_API_KEY );
@@ -53,6 +54,14 @@ class Options {
 
 	public static function is_connected(): bool {
 		return self::is_store_connected() && self::get_api_key();
+	}
+
+	public static function set_landing_page_visited(): bool {
+		return update_option( self::OPTION_LANDING_PAGE_VISITED, true );
+	}
+
+	public static function is_landing_page_visited(): bool {
+		return boolval( get_option( self::OPTION_LANDING_PAGE_VISITED ) );
 	}
 
 	public static function disconnect(): void {
