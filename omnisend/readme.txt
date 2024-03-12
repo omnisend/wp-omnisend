@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
-Stable tag: 1.3.7
+Stable tag: 1.3.8
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -14,7 +14,7 @@ Newsletters, Email Marketing, Email Automation, Forms, Pop Up, SMS by Omnisend
 == DESCRIPTION ==
 
 = THE EASIEST, MOST SIMPLE TO USE EMAIL MARKETING, NEWSLETTER, SMS MARKETING & AUTOMATION PLUGIN FOR YOUR WORDPRESS WEBSITE. =
-= IF YOU USE WOOCOMMERCE TO SELL STUFF ONLINE, CLICK <a href="https://www.omnisend.com/woocommerce-plugin/">HERE</a> TO DOWNLOAD OUR PLUGIN BUILT SPECIFICALLY FOR WOOCOMMERCE. =
+= IF YOU USE WOOCOMMERCE TO SELL STUFF ONLINE, CLICK <a href="https://wordpress.org/plugins/omnisend-connect/">HERE</a> TO DOWNLOAD OUR PLUGIN BUILT SPECIFICALLY FOR WOOCOMMERCE. =
 
 Email Marketing by Omnisend lets you use the power of email marketing and newsletters to connect with your audience like never before.
 
@@ -117,6 +117,10 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.3.8 =
+
+* Revert link to WooCommerce plugin
 
 = 1.3.7 =
 
