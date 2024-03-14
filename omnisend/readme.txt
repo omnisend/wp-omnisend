@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.4
 Requires PHP: 7.1
-Stable tag: 1.3.8
+Stable tag: 1.3.9
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -106,6 +106,9 @@ Every Omnisend customer gets our award-winning support, 24/7—even on the free 
 = Where can I find Omnisend Terms? =
 Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
+= How can I report security bugs?
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/omnisend)
+
 == Screenshots ==
 
 1. Build beautiful campaigns using our email templates
@@ -117,6 +120,10 @@ Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.3.9 =
+
+* Add Patchstack security vulnerability disclosure program link to faq
 
 = 1.3.8 =
 
