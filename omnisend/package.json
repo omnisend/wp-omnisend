@@ -1,0 +1,17 @@
+{
+	"name": "twitch-pre-publish-checklist",
+	"version": "1.0.0",
+	"description": "A pre-publish checklist for content that includes a customizable settings page.",
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"scripts": {
+		"start": "wp-scripts start",
+		"build": "wp-scripts build",
+		"lint:js": "wp-scripts lint-js"
+	},
+	"keywords": [],
+	"devDependencies": {
+		"@wordpress/eslint-plugin": "^17.10.0",
+		"@wordpress/scripts": "^23.1.0"
+	}
+}

@@ -54,6 +54,27 @@ class Omnisend_Core_Bootstrap {
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 
+		add_action(
+			'admin_enqueue_scripts',
+			function( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
+				if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'omnisend-app-market-script',
+						plugin_dir_url( __FILE__ ) . 'build/appMarket.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
+	
+
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
 
@@ -72,6 +93,14 @@ class Omnisend_Core_Bootstrap {
 		}
 	}
 
+
+    public static function omnisend_app_market() {
+		?>
+		<div id="omnisend-app-market"></div>
+		<?php
+    }
+
+
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
 		$menu_title    = 'Omnisend' . ( ! Options::is_landing_page_visited() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
@@ -82,7 +111,17 @@ class Omnisend_Core_Bootstrap {
 		$position      = 2;
 
 		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
+
+		add_submenu_page(
+			'omnisend',
+			'Omnisend App Market',
+			'Omnisend App Market',
+			'manage_options',
+			'omnisend-app-market',
+			array('Omnisend_Core_Bootstrap','omnisend_app_market')
+		);
 	}
+
 
 	public static function cron_schedules( $schedules ) {
 		$schedules[ OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE ] = array(
