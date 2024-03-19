@@ -13,15 +13,6 @@
   ],
   "plugins": [
     {
-      "slug": "omnisend-connect",
-      "name": "Email Marketing for WooCommerce by Omnisend",
-      "created_by": "Omnisend",
-      "category_id": "other",
-      "description": "Email Marketing, Newsletter, Email Automation, Forms, Pop Up, SMS, Abandoned Cart made easy for WordPress & WooCommerce by Omnisend.",
-      "logo": "https://appmarket-media.omnisend.com/woocommerce/woocommerce_logo.svg",
-      "url": "https://wordpress.org/plugins/omnisend-connect/"
-    },
-    {
       "slug": "omnisend-for-gravity-forms-add-on",
       "name": "Omnisend for Gravity Forms Add-On",
       "created_by": "Omnisend",
