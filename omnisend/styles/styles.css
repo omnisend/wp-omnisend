@@ -232,6 +232,57 @@
 	color: #1e2423;
 }
 
+.omnisend-button-container {
+	display: flex;
+	gap: 24px;
+}
+
+.omnisend-button {
+	text-decoration: none;
+
+	font-family: Roboto;
+
+	display: inline-block;
+	padding: 12px 32px;
+	border: 1px #1E2423 solid;
+	border-radius: 8px;
+	text-align: center;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 24px;
+	transition: ease all 0.3s;
+	margin-bottom: 24px;
+	color: #1E2423;
+}
+
+.omnisend-button:hover {
+	background-color: #1e2423;
+	color: #fff;
+}
+
+.omnisend-button-white {
+	text-decoration: none;
+
+	font-family: Roboto;
+
+	display: inline-block;
+	padding: 12px 32px;
+	border: 2px #fff solid;
+	border-radius: 8px;
+	text-align: center;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 24px;
+	transition: ease all 0.3s;
+	margin-bottom: 24px;
+	color: #fff;
+}
+
+.omnisend-button-white:hover {
+	background-color: #fff;
+	color: #1e2423;
+}
+
 .omnisend-button-green {
 	text-decoration: none;
 
