@@ -22,3 +22,5 @@ composer.phar
 .env
 
 *.zip
+
+omnisend/node_modules/
