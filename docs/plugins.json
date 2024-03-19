@@ -1,0 +1,60 @@
+{
+  "plugins": [
+    {
+      "slug": "omnisend-connect",
+      "name": "Email Marketing for WooCommerce by Omnisend",
+      "created_by": "Omnisend",
+      "description": "Email Marketing, Newsletter, Email Automation, Forms, Pop Up, SMS, Abandoned Cart made easy for WordPress & WooCommerce by Omnisend.",
+      "logo": "https://ps.w.org/omnisend-connect/assets/icon-256x256.png",
+      "url": "https://wordpress.org/plugins/omnisend-connect/"
+    },
+    {
+      "slug": "omnisend-for-gravity-forms-add-on",
+      "name": "Omnisend for Gravity Forms Add-On",
+      "created_by": "Omnisend",
+      "description": "Sends form data and contact information to Omnisend automatically from Gravity Forms.",
+      "logo": "https://ps.w.org/omnisend-for-gravity-forms-add-on/assets/icon-256x256.png",
+      "url": "https://wordpress.org/plugins/omnisend-for-gravity-forms-add-on/"
+    },
+    {
+      "slug": "omnisend-for-contact-form-7",
+      "name": "Omnisend for Contact Form 7 Add-On",
+      "created_by": "Omnisend",
+      "description": "The Omnisend for Contact Form 7 Add-On connects Contact Form 7 to Omnisend, automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.",
+      "logo": "https://ps.w.org/omnisend-for-contact-form-7/assets/icon-256x256.png",
+      "url": "https://wordpress.org/plugins/omnisend-for-contact-form-7/"
+    },
+    {
+      "slug": "omnisend-for-ninja-forms-add-on",
+      "name": "Omnisend for Ninja Forms Add-On",
+      "created_by": "Omnisend",
+      "description": "The Omnisend for Ninja Forms Add-On connects Ninja Forms to Omnisend, automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.",
+      "logo": "https://ps.w.org/omnisend-for-ninja-forms-add-on/assets/icon-256x256.png",
+      "url": "https://wordpress.org/plugins/omnisend-for-ninja-forms-add-on/"
+    },
+    {
+      "slug": "omnisend-for-formidable-forms-add-on",
+      "name": "Omnisend for Formidable Forms Add-On",
+      "created_by": "Omnisend",
+      "description": "The Omnisend for Formidable Forms Add-On connects Formidable Forms to Omnisend, automatically sending form data and contact information to Omnisend. This makes it simple to segment your contacts and send them personalized emails.",
+      "logo": "https://ps.w.org/omnisend-for-formidable-forms-add-on/assets/icon-256x256.png",
+      "url": "https://wordpress.org/plugins/omnisend-for-formidable-forms-add-on/"
+    },
+    {
+      "slug": "wp-fusion-lite",
+      "name": "WP Fusion Lite – Marketing Automation and CRM Integration for WordPress",
+      "created_by": "Very Good Plugins",
+      "description": "WP Fusion Lite synchronizes your WordPress users with contact records in your CRM or marketing automation system.",
+      "logo": "https://ps.w.org/wp-fusion-lite/assets/icon-128x128.png",
+      "url": "https://wordpress.org/plugins/wp-fusion-lite/"
+    },
+    {
+      "slug": "ws-form",
+      "name": "WS Form PRO",
+      "created_by": "WS Form",
+      "description": "WS Form is a powerful contact form builder plugin for WordPress.",
+      "logo": "https://ps.w.org/ws-form/assets/icon-256x256.jpg",
+      "url": "https://wsform.com/knowledgebase/omnisend/"
+    }
+  ]
+}
