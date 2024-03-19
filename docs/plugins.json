@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    {
+      "slug": "omnisend-for-gravity-forms-add-on",
+      "name": "Omnisend for Gravity Forms Add-On",
+      "created_by": "Omnisend",
+      "description": "Sends form data and contact information to Omnisend automatically from Gravity Forms.",
+      "logo": "https://ps.w.org/omnisend-for-gravity-forms-add-on/assets/icon-256x256.png?rev=3033245",
+      "url": "https://wordpress.org/plugins/omnisend-for-gravity-forms-add-on/"
+    }
+  ]
+}
