@@ -8,11 +8,11 @@ import {
 
 const AppsListNotice = () => {
 	return (
-		<Card isBorderless={true}>
+		<Card isBorderless={true} size="large">
 			<CardBody isBorderless={true}>
 				<Flex direction="column">
 					<Heading level={1}>Omnisend Add-Ons</Heading>
-					<Text size={14} style={{ maxWidth: "360px" }}>
+					<Text className="omnisend-apps-list-notice-text" size={14}>
 						You can expand the possibilities of Omnisend by integrating it with
 						additional add-ons.
 					</Text>

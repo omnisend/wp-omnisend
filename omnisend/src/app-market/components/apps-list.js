@@ -5,7 +5,6 @@ import {
 	CardBody,
 	CardFooter,
 	Flex,
-	FlexItem,
 	__experimentalSpacer as Spacer,
 	__experimentalText as Text,
 	__experimentalHeading as Heading,
@@ -26,28 +25,29 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 				gap={6}
 				wrap={true}
 				justify="start"
-				style={{ margin: "auto", maxWidth: "950px" }}
+				className="omnisend-apps-list-container"
 			>
 				{apps &&
 					apps.map((app) => (
-						<FlexItem key={app.slug}>
-							<Card
-								size={"medium"}
-								isBorderless={true}
-								backgroundSize={50}
-								style={{ maxWidth: "300px" }}
-							>
+						<Card
+							key={app.slug}
+							size={"medium"}
+							isBorderless={true}
+							backgroundSize={50}
+							className="omnisend-apps-list-card"
+						>
+							<Flex direction="column">
 								<CardHeader isBorderless="true">
 									<Flex direction="column">
 										<img
+											className="omnisend-apps-list-card-logo"
 											src={app.logo}
-											style={{ width: "40px", height: "40px" }}
 										/>
 										<Heading level={4}>{app.name}</Heading>
 										<Text size={12}>by {app.created_by}</Text>
 									</Flex>
 								</CardHeader>
-								<CardBody>
+								<CardBody className="omnisend-apps-list-card-description-container">
 									<Text size={14}>{app.description}</Text>
 								</CardBody>
 								<CardFooter isBorderless={true}>
@@ -58,8 +58,8 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 										Add this add-on
 									</Button>
 								</CardFooter>
-							</Card>
-						</FlexItem>
+							</Flex>
+						</Card>
 					))}
 			</Flex>
 		</>

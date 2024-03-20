@@ -135,7 +135,7 @@ class Omnisend_Core_Bootstrap {
 	public static function load_omnisend_admin_styles(): void {
 		// phpcs:disable WordPress.Security.NonceVerification
 		if ( isset( $_GET['page'] ) ) {
-			if ( in_array( $_GET['page'], array( 'omnisend' ), true ) ) {
+			if ( in_array( $_GET['page'], array( 'omnisend', 'omnisend-app-market' ), true ) ) {
 				wp_enqueue_style(
 					'roboto.css',
 					plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
