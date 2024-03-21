@@ -1,25 +1,37 @@
 import { Spinner, Flex, __experimentalSpacer as Spacer } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
 import AppsList from './apps-list';
 import AppsListNotice from './apps-list-notice';
-
-import '../datastore/index';
-
-import { STORE_NAME } from '../datastore/constants';
+import apiFetch from '@wordpress/api-fetch';
+import { useEffect, useState } from 'react';
 
 const AppsListLayout = () => {
-    const { apps, categories, isLoading } = useSelect((select) => {
-        return {
-            apps: select(STORE_NAME).getApps(),
-            categories: select(STORE_NAME).getCategories(),
-            isLoading: select(STORE_NAME).getIsLoading()
-        };
-    });
+    const [apps, setApps] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        apiFetch({
+            method: 'GET',
+            url: 'https://omnisend.github.io/wp-omnisend/plugins.json'
+        })
+            .then((res) => {
+                setApps(res.apps);
+                setCategories(res.categories);
+                setIsLoading(false);
+            })
+            .catch(() => {
+                console.error('Failed to load apps');
+            });
+    }, []);
 
     if (isLoading) {
         return <Spinner />;
     }
-    
+
+    if (!apps.length && !categories.length) {
+        return <>Failed to load</>;
+    }
+
     return (
         <Flex className="omnisend-apps-list-page-layout" justify="center">
             <div>
