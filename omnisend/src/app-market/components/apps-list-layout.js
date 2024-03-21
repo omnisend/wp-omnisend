@@ -47,7 +47,7 @@ const AppsListLayout = () => {
 	}
 
 	return (
-		<Flex className="omnisend-apps-list-page-layout" justify="center">
+		<Flex className="omnisend-page-layout" justify="center">
 			<div>
 				<Spacer marginBottom={10}>
 					<AppsListNotice />
