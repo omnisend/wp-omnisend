@@ -5,14 +5,17 @@ import {
 	CardBody,
 	CardFooter,
 	Flex,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalSpacer as Spacer,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalHeading as Heading,
-} from "@wordpress/components";
+} from '@wordpress/components';
 
 const AppsList = ({ apps, categoryName, categoryDescription }) => {
 	const navigateToPluginPage = (url) => {
-		window.open(url, "_blank").focus();
+		window.open(url, '_blank').focus();
 	};
 
 	return (
@@ -31,7 +34,7 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 					apps.map((app) => (
 						<Card
 							key={app.slug}
-							size={"medium"}
+							size={'medium'}
 							isBorderless={true}
 							backgroundSize={50}
 							className="omnisend-apps-list-card"
@@ -40,11 +43,14 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 								<CardHeader isBorderless="true">
 									<Flex direction="column">
 										<img
+											alt={app.name}
 											className="omnisend-apps-list-card-logo"
 											src={app.logo}
 										/>
 										<Heading level={4}>{app.name}</Heading>
-										<Text size={12}>by {app.created_by}</Text>
+										<Text size={12}>
+											by {app.created_by}
+										</Text>
 									</Flex>
 								</CardHeader>
 								<CardBody className="omnisend-apps-list-card-description-container">
@@ -53,7 +59,9 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 								<CardFooter isBorderless={true}>
 									<Button
 										variant="primary"
-										onClick={() => navigateToPluginPage(app.url)}
+										onClick={() =>
+											navigateToPluginPage(app.url)
+										}
 									>
 										Add this add-on
 									</Button>
