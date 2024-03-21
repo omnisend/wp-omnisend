@@ -2,9 +2,11 @@ import {
 	Card,
 	CardBody,
 	Flex,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalHeading as Heading,
-} from "@wordpress/components";
+} from '@wordpress/components';
 
 const AppsListNotice = () => {
 	return (
@@ -13,9 +15,10 @@ const AppsListNotice = () => {
 				<Flex direction="column">
 					<Heading level={1}>Omnisend Add-Ons</Heading>
 					<Text className="omnisend-apps-list-notice-text" size={14}>
-						You can expand the possibilities of Omnisend by integrating it with
-						additional add-ons.
+						You can expand the possibilities of Omnisend by
+						integrating it with additional add-ons.
 					</Text>
+					z
 				</Flex>
 			</CardBody>
 		</Card>

@@ -24,3 +24,5 @@ composer.phar
 *.zip
 
 omnisend/node_modules/
+/node_modules
+omnisend/build
