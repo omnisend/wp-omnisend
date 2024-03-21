@@ -1,4 +1,4 @@
-import { render } from "@wordpress/element";
-import AppsListLayout from "./components/apps-list-layout";
+import { render } from '@wordpress/element';
+import AppsListLayout from './components/apps-list-layout';
 
-render(<AppsListLayout />, document.getElementById("omnisend-app-market"));
+render(<AppsListLayout />, document.getElementById('omnisend-app-market'));

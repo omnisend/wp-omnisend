@@ -6,7 +6,6 @@ import {
 } from '@wordpress/components';
 import AppsList from './apps-list';
 import AppsListNotice from './apps-list-notice';
-import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from 'react';
 
 const AppsListLayout = () => {
@@ -15,12 +14,21 @@ const AppsListLayout = () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		apiFetch({
-			method: 'GET',
-			url: 'https://omnisend.github.io/wp-omnisend/plugins.json',
-		})
+		const getApps = async () => {
+			const response = await fetch(
+				'https://omnisend.github.io/wp-omnisend/plugins.json'
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to load apps');
+			}
+
+			return response.json();
+		};
+
+		getApps()
 			.then((res) => {
-				setApps(res.apps);
+				setApps(res.plugins);
 				setCategories(res.categories);
 				setIsLoading(false);
 			})
