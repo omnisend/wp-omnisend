@@ -47,6 +47,7 @@ class Omnisend_Core_Bootstrap {
 	public static function load(): void {
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
+		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
@@ -73,7 +74,26 @@ class Omnisend_Core_Bootstrap {
 				}
 			}
 		);
-	
+
+		add_action(
+			'admin_enqueue_scripts',
+			function( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
+				if ( file_exists( $asset_file_page )  ) { //check sufix
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'connection-script',
+						plugin_dir_url( __FILE__ ) . 'build/connection.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
 
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
@@ -99,6 +119,13 @@ class Omnisend_Core_Bootstrap {
 		<div id="omnisend-app-market"></div>
 		<?php
     }
+
+	public static function omnisend_register_connection_routes() {
+		register_rest_route( 'omnisend/v1', '/connect', array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => 'Omnisend\Internal\Connection::omnisend_post_connection',
+		) );
+	}
 
 
 	public static function add_admin_menu() {

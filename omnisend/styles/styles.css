@@ -541,11 +541,13 @@
 }
 
 /* --------------------- */
-.omnisend-apps-list-page-layout {
+.omnisend-page-layout {
 	max-width: 1000px;
+	width: 100%;
 }
 
-#omnisend-app-market {
+#omnisend-app-market,
+#omnisend-connection {
 	margin: 40px 0;
 	width: 100%;
 	display: flex;
@@ -574,5 +576,13 @@
 }
 
 .omnisend-apps-list-card-description-container {
+	flex-grow: 1;
+}
+
+.omnisend-connection-input {
+	width: 100%;
+}
+
+.omnisend-connection-input-wrap {
 	flex-grow: 1;
 }
