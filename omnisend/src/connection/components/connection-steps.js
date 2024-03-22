@@ -2,7 +2,7 @@ import { useState } from '@wordpress/element';
 import { Button, Flex, FlexItem, TextControl } from '@wordpress/components';
 
 const ConnectionSteps = ({ onSubmit }) => {
-	const [apiKey, setApiKey] = useState(null);
+	const [apiKey, setApiKey] = useState('');
 
 	const navigateToExternalUrl = (url) => {
 		window.open(url, '_blank').focus();
