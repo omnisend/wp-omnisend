@@ -1,7 +1,7 @@
 const ConnectionLogos = () => {
 	return (
 		<>
-			<div class="omnisend-icon-wrapper">
+			<div className="omnisend-icon-wrapper">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="32"
@@ -14,7 +14,7 @@ const ConnectionLogos = () => {
 						fill="black"
 					/>
 				</svg>
-				<div class="omnisend-spacing-mh-8">
+				<div className="omnisend-spacing-mh-8">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="16"

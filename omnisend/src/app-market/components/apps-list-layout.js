@@ -1,11 +1,7 @@
-import {
-	Spinner,
-	Flex,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalSpacer as Spacer,
-} from '@wordpress/components';
+import { Spinner, Flex } from '@wordpress/components';
 import AppsList from './apps-list';
 import AppsListNotice from './apps-list-notice';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useEffect, useState } from 'react';
 
 const AppsListLayout = () => {
@@ -49,12 +45,12 @@ const AppsListLayout = () => {
 	return (
 		<Flex className="omnisend-page-layout" justify="center">
 			<div>
-				<Spacer marginBottom={10}>
+				<div className="omnisend-spacing-mb-10">
 					<AppsListNotice />
-				</Spacer>
+				</div>
 				{categories.map((category) => (
 					<div key={category.id}>
-						<Spacer marginBottom={15}>
+						<div className="omnisend-spacing-mb-15">
 							<AppsList
 								apps={apps.filter(
 									(app) => app.category_id === category.id
@@ -62,7 +58,7 @@ const AppsListLayout = () => {
 								categoryName={category.name}
 								categoryDescription={category.description}
 							/>
-						</Spacer>
+						</div>
 					</div>
 				))}
 			</div>

@@ -1,24 +1,15 @@
-import {
-	Card,
-	CardBody,
-	Flex,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalText as Text,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalHeading as Heading,
-} from '@wordpress/components';
+import { Card, CardBody, Flex } from '@wordpress/components';
 
 const AppsListNotice = () => {
 	return (
 		<Card isBorderless={true} size="large">
 			<CardBody isBorderless={true}>
 				<Flex direction="column">
-					<Heading level={1}>Omnisend Add-Ons</Heading>
-					<Text className="omnisend-apps-list-notice-text" size={14}>
+					<div className="omnisend-wp-h1">Omnisend Add-Ons</div>
+					<div className="omnisend-apps-list-notice-text omnisend-wp-text-body">
 						You can expand the possibilities of Omnisend by
 						integrating it with additional add-ons.
-					</Text>
-					z
+					</div>
 				</Flex>
 			</CardBody>
 		</Card>

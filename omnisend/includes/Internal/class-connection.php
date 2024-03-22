@@ -19,7 +19,9 @@ class Connection {
 		$connected = Options::is_store_connected();
 
 		if ( $connected ) {
-			require_once __DIR__ . '/../../view/connection-success.html';
+			?>
+			<div id="omnisend-connected"></div>
+			<?php
 			return;
 		}
 

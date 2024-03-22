@@ -1,11 +1,16 @@
 const ConnectionFeatures = () => {
 	return (
 		<>
-			<p class="omnisend-paragraph-14">Connect Omnisend plugin to Wordpress to:</p>
-			<div class="omnisend-spacing-mt-4">
-				<ul class="omnisend-bullet-list">
+			<p className="omnisend-paragraph-14">
+				Connect Omnisend plugin to Wordpress to:
+			</p>
+			<div className="omnisend-spacing-mt-4">
+				<ul className="omnisend-bullet-list">
 					<li>
-						<span>Automatically import all your WordPress users to Omnisend</span>
+						<span>
+							Automatically import all your WordPress users to
+							Omnisend
+						</span>
 					</li>
 					<li>
 						<span> Collect subscribers through Forms </span>

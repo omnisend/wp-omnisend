@@ -1,19 +1,21 @@
 import { useState } from "@wordpress/element";
-import {
+import
+{
 	Button,
 	Flex,
 	FlexItem,
 	TextControl,
-	__experimentalDivider as Divider,
 	__experimentalText as Text,
 	__experimentalSpacer as Spacer,
 } from "@wordpress/components";
 
-const ConnectionSteps = ({ onSubmit }) => {
-	const [apiKey, setApiKey] = useState(null);
+const ConnectionSteps = ( { onSubmit } ) =>
+{
+	const [ apiKey, setApiKey ] = useState( null );
 
-	const navigateToExternalUrl = (url) => {
-		window.open(url, "_blank").focus();
+	const navigateToExternalUrl = ( url ) =>
+	{
+		window.open( url, "_blank" ).focus();
 	};
 
 	return (
@@ -33,7 +35,7 @@ const ConnectionSteps = ({ onSubmit }) => {
 					Go to Omnisend
 				</Button>
 			</Spacer>
-			<Divider />
+			<hr />
 			<Spacer marginTop={8} marginBottom={8}>
 				<Spacer marginBottom={5}>
 					<Text size={16}>2. Go to API keys section and create API key</Text>
@@ -49,7 +51,7 @@ const ConnectionSteps = ({ onSubmit }) => {
 					Go to API keys
 				</Button>
 			</Spacer>
-			<Divider />
+			<hr />
 			<Spacer marginTop={8} marginBottom={8}>
 				<Spacer marginBottom={5}>
 					<Text size={16}>3. Paste created API key here:</Text>
@@ -59,7 +61,7 @@ const ConnectionSteps = ({ onSubmit }) => {
 						<TextControl
 							value={apiKey}
 							className="omnisend-connection-input"
-							onChange={(nextValue) => setApiKey(nextValue ?? "")}
+							onChange={( nextValue ) => setApiKey( nextValue ?? "" )}
 						/>
 					</FlexItem>
 					<FlexItem>
@@ -68,7 +70,7 @@ const ConnectionSteps = ({ onSubmit }) => {
 							variant="primary"
 							size="compact"
 							type="submit"
-							onClick={() => onSubmit(apiKey)}
+							onClick={() => onSubmit( apiKey )}
 						>
 							Connect Omnisend
 						</Button>

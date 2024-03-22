@@ -5,12 +5,6 @@ import {
 	CardBody,
 	CardFooter,
 	Flex,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalSpacer as Spacer,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalText as Text,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalHeading as Heading,
 } from '@wordpress/components';
 
 const AppsList = ({ apps, categoryName, categoryDescription }) => {
@@ -20,10 +14,12 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 
 	return (
 		<>
-			<Spacer marginBottom={6}>
-				{categoryName && <Heading>{categoryName}</Heading>}
-				{categoryDescription && <Text>{categoryDescription}</Text>}
-			</Spacer>
+			<div className="omnisend-spacing-mb-8">
+				{categoryName && (
+					<div className="omnisend-wp-h2">{categoryName}</div>
+				)}
+				{categoryDescription && <div>{categoryDescription}</div>}
+			</div>
 			<Flex
 				gap={6}
 				wrap={true}
@@ -47,14 +43,19 @@ const AppsList = ({ apps, categoryName, categoryDescription }) => {
 											className="omnisend-apps-list-card-logo"
 											src={app.logo}
 										/>
-										<Heading level={4}>{app.name}</Heading>
-										<Text size={12}>
+										<div className="omnisend-wp-h4">
+											{app.name}
+										</div>
+
+										<div className="omnisend-wp-text-mini">
 											by {app.created_by}
-										</Text>
+										</div>
 									</Flex>
 								</CardHeader>
 								<CardBody className="omnisend-apps-list-card-description-container">
-									<Text size={14}>{app.description}</Text>
+									<div className="omnisend-wp-text-body">
+										{app.description}
+									</div>
 								</CardBody>
 								<CardFooter isBorderless={true}>
 									<Button

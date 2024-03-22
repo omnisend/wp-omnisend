@@ -3,5 +3,5 @@ import ConnectionPageLayout from "./components/connection-page-layout";
 
 render(
 	<ConnectionPageLayout />,
-	document.getElementById("omnisend-connection"),
+	document.getElementById( "omnisend-connection" ),
 );

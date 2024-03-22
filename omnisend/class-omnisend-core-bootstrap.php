@@ -79,11 +79,31 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-				if ( file_exists( $asset_file_page )  ) { //check sufix
+				if ( file_exists( $asset_file_page ) ) { //check sufix
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'connection-script',
 						plugin_dir_url( __FILE__ ) . 'build/connection.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
+
+		add_action(
+			'admin_enqueue_scripts',
+			function( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connected.asset.php';
+				if ( file_exists( $asset_file_page )  && 'toplevel_page_omnisend' === $suffix) { 
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'connected-script',
+						plugin_dir_url( __FILE__ ) . 'build/connected.js',
 						$assets['dependencies'],
 						$assets['version'],
 						true
