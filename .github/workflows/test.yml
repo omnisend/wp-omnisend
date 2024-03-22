@@ -1,0 +1,19 @@
+name: Release plugin
+
+on: [workflow_dispatch]
+jobs:
+  svn:
+    name: Release new tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install dependencies
+        run: cd omnisend && npm install --force
+      - name: Build
+        run: cd omnisend && npm run build
+      - name: Ls omnisend
+        run: ls omnisend
