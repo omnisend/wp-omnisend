@@ -1,20 +1,20 @@
 import ConnectionLogos from './connection-logos';
 import ConnectionFeatures from './connection-features';
 import ConnectionSteps from './connection-steps';
-import { useState } from '@wordpress/element';
 import { Notice, Flex, Spinner } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 
 const ConnectionPageLayout = () => {
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(null);
 
-	const connect = (apiKey) => {
+	const handleSiteConnection = (apiKey) => {
 		const fd = new FormData();
 		fd.append('api_key', apiKey);
 		setLoading(true);
 		fetch('/wp-json/omnisend/v1/connect', {
 			method: 'POST',
-			body: fd,
+			body: fd
 		})
 			.then((response) => response.json())
 			.then((data) => {
@@ -59,7 +59,7 @@ const ConnectionPageLayout = () => {
 					<hr className="omnisend-divider" />
 				</div>
 				<div className="omnisend-h1">Steps to connect to Omnisend:</div>
-				<ConnectionSteps onSubmit={connect} />
+				<ConnectionSteps onSubmit={handleSiteConnection} />
 			</div>
 		</>
 	);

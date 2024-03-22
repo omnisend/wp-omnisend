@@ -124,8 +124,9 @@ class Connection {
 
 	public static function omnisend_post_connection() {
 		$connected = Options::is_store_connected();
+
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
-		$wordpress_platform = 'wordpress';
+		$wordpress_platform = 'wordpress'; // wordpress is lowercase as it's required by integration
 
 		if ( empty( $_POST['api_key'] ) ) {
 			return rest_ensure_response( array(

@@ -42,79 +42,21 @@ register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 
 class Omnisend_Core_Bootstrap {
-
-
+	
+	
 	public static function load(): void {
+		Omnisend_Core_Bootstrap::load_react();
+		
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
-
+		
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
-
+		
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
-
-		add_action(
-			'admin_enqueue_scripts',
-			function( $suffix ) {
-				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
-				if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
-					$assets = require_once $asset_file_page;
-					wp_enqueue_script(
-						'omnisend-app-market-script',
-						plugin_dir_url( __FILE__ ) . 'build/appMarket.js',
-						$assets['dependencies'],
-						$assets['version'],
-						true
-					);
-					foreach ( $assets['dependencies'] as $style ) {
-						wp_enqueue_style( $style );
-					}
-				}
-			}
-		);
-
-		add_action(
-			'admin_enqueue_scripts',
-			function( $suffix ) {
-				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-				if ( file_exists( $asset_file_page )  && 'toplevel_page_omnisend' === $suffix) { 
-					$assets = require_once $asset_file_page;
-					wp_enqueue_script(
-						'connection-script',
-						plugin_dir_url( __FILE__ ) . 'build/connection.js',
-						$assets['dependencies'],
-						$assets['version'],
-						true
-					);
-					foreach ( $assets['dependencies'] as $style ) {
-						wp_enqueue_style( $style );
-					}
-				}
-			}
-		);
-
-		add_action(
-			'admin_enqueue_scripts',
-			function( $suffix ) {
-				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connected.asset.php';
-				if ( file_exists( $asset_file_page )  && 'toplevel_page_omnisend' === $suffix) { 
-					$assets = require_once $asset_file_page;
-					wp_enqueue_script(
-						'connected-script',
-						plugin_dir_url( __FILE__ ) . 'build/connected.js',
-						$assets['dependencies'],
-						$assets['version'],
-						true
-					);
-					foreach ( $assets['dependencies'] as $style ) {
-						wp_enqueue_style( $style );
-					}
-				}
-			}
-		);
-
+		
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
 
@@ -205,6 +147,69 @@ class Omnisend_Core_Bootstrap {
 		} elseif ( ! Options::is_connected() && ( is_plugin_active( 'woocommerce/woocommerce.php' ) || self::is_omnisend_woocommerce_plugin_active() ) && ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			echo '<div class="notice notice-error"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for WooCommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
 		}
+	}
+
+	public static function load_react(): void {
+		add_action(
+			'admin_enqueue_scripts',
+			function( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
+				if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'omnisend-app-market-script',
+						plugin_dir_url( __FILE__ ) . 'build/appMarket.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
+
+		add_action(
+			'admin_enqueue_scripts',
+			function( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connected.asset.php';
+				if ( file_exists( $asset_file_page )  && 'toplevel_page_omnisend' === $suffix) { 
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'connected-script',
+						plugin_dir_url( __FILE__ ) . 'build/connected.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
+
+
+		add_action(
+			'admin_enqueue_scripts',
+			function( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
+				if ( file_exists( $asset_file_page )  && 'toplevel_page_omnisend' === $suffix) { 
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'connection-script',
+						plugin_dir_url( __FILE__ ) . 'build/connection.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
 	}
 
 	public static function is_omnisend_woocommerce_plugin_active(): bool {
