@@ -100,12 +100,12 @@ class Omnisend_Core_Bootstrap {
 		$position      = 2;
 
 		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
-
+		add_submenu_page( $menu_slug, $page_title, 'Home', $capability, $menu_slug, $function );
 		add_submenu_page(
-			'omnisend',
+			$menu_slug,
 			'Add-Ons',
 			'Add-Ons',
-			'manage_options',
+			$capability,
 			'omnisend-app-market',
 			array('Omnisend_Core_Bootstrap','omnisend_app_market')
 		);
