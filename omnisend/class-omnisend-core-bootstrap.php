@@ -79,7 +79,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-				if ( file_exists( $asset_file_page ) ) { //check sufix
+				if ( file_exists( $asset_file_page )  && 'toplevel_page_omnisend' === $suffix) { 
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'connection-script',

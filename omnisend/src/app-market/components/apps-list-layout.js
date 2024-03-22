@@ -1,8 +1,7 @@
 import { Spinner, Flex } from '@wordpress/components';
 import AppsList from './apps-list';
 import AppsListNotice from './apps-list-notice';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from '@wordpress/element';
 
 const AppsListLayout = () => {
 	const [apps, setApps] = useState([]);

@@ -118,10 +118,10 @@ const ConnectionPageLayout = () => {
   const [loading, setLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useState)(null);
   const connect = apiKey => {
     const fd = new FormData();
-    fd.append("api_key", apiKey);
+    fd.append('api_key', apiKey);
     setLoading(true);
-    fetch("/wp-json/omnisend/v1/connect", {
-      method: "POST",
+    fetch('/wp-json/omnisend/v1/connect', {
+      method: 'POST',
       body: fd
     }).then(response => response.json()).then(data => {
       if (data.success) {
@@ -139,26 +139,26 @@ const ConnectionPageLayout = () => {
   if (loading) {
     return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Flex, {
       justify: "center"
-    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
-      marginTop: 8
+    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+      className: "omnisend-spacing-mt-6"
     }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Spinner, null)));
   }
   return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "omnisend-page-layout"
-  }, error && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
-    marginBottom: 8
+  }, error && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mb-8"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Notice, {
     status: "error"
-  }, error)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_connection_logos__WEBPACK_IMPORTED_MODULE_1__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
-    marginTop: 8,
-    marginBottom: 6
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalHeading, {
-    level: 1
-  }, "Connect Omnisend plugin")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_connection_features__WEBPACK_IMPORTED_MODULE_2__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalSpacer, {
-    marginTop: 16,
-    marginBottom: 16
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", null)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalHeading, {
-    level: 2
+  }, error)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_connection_logos__WEBPACK_IMPORTED_MODULE_1__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mv-8"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-h1"
+  }, "Connect Omnisend plugin")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_connection_features__WEBPACK_IMPORTED_MODULE_2__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mv-16"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
+    className: "omnisend-divider"
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-h1"
   }, "Steps to connect to Omnisend:"), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_connection_steps__WEBPACK_IMPORTED_MODULE_3__["default"], {
     onSubmit: connect
   })));
@@ -191,35 +191,36 @@ const ConnectionSteps = ({
 }) => {
   const [apiKey, setApiKey] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
   const navigateToExternalUrl = url => {
-    window.open(url, "_blank").focus();
+    window.open(url, '_blank').focus();
   };
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalSpacer, {
-    marginTop: 8,
-    marginBottom: 8
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalSpacer, {
-    marginBottom: 5
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalText, {
-    size: 16
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mv-8"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mb-4"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-wp-text-list"
   }, "1. Create Omnisend account")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
     variant: "secondary",
-    onClick: () => navigateToExternalUrl("https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin")
-  }, "Go to Omnisend")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalSpacer, {
-    marginTop: 8,
-    marginBottom: 8
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalSpacer, {
-    marginBottom: 5
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalText, {
-    size: 16
+    onClick: () => navigateToExternalUrl('https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin')
+  }, "Go to Omnisend")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
+    className: "omnisend-divider"
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mv-8"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mb-4"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-wp-text-list"
   }, "2. Go to API keys section and create API key")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
     variant: "secondary",
-    onClick: () => navigateToExternalUrl("https://app.omnisend.com/account/api-keys?utm_source=wordpress_plugin")
-  }, "Go to API keys")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalSpacer, {
-    marginTop: 8,
-    marginBottom: 8
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalSpacer, {
-    marginBottom: 5
-  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.__experimentalText, {
-    size: 16
+    onClick: () => navigateToExternalUrl('https://app.omnisend.com/account/api-keys?utm_source=wordpress_plugin')
+  }, "Go to API keys")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("hr", {
+    className: "omnisend-divider"
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mv-8"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-spacing-mb-4"
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "omnisend-wp-text-list"
   }, "3. Paste created API key here:")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Flex, {
     align: "'start'",
     gap: 4,
@@ -230,7 +231,7 @@ const ConnectionSteps = ({
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.TextControl, {
     value: apiKey,
     className: "omnisend-connection-input",
-    onChange: nextValue => setApiKey(nextValue !== null && nextValue !== void 0 ? nextValue : "")
+    onChange: nextValue => setApiKey(nextValue !== null && nextValue !== void 0 ? nextValue : '')
   })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.FlexItem, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__.Button, {
     disabled: !apiKey,
     variant: "primary",

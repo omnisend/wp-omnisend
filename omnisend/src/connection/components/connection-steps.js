@@ -1,67 +1,66 @@
-import { useState } from "@wordpress/element";
-import
-{
-	Button,
-	Flex,
-	FlexItem,
-	TextControl,
-	__experimentalText as Text,
-	__experimentalSpacer as Spacer,
-} from "@wordpress/components";
+import { useState } from '@wordpress/element';
+import { Button, Flex, FlexItem, TextControl } from '@wordpress/components';
 
-const ConnectionSteps = ( { onSubmit } ) =>
-{
-	const [ apiKey, setApiKey ] = useState( null );
+const ConnectionSteps = ({ onSubmit }) => {
+	const [apiKey, setApiKey] = useState(null);
 
-	const navigateToExternalUrl = ( url ) =>
-	{
-		window.open( url, "_blank" ).focus();
+	const navigateToExternalUrl = (url) => {
+		window.open(url, '_blank').focus();
 	};
 
 	return (
 		<>
-			<Spacer marginTop={8} marginBottom={8}>
-				<Spacer marginBottom={5}>
-					<Text size={16}>1. Create Omnisend account</Text>
-				</Spacer>
+			<div className="omnisend-spacing-mv-8">
+				<div className="omnisend-spacing-mb-4">
+					<div className="omnisend-wp-text-list">
+						1. Create Omnisend account
+					</div>
+				</div>
 				<Button
 					variant="secondary"
 					onClick={() =>
 						navigateToExternalUrl(
-							"https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin",
+							'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin'
 						)
 					}
 				>
 					Go to Omnisend
 				</Button>
-			</Spacer>
-			<hr />
-			<Spacer marginTop={8} marginBottom={8}>
-				<Spacer marginBottom={5}>
-					<Text size={16}>2. Go to API keys section and create API key</Text>
-				</Spacer>
+			</div>
+			<hr className="omnisend-divider" />
+			<div className="omnisend-spacing-mv-8">
+				<div className="omnisend-spacing-mb-4">
+					<div className="omnisend-wp-text-list">
+						2. Go to API keys section and create API key
+					</div>
+				</div>
 				<Button
 					variant="secondary"
 					onClick={() =>
 						navigateToExternalUrl(
-							"https://app.omnisend.com/account/api-keys?utm_source=wordpress_plugin",
+							'https://app.omnisend.com/account/api-keys?utm_source=wordpress_plugin'
 						)
 					}
 				>
 					Go to API keys
 				</Button>
-			</Spacer>
-			<hr />
-			<Spacer marginTop={8} marginBottom={8}>
-				<Spacer marginBottom={5}>
-					<Text size={16}>3. Paste created API key here:</Text>
-				</Spacer>
+			</div>
+			<hr className="omnisend-divider" />
+			<div className="omnisend-spacing-mv-8">
+				<div className="omnisend-spacing-mb-4">
+					<div className="omnisend-wp-text-list">
+						3. Paste created API key here:
+					</div>
+				</div>
 				<Flex align={"'start'"} gap={4} wrap="true">
-					<FlexItem display="flex" className="omnisend-connection-input-wrap">
+					<FlexItem
+						display="flex"
+						className="omnisend-connection-input-wrap"
+					>
 						<TextControl
 							value={apiKey}
 							className="omnisend-connection-input"
-							onChange={( nextValue ) => setApiKey( nextValue ?? "" )}
+							onChange={(nextValue) => setApiKey(nextValue ?? '')}
 						/>
 					</FlexItem>
 					<FlexItem>
@@ -70,13 +69,13 @@ const ConnectionSteps = ( { onSubmit } ) =>
 							variant="primary"
 							size="compact"
 							type="submit"
-							onClick={() => onSubmit( apiKey )}
+							onClick={() => onSubmit(apiKey)}
 						>
 							Connect Omnisend
 						</Button>
 					</FlexItem>
 				</Flex>
-			</Spacer>
+			</div>
 		</>
 	);
 };
