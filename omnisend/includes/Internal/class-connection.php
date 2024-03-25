@@ -51,12 +51,12 @@ class Connection {
 			add_action(
 				'admin_enqueue_scripts',
 				function ( $suffix ) {
-					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
-					if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
+					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
+					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
 						$assets = require_once $asset_file_page;
 						wp_enqueue_script(
-							'omnisend-app-market-script',
-							plugin_dir_url( __FILE__ ) . 'build/appMarket.js',
+							'connection-script',
+							plugin_dir_url( __FILE__ ) . 'build/connection.js',
 							$assets['dependencies'],
 							$assets['version'],
 							true

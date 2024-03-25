@@ -154,16 +154,16 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function load_react(): void {
-
+		
 		add_action(
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
-				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-				if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
+				if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
-						'connection-script',
-						plugin_dir_url( __FILE__ ) . 'build/connection.js',
+						'omnisend-app-market-script',
+						plugin_dir_url( __FILE__ ) . 'build/appMarket.js',
 						$assets['dependencies'],
 						$assets['version'],
 						true
@@ -173,7 +173,7 @@ class Omnisend_Core_Bootstrap {
 					}
 				}
 			}
-		);
+		);	
 	}
 
 	public static function is_omnisend_woocommerce_plugin_active(): bool {

@@ -20,6 +20,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _apps_list_notice__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./apps-list-notice */ "./src/app-market/components/apps-list-notice.js");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _static_plugins_data_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../static/plugins-data.js */ "./src/app-market/static/plugins-data.js");
+
 
 
 
@@ -31,9 +33,9 @@ const AppsListLayout = () => {
   const [isLoading, setIsLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useState)(true);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_4__.useEffect)(() => {
     const getApps = async () => {
-      const response = await fetch('https://omnisend.github.io/wp-omnisend/plugins.json');
+      let response = await fetch('https://omnisend.github.io/wp-omnisend/plugins.json');
       if (!response.ok) {
-        throw new Error('Failed to load apps');
+        return _static_plugins_data_js__WEBPACK_IMPORTED_MODULE_5__.PLUGINS_DATA;
       }
       return response.json();
     };
@@ -170,6 +172,79 @@ const AppsList = ({
   }, "Add this add-on")))))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (AppsList);
+
+/***/ }),
+
+/***/ "./src/app-market/static/plugins-data.js":
+/*!***********************************************!*\
+  !*** ./src/app-market/static/plugins-data.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PLUGINS_DATA: () => (/* binding */ PLUGINS_DATA)
+/* harmony export */ });
+const PLUGINS_DATA = {
+  categories: [{
+    id: 'form',
+    name: 'Form add-ons',
+    description: 'Sends form data and contact information automatically to Omnisend'
+  }, {
+    id: 'other',
+    name: 'Other add-ons',
+    description: ''
+  }],
+  plugins: [{
+    slug: 'omnisend-for-gravity-forms-add-on',
+    name: 'Omnisend for Gravity Forms Add-On',
+    created_by: 'Omnisend',
+    category_id: 'form',
+    description: 'Sends form data and contact information to Omnisend automatically from Gravity Forms',
+    logo: 'https://appmarket-media.omnisend.com/gravity_forms/gravity_forms_logo.svg',
+    url: 'https://wordpress.org/plugins/omnisend-for-gravity-forms-add-on/'
+  }, {
+    slug: 'omnisend-for-contact-form-7',
+    name: 'Omnisend for Contact Form 7 Add-On',
+    created_by: 'Omnisend',
+    category_id: 'form',
+    description: 'Sends form data and contact information to Omnisend automatically from Contact Form 7',
+    logo: 'https://appmarket-media.omnisend.com/contact_form_7/contact_form_7_logo.svg',
+    url: 'https://wordpress.org/plugins/omnisend-for-contact-form-7/'
+  }, {
+    slug: 'omnisend-for-ninja-forms-add-on',
+    name: 'Omnisend for Ninja Forms Add-On',
+    created_by: 'Omnisend',
+    category_id: 'form',
+    description: 'Sends form data and contact information to Omnisend automatically from Ninja Forms',
+    logo: 'https://appmarket-media.omnisend.com/ninja_forms/ninja_forms_logo.png',
+    url: 'https://wordpress.org/plugins/omnisend-for-ninja-forms-add-on/'
+  }, {
+    slug: 'omnisend-for-formidable-forms-add-on',
+    name: 'Omnisend for Formidable Forms Add-On',
+    created_by: 'Omnisend',
+    category_id: 'form',
+    description: 'Sends form data and contact information to Omnisend automatically from Formidable Forms',
+    logo: 'https://appmarket-media.omnisend.com/formidable_forms/formidable_forms_logo.svg',
+    url: 'https://wordpress.org/plugins/omnisend-for-formidable-forms-add-on/'
+  }, {
+    slug: 'wp-fusion-lite',
+    name: 'WP Fusion Lite – Marketing Automation and CRM Integration for WordPress',
+    created_by: 'Very Good Plugins',
+    category_id: 'other',
+    description: 'WP Fusion Lite synchronizes your WordPress users with contact records in your CRM or marketing automation system.',
+    logo: 'https://appmarket-media.omnisend.com/wp_fusion/wp_fusion_logo.svg',
+    url: 'https://wordpress.org/plugins/wp-fusion-lite/'
+  }, {
+    slug: 'ws-form',
+    name: 'WS Form PRO',
+    created_by: 'WS Form',
+    category_id: 'form',
+    description: 'Sends form data and contact information to Omnisend automatically from wsform',
+    logo: 'https://appmarket-media.omnisend.com/ws_form/ws_form_logo.png',
+    url: 'https://wsform.com/knowledgebase/omnisend/'
+  }]
+};
 
 /***/ }),
 

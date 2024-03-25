@@ -2,6 +2,7 @@ import { Spinner, Flex } from '@wordpress/components';
 import AppsList from './apps-list';
 import AppsListNotice from './apps-list-notice';
 import { useState, useEffect } from '@wordpress/element';
+import { PLUGINS_DATA } from '../static/plugins-data.js';
 
 const AppsListLayout = () => {
 	const [apps, setApps] = useState([]);
@@ -10,12 +11,10 @@ const AppsListLayout = () => {
 
 	useEffect(() => {
 		const getApps = async () => {
-			const response = await fetch(
-				'https://omnisend.github.io/wp-omnisend/plugins.json'
-			);
+			const response = await fetch('https://omnisend.github.io/wp-omnisend/plugins.json');
 
 			if (!response.ok) {
-				throw new Error('Failed to load apps');
+				return PLUGINS_DATA;
 			}
 
 			return response.json();
@@ -51,9 +50,7 @@ const AppsListLayout = () => {
 					<div key={category.id}>
 						<div className="omnisend-spacing-mb-15">
 							<AppsList
-								apps={apps.filter(
-									(app) => app.category_id === category.id
-								)}
+								apps={apps.filter((app) => app.category_id === category.id)}
 								categoryName={category.name}
 								categoryDescription={category.description}
 							/>

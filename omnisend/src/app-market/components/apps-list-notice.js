@@ -7,8 +7,7 @@ const AppsListNotice = () => {
 				<Flex direction="column">
 					<div className="omnisend-wp-h1">Omnisend Add-Ons</div>
 					<div className="omnisend-apps-list-notice-text omnisend-wp-text-body">
-						You can expand the possibilities of Omnisend by
-						integrating it with additional add-ons.
+						You can expand the possibilities of Omnisend by integrating it with additional add-ons.
 					</div>
 				</Flex>
 			</CardBody>
