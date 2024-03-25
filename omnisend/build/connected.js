@@ -170,6 +170,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+// console.log( document.getElementById( 'omnisend-connected' ) )
+// if ( document.getElementById( 'omnisend-connected' ) != null )
+// {
+//     render( <ConnectedPageLayout />, document.getElementById( 'omnisend-connected' ) );
+// }
 (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.render)((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_connected_page_layout__WEBPACK_IMPORTED_MODULE_2__["default"], null), document.getElementById('omnisend-connected'));
 })();
 

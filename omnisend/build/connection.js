@@ -357,7 +357,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-(0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.render)((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_connection_page_layout__WEBPACK_IMPORTED_MODULE_2__["default"], null), document.getElementById("omnisend-connection"));
+(0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.render)((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_connection_page_layout__WEBPACK_IMPORTED_MODULE_2__["default"], null), document.getElementById('omnisend-connection'));
 })();
 
 /******/ })()

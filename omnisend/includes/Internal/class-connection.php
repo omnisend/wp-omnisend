@@ -19,16 +19,57 @@ class Connection {
 		$connected = Options::is_store_connected();
 
 		if ( $connected ) {
+
+			add_action(
+				'admin_enqueue_scripts',
+				function ( $suffix ) {
+					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connected.asset.php';
+					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
+						$assets = require_once $asset_file_page;
+						wp_enqueue_script(
+							'connected-script',
+							plugin_dir_url( __FILE__ ) . 'build/connected.js',
+							$assets['dependencies'],
+							$assets['version'],
+							true
+						);
+						foreach ( $assets['dependencies'] as $style ) {
+							wp_enqueue_style( $style );
+						}
+					}
+				}
+			);
+
 			?>
 			<div id="omnisend-connected"></div>
 			<?php
 			return;
 		}
 
-			
 		if ( ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
+
+			add_action(
+				'admin_enqueue_scripts',
+				function ( $suffix ) {
+					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
+					if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
+						$assets = require_once $asset_file_page;
+						wp_enqueue_script(
+							'omnisend-app-market-script',
+							plugin_dir_url( __FILE__ ) . 'build/appMarket.js',
+							$assets['dependencies'],
+							$assets['version'],
+							true
+						);
+						foreach ( $assets['dependencies'] as $style ) {
+							wp_enqueue_style( $style );
+						}
+					}
+				}
+			);
+
 			?>
-			<div id="omnisend-connection"></div>
+				<div id="omnisend-connection"></div>
 			<?php
 			return;
 		}
@@ -126,13 +167,15 @@ class Connection {
 		$connected = Options::is_store_connected();
 
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
-		$wordpress_platform = 'wordpress'; // wordpress is lowercase as it's required by integration
+		$wordpress_platform = 'wordpress'; // WordPress is lowercase as it's required by integration
 
 		if ( empty( $_POST['api_key'] ) ) {
-			return rest_ensure_response( array(
-				'success' => false,
-				'error'=>'API key is required.'
-			) );
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'error'   => 'API key is required.',
+				)
+			);
 		}
 
 		if ( ! $connected && ! empty( $_POST['api_key'] ) ) {
@@ -141,17 +184,21 @@ class Connection {
 			$brand_id = ! empty( $response['brandID'] ) ? $response['brandID'] : '';
 
 			if ( ! $brand_id ) {
-				return rest_ensure_response( array(
-					'success' => false,
-					'error'=>'The connection didn’t go through. Check if the API key is correct.'
-				) );
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => 'The connection didn’t go through. Check if the API key is correct.',
+					)
+				);
 			}
 
 			if ( $response['verified'] === true && $response['platform'] !== $wordpress_platform ) {
-				return rest_ensure_response( array(
-					'success' => false,
-					'error'=>'This Omnisend account is already connected to non-WordPress site. Log in to access it.'
-				) );
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => 'This Omnisend account is already connected to non-WordPress site. Log in to access it.',
+					)
+				);
 			}
 
 			$connected = false;
@@ -171,24 +218,30 @@ class Connection {
 				if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
 					wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
 				}
-				return rest_ensure_response( array(
-					'success' => true,
-					'error'=>''
-				) );
+				return rest_ensure_response(
+					array(
+						'success' => true,
+						'error'   => '',
+					)
+				);
 			}
 
 			if ( ! $connected ) {
 				Options::disconnect(); // Store was not connected, clean up.
-				return rest_ensure_response( array(
-					'success' => false,
-					'error'=>'The connection didn’t go through. Check if the API key is correct.'
-				) );
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => 'The connection didn’t go through. Check if the API key is correct.',
+					)
+				);
 			}
 		}
 
-		return rest_ensure_response( array(
-			'success' => false,
-			'error'=>'Something went wrong. Please try again.'
-		) );
-    }
+		return rest_ensure_response(
+			array(
+				'success' => false,
+				'error'   => 'Something went wrong. Please try again.',
+			)
+		);
+	}
 }
