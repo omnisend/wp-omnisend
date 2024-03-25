@@ -16,58 +16,14 @@ class Connection {
 	public static function display(): void {
 		Options::set_landing_page_visited();
 
-		$connected = Options::is_store_connected();
-
-		if ( $connected ) {
-
-			add_action(
-				'admin_enqueue_scripts',
-				function ( $suffix ) {
-					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connected.asset.php';
-					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
-						$assets = require_once $asset_file_page;
-						wp_enqueue_script(
-							'connected-script',
-							plugin_dir_url( __FILE__ ) . 'build/connected.js',
-							$assets['dependencies'],
-							$assets['version'],
-							true
-						);
-						foreach ( $assets['dependencies'] as $style ) {
-							wp_enqueue_style( $style );
-						}
-					}
-				}
-			);
-
+		if ( self::show_connected_store_view() ) {
 			?>
 			<div id="omnisend-connected"></div>
 			<?php
 			return;
 		}
 
-		if ( ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
-
-			add_action(
-				'admin_enqueue_scripts',
-				function ( $suffix ) {
-					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
-						$assets = require_once $asset_file_page;
-						wp_enqueue_script(
-							'connection-script',
-							plugin_dir_url( __FILE__ ) . 'build/connection.js',
-							$assets['dependencies'],
-							$assets['version'],
-							true
-						);
-						foreach ( $assets['dependencies'] as $style ) {
-							wp_enqueue_style( $style );
-						}
-					}
-				}
-			);
-
+		if ( self::show_connection_view() ) {
 			?>
 				<div id="omnisend-connection"></div>
 			<?php
@@ -97,6 +53,20 @@ class Connection {
 		$arr = json_decode( $body, true );
 
 		return is_array( $arr ) ? $arr : array();
+	}
+
+	public static function show_connected_store_view(): bool {
+		return Options::is_store_connected();
+	}
+
+	public static function show_connection_view(): bool {
+		$connected = Options::is_store_connected();
+
+		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static function connect_store( $api_key ): bool {
