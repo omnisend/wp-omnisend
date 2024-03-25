@@ -62,6 +62,7 @@ class Connection {
 	public static function show_connection_view(): bool {
 		$connected = Options::is_store_connected();
 
+		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
 			return true;
 		}
@@ -137,7 +138,16 @@ class Connection {
 		$connected = Options::is_store_connected();
 
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
-		$wordpress_platform = 'wordpress'; // WordPress is lowercase as it's required by integration
+		$wordpress_platform = 'wordpress'; // WordPress is lowercase as it's required by integration.
+
+		if ( ! isset( $_POST['action_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['action_nonce'] ) ), 'omnisend_connection' ) ) {
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'error'   => 'Nonce verification failed.',
+				)
+			);
+		}
 
 		if ( empty( $_POST['api_key'] ) ) {
 			return rest_ensure_response(

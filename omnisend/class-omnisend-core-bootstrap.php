@@ -88,8 +88,11 @@ class Omnisend_Core_Bootstrap {
 			'omnisend/v1',
 			'/connect',
 			array(
-				'methods'  => WP_REST_Server::CREATABLE,
-				'callback' => 'Omnisend\Internal\Connection::omnisend_post_connection',
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => 'Omnisend\Internal\Connection::omnisend_post_connection',
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
 			)
 		);
 	}
@@ -182,7 +185,7 @@ class Omnisend_Core_Bootstrap {
 				'admin_enqueue_scripts',
 				function ( $suffix ) {
 					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-					if ( file_exists( $asset_file_page ) ) {
+					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
 						$assets = require_once $asset_file_page;
 						wp_enqueue_script(
 							'connection-script',
@@ -194,6 +197,14 @@ class Omnisend_Core_Bootstrap {
 						foreach ( $assets['dependencies'] as $style ) {
 							wp_enqueue_style( $style );
 						}
+						wp_localize_script(
+							'connection-script',
+							'omnisend_connection',
+							array(
+								'nonce'        => wp_create_nonce( 'wp_rest' ),
+								'action_nonce' => wp_create_nonce( 'connect' ),
+							)
+						);
 					}
 				}
 			);

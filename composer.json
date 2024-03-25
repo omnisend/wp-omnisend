@@ -1,10 +1,5 @@
 {
     "name": "omnisend/wp-omnisend",
-    "archive": {
-        "exclude": [
-            "*/connection.asset.php"
-        ]
-    },
     "description": "Omnisend Core plugin",
     "license": "proprietary",
     "config": {

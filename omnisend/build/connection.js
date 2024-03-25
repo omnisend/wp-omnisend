@@ -117,12 +117,16 @@ const ConnectionPageLayout = () => {
   const [error, setError] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_5__.useState)(null);
   const [loading, setLoading] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_5__.useState)(null);
   const handleSiteConnection = apiKey => {
-    const fd = new FormData();
-    fd.append('api_key', apiKey);
     setLoading(true);
+    const formData = new FormData();
+    formData.append('api_key', apiKey);
+    formData.append('action_nonce', omnisend_connection.action_nonce);
     fetch('/wp-json/omnisend/v1/connect', {
       method: 'POST',
-      body: fd
+      body: formData,
+      headers: {
+        'x-wp-nonce': omnisend_connection.nonce
+      }
     }).then(response => response.json()).then(data => {
       if (data.success) {
         location.reload();
@@ -357,10 +361,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-// if (document.getElementById('omnisend-connection')) {
-(0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.render)((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_connection_page_layout__WEBPACK_IMPORTED_MODULE_2__["default"], null), document.getElementById('omnisend-connection'));
-// }
+(0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.render)((0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_connection_page_layout__WEBPACK_IMPORTED_MODULE_2__["default"], null), document.getElementById("omnisend-connection"));
 })();
 
 /******/ })()
