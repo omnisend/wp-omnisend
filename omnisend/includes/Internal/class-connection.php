@@ -140,7 +140,7 @@ class Connection {
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
 		$wordpress_platform = 'wordpress'; // WordPress is lowercase as it's required by integration.
 
-		if ( ! isset( $_POST['action_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['action_nonce'] ) ), 'omnisend_connection' ) ) {
+		if ( ! isset( $_POST['action_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['action_nonce'] ) ), 'connect' ) ) {
 			return rest_ensure_response(
 				array(
 					'success' => false,
