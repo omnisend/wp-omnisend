@@ -17,14 +17,14 @@ jobs:
               id: extract_tag
               run: |
                   PR_FULL_TITLE="${{ github.event.pull_request.title }}" 
-                  PR_TITLE=$(echo "$PR_TITLE" | cut -d'~' -f2)
+                  PR_TITLE=$(echo "$PR_FULL_TITLE" | cut -d'~' -f2)
                   TAG_VERSION=$(echo "$PR_TITLE" | cut -d'|' -f1)
                   RELEASE_DESCRIPTION=$(echo "$PR_TITLE" | cut -d'|' -f2)
                   echo "::set-output name=tag_version::$TAG_VERSION"
                   echo "::set-output name=release_description::$RELEASE_DESCRIPTION"
-            - name: Create GitHub Release
+            - name: Create Release
               id: create_release
-              uses: actions/create-release@v1
+              uses: actions/create-release@latest
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
