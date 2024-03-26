@@ -1,0 +1,42 @@
+name: Create GitHub Tag and Release
+
+on:
+    pull_request:
+        types: [closed]
+
+jobs:
+    create_tag_release:
+        if: ${{ github.event.pull_request.merged == true && startsWith(github.event.pull_request.title, 'AUTOMATIC RELEASE ~') }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Extract tag version and release description from PR title
+              id: extract_tag
+              run: |
+                  PR_FULL_TITLE="${{ github.event.pull_request.title }}" 
+                  PR_TITLE=$(echo "$PR_TITLE" | cut -d'~' -f2)
+                  TAG_VERSION=$(echo "$PR_TITLE" | cut -d'|' -f1)
+                  RELEASE_DESCRIPTION=$(echo "$PR_TITLE" | cut -d'|' -f2)
+                  echo "::set-output name=tag_version::$TAG_VERSION"
+                  echo "::set-output name=release_description::$RELEASE_DESCRIPTION"
+            - name: Create GitHub Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ steps.extract_tag.outputs.tag_version }}
+                  release_name: Release ${{ steps.extract_tag.outputs.tag_version }}
+                  body: ${{ steps.extract_tag.outputs.release_description }}
+                  draft: false
+                  prerelease: false
+
+            - name: Push tag to GitHub
+              run: |
+                  git tag ${{ steps.extract_tag.outputs.tag_version }}
+                  git push origin ${{ steps.extract_tag.outputs.tag_version }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
