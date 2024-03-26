@@ -1,4 +1,4 @@
-name: Create GitHub Tag and Release
+name: Create GH Release
 
 on:
     pull_request:
@@ -24,6 +24,7 @@ jobs:
                   RELEASE_DESCRIPTION=$(echo "$PR_TITLE" | cut -d'|' -f2)
                   echo "::set-output name=tag_version::$TAG_VERSION"
                   echo "::set-output name=release_description::$RELEASE_DESCRIPTION"
+
             - name: Create Release
               id: create_release
               uses: actions/create-release@v1
@@ -42,3 +43,13 @@ jobs:
                   git push origin ${{ steps.extract_tag.outputs.tag_version }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: WordPress Plugin Deploy
+              if: success()
+              uses: omnisend/action-wordpress-plugin-deploy@v1.0.3
+              env:
+                  SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+                  SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+                  SLUG: omnisend
+                  BUILD_DIR: omnisend
+                  TAG: ${{ steps.extract_tag.outputs.tag_version }}
