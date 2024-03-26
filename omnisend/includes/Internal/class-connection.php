@@ -125,7 +125,7 @@ class Connection {
 		}
 
 		$response = self::get_account_data( $api_key );
-		if (!isset($response['brandID']) || ! $response['brandID'] ) {
+		if ( ! isset( $response['brandID'] ) || ! $response['brandID'] ) {
 			return;
 		}
 
