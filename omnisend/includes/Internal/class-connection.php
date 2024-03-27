@@ -57,11 +57,7 @@ class Connection {
 
 		$arr = json_decode( $body, true );
 
-		if ( $arr === null ) {
-			return array();
-		}
-
-		return $arr;
+		return is_array( $arr ) ? $arr : array();
 	}
 
 
