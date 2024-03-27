@@ -44,16 +44,26 @@ class Connection {
 				'timeout' => 10,
 			)
 		);
-
-		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			return '';
+	
+		if ( is_wp_error( $response ) ) {
+			return array();
 		}
-
+	
+		$body = wp_remote_retrieve_body( $response );
+	
+		if ( empty( $body ) ) {
+			return array();
+		}
+	
 		$arr = json_decode( $body, true );
-
-		return is_array( $arr ) ? $arr : array();
+	
+		if ( $arr === null ) {
+			return array();
+		}
+	
+		return $arr;
 	}
+	
 
 	public static function show_connected_store_view(): bool {
 		return Options::is_store_connected();
