@@ -43,13 +43,3 @@ jobs:
                   git push origin ${{ steps.extract_tag.outputs.tag_version }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: WordPress Plugin Deploy
-              if: success()
-              uses: omnisend/action-wordpress-plugin-deploy@v1.0.3
-              env:
-                  SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-                  SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-                  SLUG: omnisend
-                  BUILD_DIR: omnisend
-                  TAG: ${{ steps.extract_tag.outputs.tag_version }}
