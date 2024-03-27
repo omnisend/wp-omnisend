@@ -1,8 +1,6 @@
-name: Release plugin
-on:
-    push:
-        tags:
-            - 'v*'
+name: Release plugin manually
+
+on: [workflow_dispatch]
 jobs:
     svn:
         name: Release new tag
