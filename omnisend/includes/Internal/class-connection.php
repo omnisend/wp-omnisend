@@ -45,15 +45,21 @@ class Connection {
 			)
 		);
 
+		if ( is_wp_error( $response ) ) {
+			return array();
+		}
+
 		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			return '';
+
+		if ( empty( $body ) ) {
+			return array();
 		}
 
 		$arr = json_decode( $body, true );
 
 		return is_array( $arr ) ? $arr : array();
 	}
+
 
 	public static function show_connected_store_view(): bool {
 		return Options::is_store_connected();
@@ -125,7 +131,7 @@ class Connection {
 		}
 
 		$response = self::get_account_data( $api_key );
-		if ( ! $response['brandID'] ) {
+		if ( ! empty( $response['brandID'] ) ) {
 			return;
 		}
 
