@@ -5,9 +5,8 @@ for WordPress website.
 
 ## Plugin features
 
-* Website connection to Omnisend [features](https://www.omnisend.com/features/))
-* Client to connect other plugins to Omnisend.
-
+-   Website connection to Omnisend [features](https://www.omnisend.com/features/))
+-   Client to connect other plugins to Omnisend.
 
 ## Client
 
@@ -21,18 +20,19 @@ You can find function references in the [client folder](https://github.com/omnis
 
 ### Examples
 
-#### Ensuring that you can use Client 
+#### Ensuring that you can use Client
 
 Before using Omnisend Client you need to ensure the following conditions:
-* Omnisend Plugin is installed `is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' )`
-* Omnisend Plugin is up to date `class_exists( 'Omnisend\SDK\V1\Omnisend' )`
-* Omnisend is connected to account `Omnisend\SDK\V1\Omnisend::is_connected()`
+
+-   Omnisend Plugin is installed `is_plugin_active( 'omnisend/class-omnisend-core-bootstrap.php' )`
+-   Omnisend Plugin is up to date `class_exists( 'Omnisend\SDK\V1\Omnisend' )`
+-   Omnisend is connected to account `Omnisend\SDK\V1\Omnisend::is_connected()`
 
 If any of these conditions are false you should ask to resolve them.
 
 #### Client Initialization
 
-To send contact to the Omnisend you need to provide your integration name & version. 
+To send contact to the Omnisend you need to provide your integration name & version.
 
 This is done by getting an actual client
 
@@ -42,6 +42,7 @@ This is done by getting an actual client
 'integration version' - should be your integration version
 
 #### Contact Creation
+
 Here is how you can create a basic client & submit contact.
 
 ```php
@@ -65,7 +66,7 @@ Here is how you can create a basic client & submit contact.
 		}
 
         $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
-                    
+
         $response = $client->create_contact( $contact );
 ```
 
@@ -131,5 +132,12 @@ A second `phpcbf` script can be run to automatically correct coding standard vio
 Run test locally:
 
 ```shell
-./vendor/bin/phpunit 
+./vendor/bin/phpunit
 ```
+
+## Plugin release
+
+To release a new version of the plugin, you need to:
+
+1. Run action `Update Plugin Version` - this will create PR with version upgrade in all necessary places.
+2. Get PR approved and merge it. Actions `Create GH Release` and `Release plugin` will be triggered automatically on merge.

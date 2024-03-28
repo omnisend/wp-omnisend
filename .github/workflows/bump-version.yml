@@ -1,47 +1,47 @@
 name: Update Plugin Version
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        type: string
-        description: 'Enter the new version'
-        required: true
-      changelog:
-        type: string
-        description: 'Changelog message'
-        required: true
+    workflow_dispatch:
+        inputs:
+            version:
+                type: string
+                description: 'Enter the new version'
+                required: true
+            changelog:
+                type: string
+                description: 'Changelog message'
+                required: true
 
 jobs:
-  update:
-    name: Update Plugin Version
-    permissions: write-all
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    update:
+        name: Update Plugin Version
+        permissions: write-all
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Update version and changelog
-        run: |
-          sed -i 's/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g' omnisend/readme.txt
+            - name: Update version and changelog
+              run: |
+                  sed -i 's/Stable tag: [0-9.]\+/Stable tag: ${{ github.event.inputs.version }}/g' omnisend/readme.txt
 
-          sed -i '/== Changelog ==/a\\n= ${{ github.event.inputs.version }} =\n\n* ${{github.event.inputs.changelog}}' omnisend/readme.txt
+                  sed -i '/== Changelog ==/a\\n= ${{ github.event.inputs.version }} =\n\n* ${{github.event.inputs.changelog}}' omnisend/readme.txt
 
-          sed -i 's/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g' omnisend/class-omnisend-core-bootstrap.php
+                  sed -i 's/Version: [0-9.]\+/Version: ${{ github.event.inputs.version }}/g' omnisend/class-omnisend-core-bootstrap.php
 
-          sed -i "s/const OMNISEND_CORE_PLUGIN_VERSION = '[0-9.]\+'/const OMNISEND_CORE_PLUGIN_VERSION = '${{ github.event.inputs.version }}'/g" omnisend/class-omnisend-core-bootstrap.php
-      - name: Create new branch
-        run: |
-          git checkout -b update-plugin-${{ github.event.inputs.version }}
+                  sed -i "s/const OMNISEND_CORE_PLUGIN_VERSION = '[0-9.]\+'/const OMNISEND_CORE_PLUGIN_VERSION = '${{ github.event.inputs.version }}'/g" omnisend/class-omnisend-core-bootstrap.php
+            - name: Create new branch
+              run: |
+                  git checkout -b update-plugin-${{ github.event.inputs.version }}
 
-      - name: Commit changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Update plugin version and changelog"
-          git push -u origin update-plugin-${{ github.event.inputs.version }}
+            - name: Commit changes
+              run: |
+                  git config --local user.email "action@github.com"
+                  git config --local user.name "GitHub Action"
+                  git add .
+                  git commit -m "Update plugin version and changelog"
+                  git push -u origin update-plugin-${{ github.event.inputs.version }}
 
-      - name: Create Pull Request
-        run: gh pr create --title "Update plugin to version ${{ github.event.inputs.version }}" --body "Update plugin to version ${{ github.event.inputs.version }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Create Pull Request
+              run: gh pr create --title "AUTOMATIC RELEASE ~ v${{ github.event.inputs.version }} | ${{ github.event.inputs.changelog }}" --body "Update plugin to version ${{ github.event.inputs.version }}"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
