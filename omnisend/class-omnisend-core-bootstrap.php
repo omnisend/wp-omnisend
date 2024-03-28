@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Omnisend plugin
  *
@@ -48,9 +49,9 @@ class Omnisend_Core_Bootstrap {
 
 
 
+
 	public static function load(): void {
 		self::load_react();
-
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
@@ -86,7 +87,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function omnisend_app_market() {
 		?>
-			<div id="omnisend-app-market"></div>
+		<div id="omnisend-app-market"></div>
 		<?php
 	}
 
@@ -131,7 +132,7 @@ class Omnisend_Core_Bootstrap {
 			'<a style="color: #35938F; font-weight: bold" href="' . admin_url( 'admin.php?page=omnisend' ) . '">Go to Omnisend</a>',
 		);
 		$add_ons_link  = array(
-			'<a href="">Add-ons</a>',
+			'<a href="' . admin_url( 'admin.php?page=omnisend-app-market' ) . '">Add-ons</a>',
 		);
 		$actions       = array_merge( $omnisend_link, $add_ons_link, $actions );
 		return $actions;
@@ -150,10 +151,20 @@ class Omnisend_Core_Bootstrap {
 		$omnisend_link_dropdown_item = array(
 			'parent' => 'omnisend-link',
 			'id'     => 'add-ons',
-			'title'  => 'Add-ons (TBD)',
+			'title'  => 'Add-ons',
+			'href'   => admin_url( 'admin.php?page=omnisend-app-market' ),
 			'meta'   => false,
 		);
 
+		$omnisend_link_home_dropdown_item = array(
+			'parent' => 'omnisend-link',
+			'id'     => 'home',
+			'title'  => 'Home',
+			'href'   => admin_url( 'admin.php?page=omnisend' ),
+			'meta'   => false,
+		);
+
+		$wp_admin_bar->add_node( $omnisend_link_home_dropdown_item );
 		$wp_admin_bar->add_node( $omnisend_link_dropdown_item );
 	}
 
@@ -193,21 +204,18 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function load_omnisend_admin_styles(): void {
-		// // phpcs:disable WordPress.Security.NonceVerification
-		if ( isset( $_GET['page'] ) ) {
-				wp_enqueue_style(
-					'roboto.css',
-					plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
-					array(),
-					OMNISEND_CORE_PLUGIN_VERSION,
-				);
-				wp_enqueue_style(
-					'styles.css',
-					plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
-					array(),
-					OMNISEND_CORE_PLUGIN_VERSION,
-				);
-		}
+		wp_enqueue_style(
+			'roboto.css',
+			plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+		wp_enqueue_style(
+			'styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
 	}
 
 	public static function admin_notices(): void {
