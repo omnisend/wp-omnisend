@@ -1,10 +1,10 @@
 <script type="text/javascript">
     window.omnisend = window.omnisend || [];
-    omnisend.push(["accountID", "<?php echo $brand_id ?>"]);
+    omnisend.push(["accountID", "<?php echo esc_js($brand_id); ?>"]);
     omnisend.push(["track", "$pageViewed"]);
     !function(){var e=document.createElement("script");
         e.type="text/javascript",e.async=!0,
-            e.src="<?php echo OMNISEND_CORE_SNIPPET_URL; ?>";
+            e.src="<?php echo esc_js(OMNISEND_CORE_SNIPPET_URL); ?>";
         var t=document.getElementsByTagName("script")[0];
         t.parentNode.insertBefore(e,t)}();
     // platform: wordpress
