@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Omnisend plugin
  *
@@ -83,7 +82,7 @@ class Omnisend_Core_Bootstrap {
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}
 
-		// self::migrate_options(); fix bug and uncomment
+		// self::migrate_options(); fix bug and uncomment.
 	}
 
 
