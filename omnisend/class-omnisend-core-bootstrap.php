@@ -140,14 +140,11 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_omnisend_toolbar() {
 		global $wp_admin_bar;
-
-
-		$menu_title    = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
-
+		$menu_title = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
 
 		$omnisend_link = array(
 			'id'    => 'omnisend-link',
-			'title' => '<div class="omnisend-top-bar-icon-container"><img class="omnisend-top-bar-icon" src="' . plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png" /> <span class="ab-label">'. $menu_title  .'</span></div>',
+			'title' => '<div class="omnisend-top-bar-icon-container"><img class="omnisend-top-bar-icon" src="' . plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png" /> <span class="ab-label">' . $menu_title . '</span></div>',
 			'href'  => admin_url( 'admin.php?page=omnisend' ),
 		);
 
@@ -195,16 +192,7 @@ class Omnisend_Core_Bootstrap {
 
 
 	private static function show_notification_icon(): bool {
-		$has_seven_days_passed = function ( $timestamp ) {
-			$seven_days_ago = strtotime( '-7 day', $timestamp );
-			$current_time   = time();
-
-			return $current_time >= $seven_days_ago;
-		};
-
-		$last_visit_time = Options::get_landing_page_last_visit_time();
-
-		return ! Options::is_landing_page_visited() && $has_seven_days_passed( $last_visit_time );
+		return ! Options::is_landing_page_visited();
 	}
 
 	public static function load_omnisend_admin_styles(): void {
@@ -217,6 +205,12 @@ class Omnisend_Core_Bootstrap {
 		wp_enqueue_style(
 			'styles.css',
 			plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+		wp_enqueue_style(
+			'site-styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css?' . time(),
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
