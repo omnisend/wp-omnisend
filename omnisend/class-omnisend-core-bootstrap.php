@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Omnisend plugin
  *
@@ -49,6 +50,7 @@ class Omnisend_Core_Bootstrap {
 
 
 
+
 	public static function load(): void {
 		self::load_react();
 		// phpcs:ignore because linter could not detect internal, but it is fine
@@ -81,7 +83,7 @@ class Omnisend_Core_Bootstrap {
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}
 
-		self::migrate_options();
+		// self::migrate_options(); fix bug and uncomment
 	}
 
 
@@ -189,7 +191,6 @@ class Omnisend_Core_Bootstrap {
 			Options::set_landing_page_visited();
 		}
 	}
-
 
 	private static function show_notification_icon(): bool {
 		return ! Options::is_landing_page_visited();
