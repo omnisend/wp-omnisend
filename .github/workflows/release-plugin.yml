@@ -2,7 +2,7 @@ name: Release plugin
 on:
     push:
         tags:
-            - 'v*'
+            - '*'
 jobs:
     svn:
         name: Release new tag
