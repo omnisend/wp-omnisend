@@ -11,10 +11,12 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Options {
 	// omni_send instead of omnisend used to distinct and not interfere with Omnisend for Woo plugin.
-	private const OPTION_API_KEY              = 'omni_send_core_api_key';
-	private const OPTION_BRAND_ID             = 'omni_send_core_brand_id';
-	private const OPTION_STORE_CONNECTED      = 'omni_send_core_store_connected';
-	private const OPTION_LANDING_PAGE_VISITED = 'omni_send_core_landing_page_visited';
+	private const OPTION_API_KEY                      = 'omni_send_core_api_key';
+	private const OPTION_BRAND_ID                     = 'omni_send_core_brand_id';
+	private const OPTION_STORE_CONNECTED              = 'omni_send_core_store_connected';
+	private const OPTION_LANDING_PAGE_VISITED         = 'omni_send_core_landing_page_visited';
+	private const OPTION_LANDING_PAGE_VISIT_COUNT     = 'omni_send_core_landing_page_visit_count';
+	private const OPTION_LANDING_PAGE_VISIT_LAST_TIME = 'omni_send_core_landing_page_last_visit_time';
 
 	public static function get_api_key(): string {
 		$api_key = get_option( self::OPTION_API_KEY );
@@ -56,7 +58,22 @@ class Options {
 		return self::is_store_connected() && self::get_api_key();
 	}
 
+	public static function get_landing_page_visit_count(): int {
+		$visit_count = get_option( self::OPTION_LANDING_PAGE_VISIT_COUNT );
+
+		return is_numeric( $visit_count ) ? intval( $visit_count ) : 0;
+	}
+
+	public static function get_landing_page_last_visit_time(): int {
+		$last_visit_time = get_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME );
+
+		return is_numeric( $last_visit_time ) ? intval( $last_visit_time ) : 0;
+	}
+
 	public static function set_landing_page_visited(): bool {
+		$visit_count = self::get_landing_page_visit_count();
+		update_option( self::OPTION_LANDING_PAGE_VISIT_COUNT, $visit_count + 1 );
+		update_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME, time() );
 		return update_option( self::OPTION_LANDING_PAGE_VISITED, true );
 	}
 
@@ -68,6 +85,7 @@ class Options {
 		delete_option( self::OPTION_API_KEY );
 		delete_option( self::OPTION_BRAND_ID );
 		delete_option( self::OPTION_STORE_CONNECTED );
+		delete_option( self::OPTION_LANDING_PAGE_VISITED );
 		delete_metadata( 'user', '0', UserMetaData::LAST_SYNC, '', true );
 	}
 

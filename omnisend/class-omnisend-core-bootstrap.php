@@ -38,6 +38,8 @@ const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.j
 // Omnisend for Woo plugin.
 const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION = 'omnisend_api_key';
 
+
+
 spl_autoload_register( array( 'Omnisend_Core_Bootstrap', 'autoloader' ) );
 register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
@@ -45,16 +47,21 @@ add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 class Omnisend_Core_Bootstrap {
 
 
+
+
+
 	public static function load(): void {
 		self::load_react();
-
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
+		add_action( 'wp_before_admin_bar_render', 'Omnisend_Core_Bootstrap::add_omnisend_toolbar', 999 );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
+		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 
@@ -74,12 +81,14 @@ class Omnisend_Core_Bootstrap {
 
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}
+
+		// self::migrate_options(); fix bug and uncomment.
 	}
 
 
 	public static function omnisend_app_market() {
 		?>
-			<div id="omnisend-app-market"></div>
+		<div id="omnisend-app-market"></div>
 		<?php
 	}
 
@@ -100,11 +109,11 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
-		$menu_title    = 'Omnisend' . ( ! Options::is_landing_page_visited() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
+		$menu_title    = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend\Internal\Connection::display';
-		$omnisend_icon = 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzIgMzIiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0yNi40NDg1IDBINS41NDAyQzIuNDgyMzcgMCAwIDIuNDgxNDkgMCA1LjUzODI0VjI2LjQzOTJDMCAyOS40OTU5IDIuNDgyMzcgMzEuOTc3NCA1LjU0MDIgMzEuOTc3NEg3Ljg3NTg4SDE1LjA2MzVWMjcuMzk4QzE1LjA2MzUgMjIuOTg3NyAxNC41MjE5IDE5LjU5MjUgMTEuMjM4NCAxOC42MjI1VjE1LjAxM0MxNi41NzU1IDE1LjQ4NjggMTkuMjI3MSAxOS40NTcyIDE5LjIyNzEgMjUuOTg4VjMySDIzLjU3MTJIMjYuNDU5OEMyOS41MTc2IDMyIDMyIDI5LjUxODUgMzIgMjYuNDYxOFY1LjUzODI0QzMxLjk4ODcgMi40ODE0OSAyOS41MDYzIDAgMjYuNDQ4NSAwWk0xNi4xNTggMTEuNTUwMkMxNC40NjU0IDExLjU1MDIgMTMuMDg4OSAxMC4xNzQxIDEzLjA4ODkgOC40ODIyQzEzLjA4ODkgNi43OTAyNyAxNC40NjU0IDUuNDE0MTcgMTYuMTU4IDUuNDE0MTdDMTcuODUwNSA1LjQxNDE3IDE5LjIxNTggNi43OTAyNyAxOS4yMTU4IDguNDkzNDhDMTkuMjE1OCAxMC4xODU0IDE3Ljg1MDUgMTEuNTUwMiAxNi4xNTggMTEuNTUwMloiCiAgICAgICAgICBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K';
+		$omnisend_icon = plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png';
 		$position      = 2;
 
 		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
@@ -119,6 +128,48 @@ class Omnisend_Core_Bootstrap {
 		);
 	}
 
+	public static function add_links_in_plugin_settings( $actions ) {
+		$omnisend_link = array(
+			'<a style="color: #35938F; font-weight: bold" href="' . admin_url( 'admin.php?page=omnisend' ) . '">Go to Omnisend</a>',
+		);
+		$add_ons_link  = array(
+			'<a href="' . admin_url( 'admin.php?page=omnisend-app-market' ) . '">Add-ons</a>',
+		);
+		$actions       = array_merge( $omnisend_link, $add_ons_link, $actions );
+		return $actions;
+	}
+
+	public static function add_omnisend_toolbar() {
+		global $wp_admin_bar;
+		$menu_title = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
+
+		$omnisend_link = array(
+			'id'    => 'omnisend-link',
+			'title' => '<div class="omnisend-top-bar-icon-container"><img class="omnisend-top-bar-icon" src="' . plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png" /> <span class="ab-label">' . $menu_title . '</span></div>',
+			'href'  => admin_url( 'admin.php?page=omnisend' ),
+		);
+
+		$wp_admin_bar->add_node( $omnisend_link );
+		$omnisend_link_dropdown_item = array(
+			'parent' => 'omnisend-link',
+			'id'     => 'add-ons',
+			'title'  => 'Add-ons',
+			'href'   => admin_url( 'admin.php?page=omnisend-app-market' ),
+			'meta'   => false,
+		);
+
+		$omnisend_link_home_dropdown_item = array(
+			'parent' => 'omnisend-link',
+			'id'     => 'home',
+			'title'  => 'Home',
+			'href'   => admin_url( 'admin.php?page=omnisend' ),
+			'meta'   => false,
+		);
+
+		$wp_admin_bar->add_node( $omnisend_link_home_dropdown_item );
+		$wp_admin_bar->add_node( $omnisend_link_dropdown_item );
+	}
+
 
 	public static function cron_schedules( $schedules ) {
 		$schedules[ OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE ] = array(
@@ -129,24 +180,49 @@ class Omnisend_Core_Bootstrap {
 		return $schedules;
 	}
 
-	public static function load_omnisend_admin_styles(): void {
-		// phpcs:disable WordPress.Security.NonceVerification
-		if ( isset( $_GET['page'] ) ) {
-			if ( in_array( $_GET['page'], array( 'omnisend', 'omnisend-app-market' ), true ) ) {
-				wp_enqueue_style(
-					'roboto.css',
-					plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
-					array(),
-					OMNISEND_CORE_PLUGIN_VERSION,
-				);
-				wp_enqueue_style(
-					'styles.css',
-					plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
-					array(),
-					OMNISEND_CORE_PLUGIN_VERSION,
-				);
-			}
+
+	private static function migrate_options() {
+		$is_store_connected = Options::is_store_connected();
+		$visit_count        = Options::get_landing_page_visit_count();
+
+		$store_connected_before_visit_count_option = $is_store_connected && $visit_count === 0;
+		if ( $store_connected_before_visit_count_option ) {
+			Options::set_landing_page_visited();
 		}
+	}
+
+	private static function show_notification_icon(): bool {
+		return ! Options::is_landing_page_visited();
+	}
+
+	public static function load_omnisend_admin_styles(): void {
+		wp_enqueue_style(
+			'roboto.css',
+			plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+		wp_enqueue_style(
+			'styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+		wp_enqueue_style(
+			'site-styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+	}
+
+	public static function load_omnisend_site_styles(): void {
+		wp_enqueue_style(
+			'site-styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
 	}
 
 	public static function admin_notices(): void {

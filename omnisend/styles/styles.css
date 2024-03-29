@@ -256,7 +256,7 @@
 
 	display: inline-block;
 	padding: 12px 32px;
-	border: 1px #1E2423 solid;
+	border: 1px #1e2423 solid;
 	border-radius: 8px;
 	text-align: center;
 	font-weight: 600;
@@ -264,7 +264,7 @@
 	line-height: 24px;
 	transition: ease all 0.3s;
 	margin-bottom: 24px;
-	color: #1E2423;
+	color: #1e2423;
 }
 
 .omnisend-button:hover {
