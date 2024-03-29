@@ -59,6 +59,7 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
 		add_action( 'wp_before_admin_bar_render', 'Omnisend_Core_Bootstrap::add_omnisend_toolbar', 999 );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
+		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
@@ -140,9 +141,13 @@ class Omnisend_Core_Bootstrap {
 	public static function add_omnisend_toolbar() {
 		global $wp_admin_bar;
 
+
+		$menu_title    = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
+
+
 		$omnisend_link = array(
 			'id'    => 'omnisend-link',
-			'title' => '<div class="omnisend-top-bar-icon-container"><img class="omnisend-top-bar-icon" src="' . plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png" /> <span class="ab-label">Omnisend</span></div>',
+			'title' => '<div class="omnisend-top-bar-icon-container"><img class="omnisend-top-bar-icon" src="' . plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png" /> <span class="ab-label">'. $menu_title  .'</span></div>',
 			'href'  => admin_url( 'admin.php?page=omnisend' ),
 		);
 
@@ -212,6 +217,15 @@ class Omnisend_Core_Bootstrap {
 		wp_enqueue_style(
 			'styles.css',
 			plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+	}
+
+	public static function load_omnisend_site_styles(): void {
+		wp_enqueue_style(
+			'site-styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css?' . time(),
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
