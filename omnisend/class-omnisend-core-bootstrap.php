@@ -176,22 +176,22 @@ class Omnisend_Core_Bootstrap {
 
 
 	private static function migrate_options() {
-		$landing_page_visited = Options::is_landing_page_visited();
+		$landing_page_visited            = Options::is_landing_page_visited();
 		$landing_page_notification_state = Options::get_landing_page_notification_state();
-		$landing_page_last_visit_time = Options::get_landing_page_last_visit_time();
+		$landing_page_last_visit_time    = Options::get_landing_page_last_visit_time();
 
-		if ( $landing_page_visited && ($landing_page_notification_state === NOTIFICATION_NOT_SHOWN ||$landing_page_last_visit_time === 0)) {
+		if ( $landing_page_visited && ( $landing_page_notification_state === NOTIFICATION_NOT_SHOWN || $landing_page_last_visit_time === 0 ) ) {
 			Options::set_landing_page_visited();
 		}
 	}
 
 	private static function show_notification_icon(): bool {
-		$lastVisitTime = Options::get_landing_page_last_visit_time();
+		$last_visit_time      = Options::get_landing_page_last_visit_time();
 		$notification_state = Options::get_landing_page_notification_state();
-		$currentTime = current_time('timestamp');
+		$current_time        = current_time( 'timestamp' );
 
-		return ! Options::is_connected() && 
-		(! Options::is_landing_page_visited() || $notification_state === NOTIFICATION_DELAYED && $currentTime - $lastVisitTime > Options::get_notification_delay_time());
+		return ! Options::is_connected() &&
+		( ! Options::is_landing_page_visited() || $notification_state === NOTIFICATION_DELAYED && $current_time - $last_visit_time > Options::get_notification_delay_time() );
 	}
 
 	public static function load_omnisend_admin_styles(): void {

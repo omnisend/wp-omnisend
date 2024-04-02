@@ -9,18 +9,18 @@ namespace Omnisend\Internal;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-define('NOTIFICATION_NOT_SHOWN', 'shown');
-define('NOTIFICATION_DELAYED', 'delayed');
-define('NOTIFICATION_DISABLED', 'disabled');
+define( 'NOTIFICATION_NOT_SHOWN', 'shown' );
+define( 'NOTIFICATION_DELAYED', 'delayed' );
+define( 'NOTIFICATION_DISABLED', 'disabled' );
 
 class Options {
-	
+
 	// omni_send instead of omnisend used to distinct and not interfere with Omnisend for Woo plugin.
-	private const OPTION_API_KEY                      = 'omni_send_core_api_key';
-	private const OPTION_BRAND_ID                     = 'omni_send_core_brand_id';
-	private const OPTION_STORE_CONNECTED              = 'omni_send_core_store_connected';
-	private const OPTION_LANDING_PAGE_VISITED         = 'omni_send_core_landing_page_visited';
-	private const OPTION_LANDING_PAGE_VISIT_LAST_TIME = 'omni_send_core_landing_page_last_visit_time';
+	private const OPTION_API_KEY                         = 'omni_send_core_api_key';
+	private const OPTION_BRAND_ID                        = 'omni_send_core_brand_id';
+	private const OPTION_STORE_CONNECTED                 = 'omni_send_core_store_connected';
+	private const OPTION_LANDING_PAGE_VISITED            = 'omni_send_core_landing_page_visited';
+	private const OPTION_LANDING_PAGE_VISIT_LAST_TIME    = 'omni_send_core_landing_page_last_visit_time';
 	private const OPTION_LANDING_PAGE_NOTIFICATION_STATE = 'omni_send_core_landing_page_notification_state';
 
 	public static function get_api_key(): string {
@@ -83,25 +83,25 @@ class Options {
 	}
 
 	public static function set_landing_page_visited(): bool {
-		$notification_state = get_option(self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, NOTIFICATION_NOT_SHOWN);
-		$lastVisitTime = self::get_landing_page_last_visit_time();
-		$currentTime = current_time('timestamp');
+		$notification_state = get_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, NOTIFICATION_NOT_SHOWN );
+		$last_visit_time      = self::get_landing_page_last_visit_time();
+		$current_time        = current_time( 'timestamp' );
 
-		if ($notification_state === NOTIFICATION_NOT_SHOWN) {
+		if ( $notification_state === NOTIFICATION_NOT_SHOWN ) {
 			$notification_state = NOTIFICATION_DELAYED;
-		} elseif ($notification_state === NOTIFICATION_DELAYED && ($currentTime - $lastVisitTime) > self::get_notification_delay_time()) {
+		} elseif ( $notification_state === NOTIFICATION_DELAYED && ( $current_time - $last_visit_time ) > self::get_notification_delay_time() ) {
 			$notification_state = NOTIFICATION_DISABLED;
 		}
-	
-		update_option(self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, $notification_state);
-		update_option(self::OPTION_LANDING_PAGE_VISIT_LAST_TIME, $currentTime);
-		update_option(self::OPTION_LANDING_PAGE_VISITED, true);
-	
+
+		update_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, $notification_state );
+		update_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME, $current_time );
+		update_option( self::OPTION_LANDING_PAGE_VISITED, true );
+
 		return true;
 	}
-	
+
 	public static function get_notification_delay_time(): int {
-		return  7 * DAY_IN_SECONDS;
+		return 7 * DAY_IN_SECONDS;
 	}
 
 	public static function is_landing_page_visited(): bool {
