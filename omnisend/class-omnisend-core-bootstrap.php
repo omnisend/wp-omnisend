@@ -186,12 +186,12 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	private static function show_notification_icon(): bool {
-		$last_visit_time      = Options::get_landing_page_last_visit_time();
+		$last_visit_time    = Options::get_landing_page_last_visit_time();
 		$notification_state = Options::get_landing_page_notification_state();
-		$current_time        = current_time( 'timestamp' );
+		$current_time       = time();
 
 		return ! Options::is_connected() &&
-		( ! Options::is_landing_page_visited() || $notification_state === NOTIFICATION_DELAYED && $current_time - $last_visit_time > Options::get_notification_delay_time() );
+		( ( ! Options::is_landing_page_visited() ) || ( $notification_state === NOTIFICATION_DELAYED && ( $current_time - $last_visit_time ) > Options::get_notification_delay_time() ) );
 	}
 
 	public static function load_omnisend_admin_styles(): void {

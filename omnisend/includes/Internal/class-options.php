@@ -84,8 +84,8 @@ class Options {
 
 	public static function set_landing_page_visited(): bool {
 		$notification_state = get_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, NOTIFICATION_NOT_SHOWN );
-		$last_visit_time      = self::get_landing_page_last_visit_time();
-		$current_time        = current_time( 'timestamp' );
+		$last_visit_time    = self::get_landing_page_last_visit_time();
+		$current_time       = time();
 
 		if ( $notification_state === NOTIFICATION_NOT_SHOWN ) {
 			$notification_state = NOTIFICATION_DELAYED;
