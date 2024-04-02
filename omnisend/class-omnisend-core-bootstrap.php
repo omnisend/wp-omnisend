@@ -45,11 +45,6 @@ register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 
 class Omnisend_Core_Bootstrap {
-
-
-
-
-
 	public static function load(): void {
 		self::load_react();
 		// phpcs:ignore because linter could not detect internal, but it is fine
@@ -81,8 +76,7 @@ class Omnisend_Core_Bootstrap {
 
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}
-
-		// self::migrate_options(); fix bug and uncomment.
+		self::migrate_options();
 	}
 
 
@@ -109,7 +103,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
-		$menu_title    = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
+		$menu_title    = 'Omnisend Email Marketing' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend\Internal\Connection::display';
@@ -141,7 +135,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_omnisend_toolbar() {
 		global $wp_admin_bar;
-		$menu_title = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
+		$menu_title = 'Omnisend Email Marketing' . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
 
 		$omnisend_link = array(
 			'id'    => 'omnisend-link',
@@ -182,17 +176,22 @@ class Omnisend_Core_Bootstrap {
 
 
 	private static function migrate_options() {
-		$is_store_connected = Options::is_store_connected();
-		$visit_count        = Options::get_landing_page_visit_count();
+		$landing_page_visited = Options::is_landing_page_visited();
+		$landing_page_notification_state = Options::get_landing_page_notification_state();
+		$landing_page_last_visit_time = Options::get_landing_page_last_visit_time();
 
-		$store_connected_before_visit_count_option = $is_store_connected && $visit_count === 0;
-		if ( $store_connected_before_visit_count_option ) {
+		if ( $landing_page_visited && ($landing_page_notification_state === NOTIFICATION_NOT_SHOWN ||$landing_page_last_visit_time === 0)) {
 			Options::set_landing_page_visited();
 		}
 	}
 
 	private static function show_notification_icon(): bool {
-		return ! Options::is_landing_page_visited();
+		$lastVisitTime = Options::get_landing_page_last_visit_time();
+		$notification_state = Options::get_landing_page_notification_state();
+		$currentTime = current_time('timestamp');
+
+		return ! Options::is_connected() && 
+		(! Options::is_landing_page_visited() || $notification_state === NOTIFICATION_DELAYED && $currentTime - $lastVisitTime > Options::get_notification_delay_time());
 	}
 
 	public static function load_omnisend_admin_styles(): void {
