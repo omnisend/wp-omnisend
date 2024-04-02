@@ -74,15 +74,7 @@ class Options {
 		return is_string( $notification_state ) ? $notification_state : NOTIFICATION_NOT_SHOWN;
 	}
 
-	public static function set_landing_page_notification_state( $state ): bool {
-		if ( ! is_string( $state ) ) {
-			return false;
-		}
-
-		return update_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, $state );
-	}
-
-	public static function set_landing_page_visited(): bool {
+	public static function set_landing_page_visited(): void {
 		$notification_state = get_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, NOTIFICATION_NOT_SHOWN );
 		$last_visit_time    = self::get_landing_page_last_visit_time();
 		$current_time       = time();
@@ -96,8 +88,6 @@ class Options {
 		update_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE, $notification_state );
 		update_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME, $current_time );
 		update_option( self::OPTION_LANDING_PAGE_VISITED, true );
-
-		return true;
 	}
 
 	public static function get_notification_delay_time(): int {
