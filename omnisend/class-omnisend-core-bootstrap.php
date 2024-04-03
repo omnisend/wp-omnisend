@@ -26,6 +26,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 const OMNISEND_CORE_PLUGIN_VERSION = '1.3.14';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
+const OMNISEND_MENU_TITLE		  = 'Omnisend Email Marketing';
 
 const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 
@@ -103,7 +104,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
-		$menu_title    = 'Omnisend Email Marketing' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
+		$menu_title    = OMNISEND_MENU_TITLE . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend\Internal\Connection::display';
@@ -135,7 +136,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_omnisend_toolbar() {
 		global $wp_admin_bar;
-		$menu_title = 'Omnisend Email Marketing' . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
+		$menu_title = OMNISEND_MENU_TITLE . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
 
 		$omnisend_link = array(
 			'id'    => 'omnisend-link',
@@ -289,7 +290,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
-				if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
+				if ( file_exists( $asset_file_page ) && self::normalizeMenuTitleToSuffix() === $suffix ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'omnisend-app-market-script',
@@ -304,6 +305,11 @@ class Omnisend_Core_Bootstrap {
 				}
 			}
 		);
+	}
+
+	// when menu title is changed, this function should be updated or checked as well
+	private static function normalizeMenuTitleToSuffix() : string {
+		return str_replace( ' ', '-', strtolower( OMNISEND_MENU_TITLE ) ) . '_page_omnisend-app-market';
 	}
 
 	public static function is_omnisend_woocommerce_plugin_active(): bool {
