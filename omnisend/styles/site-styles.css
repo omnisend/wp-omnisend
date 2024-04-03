@@ -3,45 +3,6 @@
 	width: 20px;
 }
 
-.omnisend-toolbar-counter{
-	background-color: #d63638;
-	color: #fff;
-	padding: 1px 7px 1px 6px !important;
-	border-radius: 50% !important;
-}
-
-.omnisend-top-bar-icon {
-	height: 20px !important;
-	padding-right: 4px !important;
-}
-
-.omnisend-top-bar-icon-container {
-	height: 100% !important;
-	display: flex !important;
-	align-items: center !important;
-}
-
-@media screen and (max-width: 782px) {
-	#wpadminbar li#wp-admin-bar-omnisend-link {
-	margin-left: auto;
-	margin-right: auto;
-	display: block;
-	}
-	.omnisend-top-bar-icon {
-	height: 30px !important;
-	display: block;
-	}
-}
-
 .omnisend-settings-text {
 	color: #35938f;
-}
-
-.omnisend-toolbar-icon {
-	float: left;
-	width: 24px !important;
-	height: 24px !important;
-	background-repeat: no-repeat;
-	background-position: 0 6px;
-	background-size: 20px;
 }

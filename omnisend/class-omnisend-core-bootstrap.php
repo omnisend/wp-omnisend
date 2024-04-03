@@ -54,7 +54,6 @@ class Omnisend_Core_Bootstrap {
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
-		add_action( 'wp_before_admin_bar_render', 'Omnisend_Core_Bootstrap::add_omnisend_toolbar', 999 );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
 		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
@@ -133,38 +132,6 @@ class Omnisend_Core_Bootstrap {
 		$actions       = array_merge( $omnisend_link, $add_ons_link, $actions );
 		return $actions;
 	}
-
-	public static function add_omnisend_toolbar() {
-		global $wp_admin_bar;
-		$menu_title = OMNISEND_MENU_TITLE . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
-
-		$omnisend_link = array(
-			'id'    => 'omnisend-link',
-			'title' => '<div class="omnisend-top-bar-icon-container"><img class="omnisend-top-bar-icon" src="' . plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png" /> <span class="ab-label">' . $menu_title . '</span></div>',
-			'href'  => admin_url( 'admin.php?page=omnisend' ),
-		);
-
-		$wp_admin_bar->add_node( $omnisend_link );
-		$omnisend_link_dropdown_item = array(
-			'parent' => 'omnisend-link',
-			'id'     => 'add-ons',
-			'title'  => 'Add-ons',
-			'href'   => admin_url( 'admin.php?page=omnisend-app-market' ),
-			'meta'   => false,
-		);
-
-		$omnisend_link_home_dropdown_item = array(
-			'parent' => 'omnisend-link',
-			'id'     => 'home',
-			'title'  => 'Home',
-			'href'   => admin_url( 'admin.php?page=omnisend' ),
-			'meta'   => false,
-		);
-
-		$wp_admin_bar->add_node( $omnisend_link_home_dropdown_item );
-		$wp_admin_bar->add_node( $omnisend_link_dropdown_item );
-	}
-
 
 	public static function cron_schedules( $schedules ) {
 		$schedules[ OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE ] = array(
@@ -314,6 +281,10 @@ class Omnisend_Core_Bootstrap {
 
 	public static function is_omnisend_woocommerce_plugin_active(): bool {
 		return in_array( 'omnisend-connect/omnisend-woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) );
+	}
+
+	public static function is_hostinger_plugin_active(): bool {
+		return in_array( 'hostinger/hostinger.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) );
 	}
 
 	public static function is_omnisend_woocommerce_plugin_connected(): bool {
