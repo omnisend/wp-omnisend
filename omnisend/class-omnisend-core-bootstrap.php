@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 const OMNISEND_CORE_PLUGIN_VERSION = '1.3.14';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
-const OMNISEND_MENU_TITLE		  = 'Omnisend Email Marketing';
+const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
 
 const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 
@@ -290,7 +290,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
-				if ( file_exists( $asset_file_page ) && self::normalizeMenuTitleToSuffix() === $suffix ) {
+				if ( file_exists( $asset_file_page ) && self::normalize_menu_title_to_suffix() === $suffix ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'omnisend-app-market-script',
@@ -307,8 +307,8 @@ class Omnisend_Core_Bootstrap {
 		);
 	}
 
-	// when menu title is changed, this function should be updated or checked as well
-	private static function normalizeMenuTitleToSuffix() : string {
+	// when menu title is changed, this function should be updated or checked as well.
+	private static function normalize_menu_title_to_suffix(): string {
 		return str_replace( ' ', '-', strtolower( OMNISEND_MENU_TITLE ) ) . '_page_omnisend-app-market';
 	}
 
