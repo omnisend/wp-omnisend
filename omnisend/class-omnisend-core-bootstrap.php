@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.3.13
+ * Version: 1.3.14
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -23,9 +23,10 @@ use Omnisend\Internal\Connection;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.3.13';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.3.14';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
+const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
 
 const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 
@@ -45,11 +46,6 @@ register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 
 class Omnisend_Core_Bootstrap {
-
-
-
-
-
 	public static function load(): void {
 		self::load_react();
 		// phpcs:ignore because linter could not detect internal, but it is fine
@@ -81,8 +77,7 @@ class Omnisend_Core_Bootstrap {
 
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}
-
-		// self::migrate_options(); fix bug and uncomment.
+		self::migrate_options();
 	}
 
 
@@ -109,7 +104,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
-		$menu_title    = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
+		$menu_title    = OMNISEND_MENU_TITLE . ( self::show_notification_icon() ? ' <span class="update-plugins count-1"><span class="plugin-count">1</span></span>' : '' );
 		$capability    = 'manage_options';
 		$menu_slug     = OMNISEND_CORE_SETTINGS_PAGE;
 		$function      = 'Omnisend\Internal\Connection::display';
@@ -141,7 +136,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function add_omnisend_toolbar() {
 		global $wp_admin_bar;
-		$menu_title = 'Omnisend' . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
+		$menu_title = OMNISEND_MENU_TITLE . ( self::show_notification_icon() ? ' <span class="update-plugins"><span class="omnisend-toolbar-counter">1</span></span>' : '' );
 
 		$omnisend_link = array(
 			'id'    => 'omnisend-link',
@@ -182,17 +177,22 @@ class Omnisend_Core_Bootstrap {
 
 
 	private static function migrate_options() {
-		$is_store_connected = Options::is_store_connected();
-		$visit_count        = Options::get_landing_page_visit_count();
+		$landing_page_visited            = Options::is_landing_page_visited();
+		$landing_page_notification_state = Options::get_landing_page_notification_state();
+		$landing_page_last_visit_time    = Options::get_landing_page_last_visit_time();
 
-		$store_connected_before_visit_count_option = $is_store_connected && $visit_count === 0;
-		if ( $store_connected_before_visit_count_option ) {
+		if ( $landing_page_visited && ( $landing_page_notification_state === NOTIFICATION_NOT_SHOWN || $landing_page_last_visit_time === 0 ) ) {
 			Options::set_landing_page_visited();
 		}
 	}
 
 	private static function show_notification_icon(): bool {
-		return ! Options::is_landing_page_visited();
+		$last_visit_time    = Options::get_landing_page_last_visit_time();
+		$notification_state = Options::get_landing_page_notification_state();
+		$current_time       = time();
+
+		return ! Options::is_connected() &&
+		( ( ! Options::is_landing_page_visited() ) || ( $notification_state === NOTIFICATION_DELAYED && ( $current_time - $last_visit_time ) > Options::get_notification_delay_time() ) );
 	}
 
 	public static function load_omnisend_admin_styles(): void {
@@ -290,7 +290,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
-				if ( file_exists( $asset_file_page ) && 'omnisend_page_omnisend-app-market' === $suffix ) {
+				if ( file_exists( $asset_file_page ) && self::normalize_menu_title_to_suffix() === $suffix ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'omnisend-app-market-script',
@@ -305,6 +305,11 @@ class Omnisend_Core_Bootstrap {
 				}
 			}
 		);
+	}
+
+	// when menu title is changed, this function should be updated or checked as well.
+	private static function normalize_menu_title_to_suffix(): string {
+		return str_replace( ' ', '-', strtolower( OMNISEND_MENU_TITLE ) ) . '_page_omnisend-app-market';
 	}
 
 	public static function is_omnisend_woocommerce_plugin_active(): bool {
