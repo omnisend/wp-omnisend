@@ -63,7 +63,7 @@ export const PLUGINS_DATA = {
 			name: 'WS Form PRO',
 			created_by: 'WS Form',
 			category_id: 'form',
-			description: 'Sends form data and contact information to Omnisend automatically from wsform',
+			description: 'Sends form data and contact information to Omnisend automatically from WS Form',
 			logo: 'https://appmarket-media.omnisend.com/ws_form/ws_form_logo.png',
 			url: 'https://wsform.com/knowledgebase/omnisend/'
 		}
