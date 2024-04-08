@@ -78,6 +78,10 @@ class Omnisend_Core_Bootstrap {
 
 
 	public static function omnisend_app_market() {
+		if(!current_user_can('manage_options')){
+			wp_die(__( 'You do not have sufficient permissions to access this page.'));
+		}
+
 		?>
 			<div id="omnisend-app-market"></div>
 		<?php
