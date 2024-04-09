@@ -51,6 +51,7 @@ class Omnisend_Core_Bootstrap {
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
+		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
@@ -204,21 +205,27 @@ class Omnisend_Core_Bootstrap {
 		);
 	}
 
-	public static function admin_notices(): void {
+	public static function hide_notices(): void {
 		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false ) {
-				remove_all_actions( 'admin_notices' );
-				if ( self::is_hostinger_plugin_active() ) {
-					self::omnisend_hostinger_discount_notice();
-				}
+				echo '<style>.notice:not(.omnisend-notice) { display: none !important; }</style>';
 			}
 		}
+	}
 
+	public static function admin_notices(): void {
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false && self::is_hostinger_plugin_active() ) {
+					self::omnisend_hostinger_discount_notice();
+
+			}
+		}
 		if ( Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
-			echo '<div class="notice notice-error"><p>Since you have already connected the <strong>Omnisend</strong> plugin, to use <strong>Omnisend for Woocommerce</strong> please contact <a href=mailto:"support@omnisend.com">customer support</a>.</p></div>';
+			echo '<div class="notice notice-error omnisend-notice"><p>Since you have already connected the <strong>Omnisend</strong> plugin, to use <strong>Omnisend for Woocommerce</strong> please contact <a href=mailto:"support@omnisend.com">customer support</a>.</p></div>';
 		} elseif ( ! Options::is_connected() && ( is_plugin_active( 'woocommerce/woocommerce.php' ) || self::is_omnisend_woocommerce_plugin_active() ) && ! self::is_omnisend_woocommerce_plugin_connected() ) {
-			echo '<div class="notice notice-error"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for WooCommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
+			echo '<div class="notice notice-error omnisend-notice"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for WooCommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
 		}
 	}
 
@@ -228,7 +235,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/notices.asset.php';
-				if ( file_exists( $asset_file_page ) && ( 'toplevel_page_omnisend' === $suffix || self::normalize_menu_title_to_suffix() === $suffix ) ) {
+				if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix || self::normalize_menu_title_to_suffix() === $suffix ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'connection-script',
