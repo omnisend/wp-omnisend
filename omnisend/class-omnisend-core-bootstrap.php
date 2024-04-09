@@ -238,7 +238,7 @@ class Omnisend_Core_Bootstrap {
 				if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix || self::normalize_menu_title_to_suffix() === $suffix ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
-						'connection-script',
+						'notices-script',
 						plugin_dir_url( __FILE__ ) . 'build/notices.js',
 						$assets['dependencies'],
 						$assets['version'],
