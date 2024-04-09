@@ -1,8 +1,8 @@
 name: Release plugin
 on:
-  create:
+    create:
 jobs:
-    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    if: startsWith(github.ref, 'refs/tags/v')
     svn:
         name: Release new tag
         runs-on: ubuntu-latest
