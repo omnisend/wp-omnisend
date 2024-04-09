@@ -181,6 +181,12 @@ class Omnisend_Core_Bootstrap {
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
+		wp_enqueue_style(
+			'notice-styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/notice-styles.css?' . time(),
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
 	}
 
 	public static function load_omnisend_site_styles(): void {
@@ -193,6 +199,17 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function admin_notices(): void {
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false ) {
+				remove_all_actions( 'admin_notices' );
+				if ( self::is_hostinger_plugin_active() ) {
+					echo '<div class="omnisend-custom-notice"><img src="' . esc_url( plugin_dir_url( __FILE__ ) ) . 'assets/img/omnisend-notice-discount-icon.svg" />
+					<div>Get 30% off Omnisend for 6 months with code ONLYHOSTINGER30</div><a href="https://your.omnisend.com/LXqyZ0" target="_blank" class="omnisend-custom-notice-discount-button">Get Omnisend discount</a></div>';
+				}
+			}
+		}
+
 		if ( Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
 			echo '<div class="notice notice-error"><p>Since you have already connected the <strong>Omnisend</strong> plugin, to use <strong>Omnisend for Woocommerce</strong> please contact <a href=mailto:"support@omnisend.com">customer support</a>.</p></div>';
 		} elseif ( ! Options::is_connected() && ( is_plugin_active( 'woocommerce/woocommerce.php' ) || self::is_omnisend_woocommerce_plugin_active() ) && ! self::is_omnisend_woocommerce_plugin_connected() ) {

@@ -1,0 +1,31 @@
+.omnisend-custom-notice {
+	width: 100%;
+	background-color: #673de6;
+	margin-left: -20px;
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	align-items: center;
+	border-color: #673de6;
+	color: #fff;
+	padding: 8px 24px;
+	margin-bottom: 1rem;
+	font-weight: 300;
+	font-family: Roboto;
+	font-size: 14px;
+	line-height: 24px;
+}
+
+.omnisend-custom-notice-discount-button {
+	color: inherit;
+	padding: 8px 16px;
+	border: solid #fff 1px;
+	border-radius: 8px;
+	text-decoration: none;
+	margin-right: 10px;
+}
+
+.omnisend-custom-notice-discount-button:hover {
+	color: #673de6;
+	background-color: #fff;
+}
