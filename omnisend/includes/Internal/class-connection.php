@@ -14,8 +14,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Connection {
 
 	public static function display(): void {
-		if(!current_user_can('manage_options')){
-			wp_die(__( 'You do not have sufficient permissions to access this page.'));
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 		}
 
 		Options::set_landing_page_visited();
