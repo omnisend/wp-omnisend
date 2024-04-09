@@ -10,7 +10,7 @@
 	color: #fff;
 	padding: 8px 24px;
 	margin-bottom: 1rem;
-	font-weight: 300;
+	font-weight: 400;
 	font-family: Roboto;
 	font-size: 14px;
 	line-height: 24px;
@@ -28,4 +28,15 @@
 .omnisend-custom-notice-discount-button:hover {
 	color: #673de6;
 	background-color: #fff;
+}
+
+.omnisend-custom-notice-discount-button:active,
+.omnisend-custom-notice-discount-button:focus {
+	color: #673de6;
+	background-color: #fff;
+	box-shadow: none;
+}
+
+.omnisend-custom-notice-strong-text {
+	font-weight: 500;
 }

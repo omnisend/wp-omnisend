@@ -86,6 +86,12 @@ class Omnisend_Core_Bootstrap {
 		<?php
 	}
 
+	public static function omnisend_hostinger_discount_notice() {
+		?>
+		<div id="omnisend-hostinger-discount-notice"></div>
+		<?php
+	}
+
 	public static function omnisend_register_connection_routes() {
 		register_rest_route(
 			'omnisend/v1',
@@ -204,8 +210,7 @@ class Omnisend_Core_Bootstrap {
 			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false ) {
 				remove_all_actions( 'admin_notices' );
 				if ( self::is_hostinger_plugin_active() ) {
-					echo '<div class="omnisend-custom-notice"><img src="' . esc_url( plugin_dir_url( __FILE__ ) ) . 'assets/img/omnisend-notice-discount-icon.svg" />
-					<div>Get 30% off Omnisend for 6 months with code ONLYHOSTINGER30</div><a href="https://your.omnisend.com/LXqyZ0" target="_blank" class="omnisend-custom-notice-discount-button">Get Omnisend discount</a></div>';
+					self::omnisend_hostinger_discount_notice();
 				}
 			}
 		}
@@ -218,6 +223,27 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function load_react(): void {
+
+		add_action(
+			'admin_enqueue_scripts',
+			function ( $suffix ) {
+				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/notices.asset.php';
+				if ( file_exists( $asset_file_page ) && ( 'toplevel_page_omnisend' === $suffix || self::normalize_menu_title_to_suffix() === $suffix ) ) {
+					$assets = require_once $asset_file_page;
+					wp_enqueue_script(
+						'connection-script',
+						plugin_dir_url( __FILE__ ) . 'build/notices.js',
+						$assets['dependencies'],
+						$assets['version'],
+						true
+					);
+					foreach ( $assets['dependencies'] as $style ) {
+						wp_enqueue_style( $style );
+					}
+				}
+			}
+		);
+
 		if ( Connection::show_connected_store_view() ) {
 			add_action(
 				'admin_enqueue_scripts',
