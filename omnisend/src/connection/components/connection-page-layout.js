@@ -16,7 +16,7 @@ const ConnectionPageLayout = () =>
 		formData.append( 'api_key', apiKey );
 		formData.append( 'action_nonce', omnisend_connection.action_nonce );
 
-		fetch( '/wp-json/omnisend/v1/connect', {
+		fetch( omnisend_connection.site_url + '/wp-json/omnisend/v1/connect', {
 			method: 'POST',
 			body: formData,
 			headers: {
