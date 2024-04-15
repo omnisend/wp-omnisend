@@ -58,7 +58,7 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
 		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
-		
+
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
