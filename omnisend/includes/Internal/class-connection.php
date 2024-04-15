@@ -14,6 +14,10 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Connection {
 
 	public static function display(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
+		}
+
 		Options::set_landing_page_visited();
 
 		if ( self::show_connected_store_view() ) {
@@ -145,6 +149,15 @@ class Connection {
 
 		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
 		$wordpress_platform = 'wordpress'; // WordPress is lowercase as it's required by integration.
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'error'   => 'You do not have sufficient permissions to perform this action.',
+				)
+			);
+		}
 
 		if ( ! isset( $_POST['action_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['action_nonce'] ) ), 'connect' ) ) {
 			return rest_ensure_response(
