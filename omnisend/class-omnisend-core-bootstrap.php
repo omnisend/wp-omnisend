@@ -209,7 +209,7 @@ class Omnisend_Core_Bootstrap {
 		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false ) {
-				echo '<style>[class*="notice"]:not([class*="omnisend"]) { display: none !important; }</style>';
+				echo '<style>[class*="notice"]:not([class*="omnisend"]), .notice:not(.omnisend-notice) { display: none !important; }</style>';
 			}
 		}
 	}
