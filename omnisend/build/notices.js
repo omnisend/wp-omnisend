@@ -16,8 +16,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 
 const DiscountNotice = () => {
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    class: "omnisend-custom-notice"
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    class: "omnisend-custom-notice omnisend-notice"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("img", {
     src: "/wp-content/plugins/omnisend/assets/img/omnisend-notice-discount-icon.svg"
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, "Get 30% off Omnisend for 6 months with code ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
@@ -26,7 +26,7 @@ const DiscountNotice = () => {
     href: "https://your.omnisend.com/LXqyZ0",
     target: "_blank",
     class: "omnisend-custom-notice-discount-button"
-  }, "Get Omnisend discount")));
+  }, "Get Omnisend discount"));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DiscountNotice);
 

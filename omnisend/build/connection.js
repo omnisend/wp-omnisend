@@ -121,7 +121,7 @@ const ConnectionPageLayout = () => {
     const formData = new FormData();
     formData.append('api_key', apiKey);
     formData.append('action_nonce', omnisend_connection.action_nonce);
-    fetch('/wp-json/omnisend/v1/connect', {
+    fetch(omnisend_connection.site_url + '/wp-json/omnisend/v1/connect', {
       method: 'POST',
       body: formData,
       headers: {
@@ -152,6 +152,7 @@ const ConnectionPageLayout = () => {
   }, error && (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "omnisend-spacing-mb-8"
   }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Notice, {
+    className: "omnisend-notice",
     status: "error"
   }, error)), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_connection_logos__WEBPACK_IMPORTED_MODULE_1__["default"], null), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     className: "omnisend-spacing-mv-8"

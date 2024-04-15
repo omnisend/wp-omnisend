@@ -59,7 +59,7 @@ const ConnectionPageLayout = () =>
 			<div className="omnisend-page-layout">
 				{error && (
 					<div className="omnisend-spacing-mb-8">
-						<Notice status="error">{error}</Notice>
+						<Notice className='omnisend-notice' status="error">{error}</Notice>
 					</div>
 				)}
 				<ConnectionLogos />
