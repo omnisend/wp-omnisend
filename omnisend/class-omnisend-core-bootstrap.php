@@ -42,6 +42,7 @@ const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION = 'omnisend_api_key';
 
 
 spl_autoload_register( array( 'Omnisend_Core_Bootstrap', 'autoloader' ) );
+
 register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 

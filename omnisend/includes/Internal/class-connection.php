@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Connection {
 
+	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin';
+
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
@@ -29,12 +31,29 @@ class Connection {
 
 		if ( self::show_connection_view() ) {
 			?>
-				<div id="omnisend-connection"></div>
+			<div id="omnisend-connection"></div>
 			<?php
 			return;
 		}
 
+		self::resolve_wordpress_settings();
+
 		require_once __DIR__ . '/../../view/landing-page.html';
+	}
+
+	public static function resolve_wordpress_settings() {
+		$url      = 'https://api.omnisend.com/wordpress/settings';
+		$response = wp_remote_get( $url );
+
+		if ( ! is_wp_error( $response ) ) {
+			$body = wp_remote_retrieve_body( $response );
+
+			$data = json_decode( $body );
+			// ignore phpcs warning as it's response from API.
+			if ( ! empty( $data->exploreOmnisendLink ) ) { // phpcs:ignore 
+				self::$landing_page_url = $data->exploreOmnisendLink; // phpcs:ignore 
+			}
+		}
 	}
 
 	private static function get_account_data( $api_key ): array {
