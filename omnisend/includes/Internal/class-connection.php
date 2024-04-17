@@ -45,19 +45,13 @@ class Connection {
 		$url      = 'https://api.omnisend.com/wordpress/settings';
 		$response = wp_remote_get( $url );
 
-		if ( is_wp_error( $response ) ) {
-			// used for debugging.
-			error_log( $response->get_error_message() );  // phpcs:ignore
-
-		} else {
+		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );
 
 			$data = json_decode( $body );
 			// ignore phpcs warning as it's response from API.
 			if ( ! empty( $data->exploreOmnisendLink ) ) { // phpcs:ignore 
-
 				self::$landing_page_url = $data->exploreOmnisendLink; // phpcs:ignore 
-
 			}
 		}
 	}
