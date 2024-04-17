@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Omnisend plugin
  *
@@ -12,6 +13,8 @@ use Omnisend_Core_Bootstrap;
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Connection {
+
+	public static $Landing_page_URL = 'initial-link';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -29,9 +32,24 @@ class Connection {
 
 		if ( self::show_connection_view() ) {
 			?>
-				<div id="omnisend-connection"></div>
+			<div id="omnisend-connection"></div>
 			<?php
 			return;
+		}
+
+		$url      = 'https://worpress-integrations.omnisend.work';
+		$response = wp_remote_get( $url );
+
+		if ( is_wp_error( $response ) ) {
+			error_log( $response->get_error_message() );
+		} else {
+			$body = wp_remote_retrieve_body( $response );
+
+			$data = json_decode( $body );
+
+			if ( ! empty( $data->exploreOmnisendLink ) ) {
+				self::$Landing_page_URL = $data->exploreOmnisendLink;
+			}
 		}
 
 		require_once __DIR__ . '/../../view/landing-page.html';
