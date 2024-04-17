@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Connection {
 
-	public static $Landing_page_URL = 'initial-link';
+	public static $Landing_page_URL = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
