@@ -23,7 +23,7 @@ const DiscountNotice = () => {
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, "Get 30% off Omnisend for 6 months with code ", (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
     class: "omnisend-notice omnisend-custom-notice-strong-text"
   }, "ONLYHOSTINGER30")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("a", {
-    href: "https://your.omnisend.com/LXqyZ0",
+    href: "https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin",
     target: "_blank",
     class: "omnisend-notice omnisend-custom-notice-discount-button"
   }, "Get Omnisend discount"));
