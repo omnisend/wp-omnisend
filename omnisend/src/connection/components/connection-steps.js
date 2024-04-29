@@ -16,7 +16,7 @@ const ConnectionSteps = ({ onSubmit }) => {
 				</div>
 				<Button
 					variant="secondary"
-					onClick={() => navigateToExternalUrl('https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin')}
+					onClick={() => navigateToExternalUrl('https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store')}
 				>
 					Go to Omnisend
 				</Button>
@@ -28,7 +28,7 @@ const ConnectionSteps = ({ onSubmit }) => {
 				</div>
 				<Button
 					variant="secondary"
-					onClick={() => navigateToExternalUrl('https://app.omnisend.com/apps/connect-store/wordpress?source=wordpress%20plugin')}
+					onClick={() => navigateToExternalUrl('https://app.omnisend.com/apps/connect-store/wordpress?source=wordpress%20plugin&utm_content=api_keys')}
 				>
 					Go to API keys
 				</Button>
