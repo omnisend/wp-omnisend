@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Connection {
 
-	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin';
+	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -42,7 +42,7 @@ class Connection {
 	}
 
 	public static function resolve_wordpress_settings() {
-		$url      = 'https://api.omnisend.com/wordpress/settings';
+		$url      = 'https://api.omnisend.com/wordpress/settings?version=' . OMNISEND_CORE_PLUGIN_VERSION;
 		$response = wp_remote_get( $url );
 
 		if ( ! is_wp_error( $response ) ) {
