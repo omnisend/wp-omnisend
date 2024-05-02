@@ -52,7 +52,7 @@ class Omnisend_Core_Bootstrap {
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
-		add_action( 'admin_head', 'Omnisend_Core_Bootstrap::hide_notices' );
+		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
