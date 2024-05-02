@@ -52,7 +52,7 @@ class Omnisend_Core_Bootstrap {
 		// phpcs:ignore because linter could not detect internal, but it is fine
 		add_filter('cron_schedules', 'Omnisend_Core_Bootstrap::cron_schedules'); // phpcs:ignore
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
-		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );
+		add_action( 'admin_head', 'Omnisend_Core_Bootstrap::hide_notices' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
@@ -211,11 +211,9 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function hide_notices(): void {
-		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false ) {
-				echo '<style>[class*="notice"]:not([class*="components"], .omnisend-notice, .notice), .notice:not(.omnisend-notice) { display: none !important; }</style>';
-			}
+		$screen = get_current_screen();
+		if ( $screen && ( $screen->id === 'toplevel_page_omnisend' || $screen->id === 'omnisend-email-marketing_page_omnisend-app-market' ) ) {
+			echo '<style>[class*="notice"]:not([class*="components"], .omnisend-notice, .notice), .notice:not(.omnisend-notice) { display: none !important; }</style>';
 		}
 	}
 
