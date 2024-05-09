@@ -31,7 +31,7 @@ class Utils {
 	 */
 	public static function clean_up_custom_property_name( $name ): string {
 		$name = preg_replace( '/[^a-zA-Z0-9_]/', '', $name );
-		return mb_strimwidth( $name, 0, 128 );
+		return substr( $name, 0, 128 );
 	}
 
 	/**
@@ -54,6 +54,7 @@ class Utils {
 	 */
 	public static function clean_up_tag( $tag ): string {
 		$tag = preg_replace( '/[^A-Za-z0-9_\- ]/', '', $tag );
-		return mb_strimwidth( $tag, 0, 128 );
+
+		return substr( $tag, 0, 128 );
 	}
 }
