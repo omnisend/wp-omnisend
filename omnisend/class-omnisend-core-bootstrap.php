@@ -34,6 +34,7 @@ const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
 // Change for different environment.
 const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
+const OMNISEND_CORE_API_V5      = 'https://api.omnisend.com/v5';
 const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
 
 // Omnisend for Woo plugin.
