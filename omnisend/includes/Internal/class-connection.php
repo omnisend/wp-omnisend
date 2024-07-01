@@ -154,7 +154,7 @@ class Connection {
 		}
 
 		$response = self::get_account_data( $api_key );
-		if ( ! empty( $response['brandID'] ) ) {
+		if ( empty( $response['brandID'] ) ) {
 			return;
 		}
 
