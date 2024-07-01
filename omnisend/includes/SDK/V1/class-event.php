@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Omnisend Client
  *
@@ -10,19 +9,19 @@ namespace Omnisend\SDK\V1;
 
 use WP_Error;
 
-defined('ABSPATH') || die('no direct access');
+defined( 'ABSPATH' ) || die( 'no direct access' );
 
 /**
  * Omnisend Event class. It's should be used with Omnisend Client.
  *
  */
-class Event
-{
-	private $contact        = null; //from contacts
-	private $event_name     = null;
-	private $event_time     = null;
-	private $origin         = null;
-	private $properties     = null;
+class Event {
+
+	private $contact    = null;
+	private $event_name = null;
+	private $event_time = null;
+	private $origin     = null;
+	private $properties = null;
 
 	/**
 	 * Validate event properties.
@@ -32,15 +31,14 @@ class Event
 	 *
 	 * @return WP_Error
 	 */
-	public function validate(): WP_Error
-	{
+	public function validate(): WP_Error {
 
 		$error = new WP_Error();
 
-		if ($this->contact != null) {
-			$contactError = $this->contact->validate;
-			if (is_wp_error($contactError)) {
-				$error->add($contactError);
+		if ( $this->contact != null ) {
+			$contact_error = $this->contact->validate;
+			if ( is_wp_error( $contact_error ) ) {
+				$error->add( $contact_error );
 			}
 		}
 
@@ -54,8 +52,7 @@ class Event
 	 *
 	 * @return void
 	 */
-	public function set_event_name($event_name): void
-	{
+	public function set_event_name( $event_name ): void {
 		$this->event_name = $event_name;
 	}
 
@@ -66,8 +63,7 @@ class Event
 	 *
 	 * @return void
 	 */
-	public function set_event_time($event_time): void
-	{
+	public function set_event_time( $event_time ): void {
 		$this->event_time = $event_time;
 	}
 
@@ -79,8 +75,7 @@ class Event
 	 *
 	 * @return void
 	 */
-	public function set_origin($origin): void
-	{
+	public function set_origin( $origin ): void {
 		$this->origin = $origin;
 	}
 
@@ -91,8 +86,7 @@ class Event
 	 *
 	 * @return void
 	 */
-	public function set_properties($properties): void
-	{
+	public function set_properties( $properties ): void {
 		$this->properties = $properties;
 	}
 
@@ -103,8 +97,7 @@ class Event
 	 *
 	 * @return void
 	 */
-	public function set_contact($contact): void
-	{
+	public function set_contact( $contact ): void {
 		$this->contact = $contact;
 	}
 }

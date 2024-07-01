@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Omnisend Client
  *
@@ -10,10 +9,10 @@ namespace Omnisend\SDK\V1;
 
 use WP_Error;
 
-defined('ABSPATH') || die('no direct access');
+defined( 'ABSPATH' ) || die( 'no direct access' );
 
-class SendCustomerEventResponse
-{
+class SendCustomerEventResponse {
+
 
 	private WP_Error $wp_error;
 
@@ -21,13 +20,11 @@ class SendCustomerEventResponse
 	 * @param string $contact_id
 	 * @param WP_Error $wp_error
 	 */
-	public function __construct(WP_Error $wp_error)
-	{
-		$this->wp_error   = $wp_error;
+	public function __construct( WP_Error $wp_error ) {
+		$this->wp_error = $wp_error;
 	}
 
-	public function get_wp_error(): WP_Error
-	{
+	public function get_wp_error(): WP_Error {
 		return $this->wp_error;
 	}
 }

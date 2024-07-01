@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Omnisend Client
  *
@@ -8,14 +7,15 @@
 
 namespace Omnisend\SDK\V1;
 
-defined('ABSPATH') || die('no direct access');
+defined( 'ABSPATH' ) || die( 'no direct access' );
 
 /**
  * Client to interact with Omnisend.
  *
  */
-interface Client
-{
+interface Client {
+
+
 
 	/**
 	 * Create a contact in Omnisend. For it to succeed ensure that provided contact at least have email or phone number.
@@ -24,7 +24,7 @@ interface Client
 	 *
 	 * @return CreateContactResponse
 	 */
-	public function create_contact($contact): CreateContactResponse;
+	public function create_contact( $contact ): CreateContactResponse;
 
 	/**
 	 * Send customer event in Omnisend. Customer events are used to track customer behavior and trigger automations based on that behavior.
@@ -33,5 +33,5 @@ interface Client
 	 *
 	 * @return CreateContactResponse
 	 */
-	public function send_customer_event($event): SendCustomerEventResponse;
+	public function send_customer_event( $event ): SendCustomerEventResponse;
 }
