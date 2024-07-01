@@ -69,6 +69,7 @@ Here is how you can create a basic client & submit contact.
 
         $response = $client->create_contact( $contact );
 ```
+#### Customer events
 
 #### Error handling
 

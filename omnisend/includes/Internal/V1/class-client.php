@@ -11,7 +11,7 @@ namespace Omnisend\Internal\V1;
 use Omnisend\SDK\V1\Contact;
 use Omnisend\SDK\V1\CreateContactResponse;
 use Omnisend\SDK\V1\Event;
-use Omnisend\SDK\V1\SendCustomEventResponse;
+use Omnisend\SDK\V1\SendCustomerEventResponse;
 use WP_Error;
 
 defined('ABSPATH') || die('no direct access');
@@ -95,7 +95,7 @@ class Client implements \Omnisend\SDK\V1\Client
 		return new CreateContactResponse((string) $arr['contactID'], $error);
 	}
 
-	public function send_customer_event($event): SendCustomEventResponse
+	public function send_customer_event($event): SendCustomerEventResponse
 	{
 		$error = new WP_Error();
 
@@ -108,7 +108,7 @@ class Client implements \Omnisend\SDK\V1\Client
 		$error->merge_from($this->check_setup());
 
 		if ($error->has_errors()) {
-			return new SendCustomEventResponse($error);
+			return new SendCustomerEventResponse($error);
 		}
 
 		$response = wp_remote_post(
@@ -127,7 +127,7 @@ class Client implements \Omnisend\SDK\V1\Client
 
 		if (is_wp_error($response)) {
 			error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
-			return new SendCustomEventResponse($response);
+			return new SendCustomerEventResponse($response);
 		}
 
 		$http_code = wp_remote_retrieve_response_code($response);
@@ -135,23 +135,23 @@ class Client implements \Omnisend\SDK\V1\Client
 			$body    = wp_remote_retrieve_body($response);
 			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message($response) . " - {$body}";
 			$error->add('omnisend_api', $err_msg);
-			return new SendCustomEventResponse($error);
+			return new SendCustomerEventResponse($error);
 		}
 
 		$body = wp_remote_retrieve_body($response);
 		if (!$body) {
 			$error->add('omnisend_api', 'empty response');
-			return new CreateContactResponse('', $error);
+			return new SendCustomerEventResponse('', $error);
 		}
 
 		$arr = json_decode($body, true);
 
 		if (empty($arr['contactID'])) {
 			$error->add('omnisend_api', 'contactID not found in response.');
-			return new SendCustomEventResponse($error);
+			return new SendCustomerEventResponse($error);
 		}
 
-		return new SendCustomEventResponse($error);
+		return new SendCustomerEventResponse($error);
 	}
 
 	/**

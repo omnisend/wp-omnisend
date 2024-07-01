@@ -33,5 +33,5 @@ interface Client
 	 *
 	 * @return CreateContactResponse
 	 */
-	public function send_customer_event($event): SendCustomEventResponse;
+	public function send_customer_event($event): SendCustomerEventResponse;
 }

@@ -12,7 +12,7 @@ use WP_Error;
 
 defined('ABSPATH') || die('no direct access');
 
-class SendCustomEventResponse
+class SendCustomerEventResponse
 {
 
 	private WP_Error $wp_error;
