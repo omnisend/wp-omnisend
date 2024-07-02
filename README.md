@@ -69,17 +69,51 @@ Here is how you can create a basic client & submit contact.
 
         $response = $client->create_contact( $contact );
 ```
+
 #### Customer events
+
+Here is how you can send customer events.
+
+```php
+		$contact  = new EventContact();
+		$contact->set_email( $email );
+
+		$event =  new Event();
+		$event->set_contact($contact);
+		$event->set_origin('wordpress');
+		$event->set_event_name('something hapened');
+		$event->add_properties('importantProperty1', $importantProperty1);
+		$event->add_properties('importantProperty2', $importantProperty2);
+
+		$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+
+		$response = $client->send_customer_event($event);
+```
 
 #### Error handling
 
-If data provided is invalid or creation fails, then
+If data provided is invalid or contact creation fails, then
 
 ```php
 $response = $client->create_contact($contact)
 ```
 
 Will return `CreateContactResponse`. Depending on your integration logic you should handle the error i.e
+
+```php
+    if ( $response->get_wp_error()->has_errors() ) {
+        error_log( 'Error in after_submission: ' . $response->get_wp_error()->get_error_message());
+        return;
+    }
+```
+
+If data provided is invalid or sending customer event fails, then
+
+```php
+$response = $client->send_customer_event($event);
+```
+
+Will return `SendCustomerEventResponse`. Depending on your integration logic you should handle the error i.e
 
 ```php
     if ( $response->get_wp_error()->has_errors() ) {
