@@ -19,6 +19,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 
 
+
 	private string $api_key;
 	private string $plugin_name;
 	private string $plugin_version;

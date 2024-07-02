@@ -7,6 +7,7 @@
 
 namespace Omnisend\SDK\V1;
 
+use Omnisend\SDK\V1\EventContact;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
@@ -17,16 +18,17 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  */
 class Event {
 
-	private $contact    = null;
-	private $event_name = null;
-	private $event_time = null;
-	private $origin     = null;
-	private $properties = null;
+
+	private $contact          = null;
+	private $event_name       = null;
+	private $event_time       = null;
+	private $origin           = null;
+	private array $properties = array();
 
 	/**
 	 * Validate event properties.
 	 *
-	 * todo kas yra reuquired? ka reikia vailiduoti?
+	 * TODO kas yra reuquired? ka reikia vailiduoti?
 	 * It ensures that phone or email is set and that they are valid. In addition other properties are validated if they are expected type and format.
 	 *
 	 * @return WP_Error
@@ -34,12 +36,8 @@ class Event {
 	public function validate(): WP_Error {
 
 		$error = new WP_Error();
-
-		if ( $this->contact != null ) {
-			$contact_error = $this->contact->validate;
-			if ( is_wp_error( $contact_error ) ) {
-				$error->add( $contact_error );
-			}
+		if ( $contact instanceof EventContact ) {
+			$error->merge_from( $contact->validate() );
 		}
 
 		return $error;
@@ -69,7 +67,7 @@ class Event {
 
 
 	/**
-	 * Sets event origin.". //todo event origin ar just origin?
+	 * Sets event origin.
 	 *
 	 * @param $origin
 	 *
@@ -80,14 +78,17 @@ class Event {
 	}
 
 	/**
-	 * Sets event properties. //todo event properties ar just properties?
-	 *
-	 * @param $properties
+	 * @param $key
+	 * @param $value
 	 *
 	 * @return void
 	 */
-	public function set_properties( $properties ): void {
-		$this->properties = $properties;
+	public function add_properties( $key, $value ): void {
+		if ( $key == '' ) {
+			return;
+		}
+
+		$this->properties[ $key ] = $value;
 	}
 
 	/**
@@ -99,5 +100,46 @@ class Event {
 	 */
 	public function set_contact( $contact ): void {
 		$this->contact = $contact;
+	}
+
+	/**
+	 * Convert event to array.
+	 *
+	 * If event is valid it will be transformed to array that can be sent to Omnisend.
+	 *
+	 * @return array
+	 */
+	public function to_array(): array {
+		if ( $this->validate()->has_errors() ) {
+			return array();
+		}
+
+		$time_now = gmdate( 'c' );
+
+		$arr = array();
+
+		if ( $this->contact ) {
+			$arr['contact'] = $this->contact->to_array();
+		}
+
+		if ( $this->event_name ) {
+			$arr['eventName'] = $this->event_name;
+		}
+
+		if ( $this->event_time ) {
+			$arr['eventTime'] = $this->event_time;
+		} else {
+			$arr['eventTime'] = $this->$time_now;
+		}
+
+		if ( $this->origin ) {
+			$arr['origin'] = $this->origin;
+		}
+
+		if ( $this->properties ) {
+			$arr['properties'] = $this->properties;
+		}
+
+		return $arr;
 	}
 }

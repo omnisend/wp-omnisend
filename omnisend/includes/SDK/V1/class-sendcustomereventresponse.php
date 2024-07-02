@@ -17,7 +17,6 @@ class SendCustomerEventResponse {
 	private WP_Error $wp_error;
 
 	/**
-	 * @param string $contact_id
 	 * @param WP_Error $wp_error
 	 */
 	public function __construct( WP_Error $wp_error ) {

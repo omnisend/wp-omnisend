@@ -31,7 +31,7 @@ interface Client {
 	 *
 	 * @param Event $event
 	 *
-	 * @return CreateContactResponse
+	 * @return SendCustomerEventResponse
 	 */
 	public function send_customer_event( $event ): SendCustomerEventResponse;
 }
