@@ -136,19 +136,6 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SendCustomerEventResponse( $error );
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-			return new SendCustomerEventResponse( '', $error );
-		}
-
-		$arr = json_decode( $body, true );
-
-		if ( empty( $arr['contactID'] ) ) {
-			$error->add( 'omnisend_api', 'contactID not found in response.' );
-			return new SendCustomerEventResponse( $error );
-		}
-
 		return new SendCustomerEventResponse( $error );
 	}
 
