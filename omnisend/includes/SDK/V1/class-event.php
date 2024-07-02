@@ -18,7 +18,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  */
 class Event {
 
-
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_time       = null;
@@ -29,7 +28,7 @@ class Event {
 	 * Validate event properties.
 	 *
 	 * TODO kas yra reuquired? ka reikia vailiduoti?
-	 * It ensures that phone or email is set and that they are valid. In addition other properties are validated if they are expected type and format.
+	 * It ensures that all required properties are set
 	 *
 	 * @return WP_Error
 	 */
