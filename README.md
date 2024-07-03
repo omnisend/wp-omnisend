@@ -16,7 +16,7 @@ The plugin provides an SDK client to easily integrate with Omnisend API.
 > To use in your plugin you must check if wp-omnisend plugin is installed.
 > Provided client will send data to Omnisend if it is connected.
 
-You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/events-support/omnisend/includes/SDK/V1).
+You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/SDK/V1).
 
 ### Examples
 
