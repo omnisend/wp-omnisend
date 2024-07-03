@@ -18,9 +18,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  */
 class Event {
 
-
-
-
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_time       = null;

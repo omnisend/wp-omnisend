@@ -13,7 +13,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class SendCustomerEventResponse {
 
-
 	private WP_Error $wp_error;
 
 	/**

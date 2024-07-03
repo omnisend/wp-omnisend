@@ -18,8 +18,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  */
 class Contact {
 
-
-
 	private $id                 = null;
 	private $first_name         = null;
 	private $last_name          = null;
