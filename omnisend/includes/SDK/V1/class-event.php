@@ -28,7 +28,6 @@ class Event {
 	/**
 	 * Validate event properties.
 	 *
-	 * TODO kas yra reuquired? ka reikia vailiduoti?
 	 * It ensures that all required properties are set
 	 *
 	 * @return WP_Error
@@ -38,6 +37,27 @@ class Event {
 		$error = new WP_Error();
 		if ( $contact instanceof Contact ) {
 			$error->merge_from( $contact->validate() );
+		}
+
+		if ( $this->$event_name == null ) {
+			$error->add( 'event_name', 'Is required.' );
+		}
+
+		if ( $this->$event_name != null && ! is_string( $this->$event_name ) ) {
+			$error->add( $event_name, 'Not a string.' );
+		}
+
+		if ( $this->$origin != null && ! is_string( $this->$origin ) ) {
+			$error->add( $origin, 'Not a string.' );
+		}
+
+		foreach ( $properties as $name => $value ) {
+			if ( ! is_string( $name ) ) {
+				$error->add( $name, 'Not a string.' );
+			}
+			if ( ! is_string( $value ) ) {
+				$error->add( $value, 'Not a string.' );
+			}
 		}
 
 		return $error;
