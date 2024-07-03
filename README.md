@@ -74,20 +74,22 @@ Here is how you can create a basic client & submit contact.
 Here is how you can send customer events.
 
 ```php
-	$contact  = new EventContact();
+	$contact  = new Contact();
 	$contact->set_email( $email );
 
 	$event =  new Event();
-	$event->set_contact($contact);
-	$event->set_origin('wordpress');
-	$event->set_event_name('something hapened');
-	$event->add_properties('importantProperty1', $importantProperty1);
-	$event->add_properties('importantProperty2', $importantProperty2);
+	$event->set_contact( $contact );
+	$event->set_origin( 'appName' );
+	$event->set_event_name( 'something hapened' );
+	$event->add_properties( 'importantProperty1', $importantProperty1 );
+	$event->add_properties( 'importantProperty2', $importantProperty2 );
 
 	$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
 
 	$response = $client->send_customer_event($event);
 ```
+
+You can send contact identifiers and if contact exists, then event will be attributed for this contact, if not - new contact will be created and event will be attributed to this new contact
 
 #### Error handling
 
