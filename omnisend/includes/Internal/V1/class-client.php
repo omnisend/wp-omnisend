@@ -52,7 +52,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V3 . '/contacts',
+			OMNISEND_CORE_API_V5 . '/contacts',
 			array(
 				'body'    => wp_json_encode( $contact->to_array() ),
 				'headers' => array(
