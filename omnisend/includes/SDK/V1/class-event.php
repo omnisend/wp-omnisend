@@ -7,7 +7,7 @@
 
 namespace Omnisend\SDK\V1;
 
-use Omnisend\SDK\V1\EventContact;
+use Omnisend\SDK\V1\Contact;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
@@ -17,6 +17,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  *
  */
 class Event {
+
 
 	private $contact          = null;
 	private $event_name       = null;
@@ -35,7 +36,7 @@ class Event {
 	public function validate(): WP_Error {
 
 		$error = new WP_Error();
-		if ( $contact instanceof EventContact ) {
+		if ( $contact instanceof Contact ) {
 			$error->merge_from( $contact->validate() );
 		}
 
@@ -118,7 +119,7 @@ class Event {
 		$arr = array();
 
 		if ( $this->contact ) {
-			$arr['contact'] = $this->contact->to_array();
+			$arr['contact'] = $this->contact->to_array_for_event();
 		}
 
 		if ( $this->event_name ) {
