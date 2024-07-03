@@ -80,9 +80,9 @@ $contact->set_email( $email );
 $event =  new Event();
 $event->set_contact( $contact );
 $event->set_origin( 'appName' );
-$event->set_event_name( 'something hapened' );
-$event->add_properties( 'importantProperty1', $importantProperty1 );
-$event->add_properties( 'importantProperty2', $importantProperty2 );
+$event->set_event_name( 'site viewed' );
+$event->add_properties( 'pageUrl', $pageUrl );
+$event->add_properties( 'pageTitle', $pageTitle );
 
 $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
 
