@@ -79,7 +79,7 @@ $contact->set_email( $email );
 
 $event =  new Event();
 $event->set_contact( $contact );
-$event->set_origin( 'appName' );
+$event->set_origin( 'api' );
 $event->set_event_name( 'site viewed' );
 $event->add_properties( 'pageUrl', $pageUrl );
 $event->add_properties( 'pageTitle', $pageTitle );
