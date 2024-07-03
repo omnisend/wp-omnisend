@@ -22,6 +22,7 @@ class Event {
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_time       = null;
+	private $event_version    = null;
 	private $origin           = null;
 	private array $properties = array();
 
@@ -45,6 +46,10 @@ class Event {
 
 		if ( $this->$event_name != null && ! is_string( $this->$event_name ) ) {
 			$error->add( $event_name, 'Not a string.' );
+		}
+
+		if ( $this->$event_version != null && ! is_string( $this->$event_version ) ) {
+			$error->add( $event_version, 'Not a string.' );
 		}
 
 		if ( $this->$origin != null && ! is_string( $this->$origin ) ) {
@@ -83,6 +88,17 @@ class Event {
 	 */
 	public function set_event_time( $event_time ): void {
 		$this->event_time = $event_time;
+	}
+
+	/**
+	 * Sets event version.
+	 *
+	 * @param $event_version
+	 *
+	 * @return void
+	 */
+	public function set_event_version( $event_version ): void {
+		$this->event_version = $event_version;
 	}
 
 
@@ -154,6 +170,10 @@ class Event {
 
 		if ( $this->origin ) {
 			$arr['origin'] = $this->origin;
+		}
+
+		if ( $this->event_version ) {
+			$arr['eventVersion'] = $this->event_version;
 		}
 
 		if ( $this->properties ) {
