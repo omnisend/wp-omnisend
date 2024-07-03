@@ -46,27 +46,27 @@ This is done by getting an actual client
 Here is how you can create a basic client & submit contact.
 
 ```php
-	$contact  = new Contact();
+$contact  = new Contact();
 
-	$contact->set_email( $email );
-	if ( $phone_number != '' ) {
-		$contact->set_phone( $phone_number );
-	}
-	$contact->set_first_name( $first_name );
-	$contact->set_last_name( $last_name );
-	$contact->set_birthday( $birthday );
-	$contact->set_postal_code( $postal_code );
-	$contact->set_address( $address );
-	$contact->set_state( $state );
-	$contact->set_country( $country );
-	$contact->set_city( $city );
-	if ( $email_consent ) {
-		$contact->set_email_consent( 'actual_email_consent_for_gdrp' );
-		$contact->set_email_opt_in( 'where user opted to become subscriber' );
-	}
-	$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+$contact->set_email( $email );
+if ( $phone_number != '' ) {
+	$contact->set_phone( $phone_number );
+}
+$contact->set_first_name( $first_name );
+$contact->set_last_name( $last_name );
+$contact->set_birthday( $birthday );
+$contact->set_postal_code( $postal_code );
+$contact->set_address( $address );
+$contact->set_state( $state );
+$contact->set_country( $country );
+$contact->set_city( $city );
+if ( $email_consent ) {
+	$contact->set_email_consent( 'actual_email_consent_for_gdrp' );
+	$contact->set_email_opt_in( 'where user opted to become subscriber' );
+}
+$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
 	
-	$response = $client->create_contact( $contact );
+$response = $client->create_contact( $contact );
 ```
 
 #### Customer events
@@ -74,19 +74,19 @@ Here is how you can create a basic client & submit contact.
 Here is how you can send customer events.
 
 ```php
-	$contact  = new Contact();
-	$contact->set_email( $email );
+$contact  = new Contact();
+$contact->set_email( $email );
 
-	$event =  new Event();
-	$event->set_contact( $contact );
-	$event->set_origin( 'appName' );
-	$event->set_event_name( 'something hapened' );
-	$event->add_properties( 'importantProperty1', $importantProperty1 );
-	$event->add_properties( 'importantProperty2', $importantProperty2 );
+$event =  new Event();
+$event->set_contact( $contact );
+$event->set_origin( 'appName' );
+$event->set_event_name( 'something hapened' );
+$event->add_properties( 'importantProperty1', $importantProperty1 );
+$event->add_properties( 'importantProperty2', $importantProperty2 );
 
-	$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
 
-	$response = $client->send_customer_event($event);
+$response = $client->send_customer_event($event);
 ```
 
 You can send contact identifiers and if contact exists, then event will be attributed for this contact, if not - new contact will be created and event will be attributed to this new contact
