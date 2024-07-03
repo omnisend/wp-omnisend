@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Omnisend Client
  *
@@ -19,6 +20,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Event {
 
 
+
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_time       = null;
@@ -36,34 +38,34 @@ class Event {
 	public function validate(): WP_Error {
 
 		$error = new WP_Error();
-		if ( $contact instanceof Contact ) {
-			$error->merge_from( $contact->validate() );
+		if ( $this->contact instanceof Contact ) {
+			$error->merge_from( $this->contact->validate() );
 		}
 
-		if ( $this->$event_name == null ) {
+		if ( $this->event_name == null ) {
 			$error->add( 'event_name', 'Is required.' );
 		}
 
-		if ( $this->$event_name != null && ! is_string( $this->$event_name ) ) {
-			$error->add( $event_name, 'Not a string.' );
+		if ( $this->event_name != null && ! is_string( $this->event_name ) ) {
+			$error->add( 'event_name', 'Not a string.' );
 		}
 
-		if ( $this->$event_version != null && ! is_string( $this->$event_version ) ) {
-			$error->add( $event_version, 'Not a string.' );
+		if ( $this->event_version != null && ! is_string( $this->event_version ) ) {
+			$error->add( 'event_version', 'Not a string.' );
 		}
 
-		if ( $this->$origin != null && ! is_string( $this->$origin ) ) {
-			$error->add( $origin, 'Not a string.' );
+		if ( $this->origin != null && ! is_string( $this->origin ) ) {
+			$error->add( 'origin', 'Not a string.' );
 		}
 
-		if ( $this->$event_time != null ) {
-			$dt = DateTime::createFromFormat( 'Y-m-d', $event_time );
+		if ( $this->event_time != null ) {
+			$dt = DateTime::createFromFormat( 'Y-m-d', $this->event_time );
 			if ( ! $dt ) {
-				$error->add( $event_time, 'Not valid date format.' );
+				$error->add( 'event_time', 'Not valid date format.' );
 			}
 		}
 
-		foreach ( $properties as $name => $value ) {
+		foreach ( $this->properties as $name => $value ) {
 			if ( ! is_string( $name ) ) {
 				$error->add( $name, 'Not a string.' );
 			}
