@@ -121,6 +121,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 1.4.0 =
+
+* Add support for customer events via SDK
+
 = v1.4.0 =
 
 * Add support for customer events via SDK
