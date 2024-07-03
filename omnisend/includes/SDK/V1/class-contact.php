@@ -19,6 +19,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Contact {
 
 
+
 	private $id                 = null;
 	private $first_name         = null;
 	private $last_name          = null;
@@ -245,10 +246,13 @@ class Contact {
 
 		$arr = array(
 			'consents' => array(),
+			'optIns'   => array(),
 			'tags'     => array_values( array_unique( $this->tags ) ),
 		);
 
 		if ( $this->email ) {
+			$arr['email'] = $this->email;
+
 			if ( $this->email_consent ) {
 				$email_cahnnel_consent = array(
 					'channel'   => 'email',
@@ -260,6 +264,16 @@ class Contact {
 
 				$arr['consents'][] = $email_cahnnel_consent;
 			}
+
+			if ( $this->email_opt_in_source ) {
+				$email_cahnnel_opt_in = array(
+					'channel'   => 'email',
+					'createdAt' => $time_now,
+					'source'    => $this->email_opt_in_source,
+				);
+
+				$arr['optIns'][] = $email_cahnnel_opt_in;
+			}
 		}
 
 		if ( $this->custom_properties ) {
@@ -267,6 +281,8 @@ class Contact {
 		}
 
 		if ( $this->phone ) {
+			$arr['phone'] = $this->phone;
+
 			if ( $this->phone_consent ) {
 				$phone_channel_consent = array(
 					'channel'   => 'phone',
@@ -275,16 +291,18 @@ class Contact {
 					'ip'        => $ip,
 					'userAgent' => $user_agent,
 				);
-				$arr['consents'][]                = $phone_channel_consent;
+				$arr['consents'][]     = $phone_channel_consent;
 			}
-		}
 
-		if ( $this->email ) {
-			$arr['email'] = $this->email;
-		}
+			if ( $this->phone_opt_in_source ) {
+				$phone_cahnnel_opt_in = array(
+					'channel'   => 'phone',
+					'createdAt' => $time_now,
+					'source'    => $this->phone_opt_in_source,
+				);
 
-		if ( $this->phone ) {
-			$arr['phone'] = $this->phone;
+				$arr['optIns'][] = $phone_cahnnel_opt_in;
+			}
 		}
 
 		if ( $this->id ) {
