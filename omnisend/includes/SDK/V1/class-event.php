@@ -56,6 +56,13 @@ class Event {
 			$error->add( $origin, 'Not a string.' );
 		}
 
+		if ( $this->$event_time != null ) {
+			$dt = DateTime::createFromFormat( 'Y-m-d', $event_time );
+			if ( ! $dt ) {
+				$error->add( $event_time, 'Not valid date format.' );
+			}
+		}
+
 		foreach ( $properties as $name => $value ) {
 			if ( ! is_string( $name ) ) {
 				$error->add( $name, 'Not a string.' );
@@ -80,7 +87,7 @@ class Event {
 	}
 
 	/**
-	 * Sets event time.
+	 * Sets event time. Time should be in RFC3339 (example 2011-01-01T00:00:00Z)
 	 *
 	 * @param $event_time
 	 *
