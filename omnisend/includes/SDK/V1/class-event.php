@@ -150,8 +150,6 @@ class Event {
 			return array();
 		}
 
-		$time_now = gmdate( 'c' );
-
 		$arr = array();
 
 		if ( $this->contact ) {
@@ -164,8 +162,6 @@ class Event {
 
 		if ( $this->event_time ) {
 			$arr['eventTime'] = $this->event_time;
-		} else {
-			$arr['eventTime'] = $this->$time_now;
 		}
 
 		if ( $this->origin ) {

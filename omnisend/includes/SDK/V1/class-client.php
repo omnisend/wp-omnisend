@@ -15,9 +15,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  */
 interface Client {
 
-
-
-
 	/**
 	 * Create a contact in Omnisend. For it to succeed ensure that provided contact at least have email or phone number.
 	 *
