@@ -53,10 +53,6 @@ class Event {
 			$error->add( 'event_version', 'Not a string.' );
 		}
 
-		if ( $this->origin == null ) {
-			$error->add( 'origin', 'Is required.' );
-		}
-
 		if ( $this->origin != null && ! is_string( $this->origin ) ) {
 			$error->add( 'origin', 'Not a string.' );
 		}
@@ -115,13 +111,16 @@ class Event {
 
 
 	/**
-	 * Sets event origin.
+	 * Sets event origin. Default value is api
 	 *
 	 * @param $origin
 	 *
 	 * @return void
 	 */
 	public function set_origin( $origin ): void {
+		if ( $origin == null ) {
+			$this->origin = 'api';
+		}
 		$this->origin = $origin;
 	}
 
