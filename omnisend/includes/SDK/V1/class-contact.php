@@ -17,6 +17,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  *
  */
 class Contact {
+
+	private $id                 = null;
 	private $first_name         = null;
 	private $last_name          = null;
 	private $email              = null;
@@ -81,8 +83,8 @@ class Contact {
 			$error->add( 'send_welcome_email', 'Not a valid boolean.' );
 		}
 
-		if ( $this->phone == null && $this->email == null ) {
-			$error->add( 'identifier', 'Phone or email must be set.' );
+		if ( $this->phone == null && $this->email == null && $this->id == null ) {
+			$error->add( 'identifier', 'Phone, email or ID must be set.' );
 		}
 
 		if ( $this->gender != null && ! in_array( $this->gender, array( 'm', 'f' ) ) ) {
@@ -175,6 +177,10 @@ class Contact {
 			$arr['identifiers'][] = $phone_identifier;
 		}
 
+		if ( $this->id ) {
+			$arr['contactID'] = $this->id;
+		}
+
 		if ( $this->first_name ) {
 			$arr['firstName'] = $this->first_name;
 		}
@@ -220,6 +226,128 @@ class Contact {
 
 
 	/**
+	 * Convert contact to array for events.
+	 *
+	 * If contact is valid it will be transformed to array that can be sent to Omnisend while creating event.
+	 *
+	 * @return array
+	 */
+	public function to_array_for_event(): array {
+		if ( $this->validate()->has_errors() ) {
+			return array();
+		}
+
+		$time_now = gmdate( 'c' );
+
+		$user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? 'user agent not found' ) );
+		$ip         = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'ip not found' ) );
+
+		$arr = array(
+			'consents' => array(),
+			'optIns'   => array(),
+			'tags'     => array_values( array_unique( $this->tags ) ),
+		);
+
+		if ( $this->email ) {
+			$arr['email'] = $this->email;
+
+			if ( $this->email_consent ) {
+				$email_cahnnel_consent = array(
+					'channel'   => 'email',
+					'source'    => $this->email_consent,
+					'createdAt' => $time_now,
+					'ip'        => $ip,
+					'userAgent' => $user_agent,
+				);
+
+				$arr['consents'][] = $email_cahnnel_consent;
+			}
+
+			if ( $this->email_opt_in_source ) {
+				$email_cahnnel_opt_in = array(
+					'channel'   => 'email',
+					'createdAt' => $time_now,
+					'source'    => $this->email_opt_in_source,
+				);
+
+				$arr['optIns'][] = $email_cahnnel_opt_in;
+			}
+		}
+
+		if ( $this->custom_properties ) {
+			$arr['customProperties'] = $this->custom_properties;
+		}
+
+		if ( $this->phone ) {
+			$arr['phone'] = $this->phone;
+
+			if ( $this->phone_consent ) {
+				$phone_channel_consent = array(
+					'channel'   => 'phone',
+					'source'    => $this->phone_consent,
+					'createdAt' => $time_now,
+					'ip'        => $ip,
+					'userAgent' => $user_agent,
+				);
+				$arr['consents'][]     = $phone_channel_consent;
+			}
+
+			if ( $this->phone_opt_in_source ) {
+				$phone_cahnnel_opt_in = array(
+					'channel'   => 'phone',
+					'createdAt' => $time_now,
+					'source'    => $this->phone_opt_in_source,
+				);
+
+				$arr['optIns'][] = $phone_cahnnel_opt_in;
+			}
+		}
+
+		if ( $this->id ) {
+			$arr['id'] = $this->id;
+		}
+
+		if ( $this->first_name ) {
+			$arr['firstName'] = $this->first_name;
+		}
+
+		if ( $this->last_name ) {
+			$arr['lastName'] = $this->last_name;
+		}
+
+		if ( $this->address ) {
+			$arr['address'] = $this->address;
+		}
+
+		if ( $this->city ) {
+			$arr['city'] = $this->city;
+		}
+
+		if ( $this->state ) {
+			$arr['state'] = $this->state;
+		}
+
+		if ( $this->country ) {
+			$arr['country'] = $this->country;
+		}
+
+		if ( $this->postal_code ) {
+			$arr['postalCode'] = $this->postal_code;
+		}
+
+		if ( $this->birthday ) {
+			$arr['birthdate'] = $this->birthday;
+		}
+
+		if ( $this->gender ) {
+			$arr['gender'] = $this->gender;
+		}
+
+		return $arr;
+	}
+
+
+	/**
 	 * Sets contact email.
 	 *
 	 * @param $email
@@ -229,6 +357,19 @@ class Contact {
 	public function set_email( $email ): void {
 		if ( $email && is_string( $email ) ) {
 			$this->email = $email;
+		}
+	}
+
+	/**
+	 * Sets contact id.
+	 *
+	 * @param $id
+	 *
+	 * @return void
+	 */
+	public function set_id( $id ): void {
+		if ( $id && is_string( $id ) ) {
+			$this->id = $id;
 		}
 	}
 
@@ -400,15 +541,15 @@ class Contact {
 		$this->email_consent = $consent_text;
 	}
 
-		/**
-		 * Sets email concent status. It's needed for GDPR compliance.
-		 *
-		 * Common format is `form:form_name` or `popup:popup_name`.
-		 *
-		 * @param $consent_text
-		 *
-		 * @return void
-		 */
+	/**
+	 * Sets email concent status. It's needed for GDPR compliance.
+	 *
+	 * Common format is `form:form_name` or `popup:popup_name`.
+	 *
+	 * @param $consent_text
+	 *
+	 * @return void
+	 */
 	public function set_phone_consent( $consent_text ): void {
 		$this->phone_consent = $consent_text;
 	}

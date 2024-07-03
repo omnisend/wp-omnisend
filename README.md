@@ -16,7 +16,7 @@ The plugin provides an SDK client to easily integrate with Omnisend API.
 > To use in your plugin you must check if wp-omnisend plugin is installed.
 > Provided client will send data to Omnisend if it is connected.
 
-You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/Public/V1).
+You can find function references in the [client folder](https://github.com/omnisend/wp-omnisend/tree/main/omnisend/includes/SDK/V1).
 
 ### Examples
 
@@ -46,39 +46,75 @@ This is done by getting an actual client
 Here is how you can create a basic client & submit contact.
 
 ```php
-		$contact  = new Contact();
+$contact  = new Contact();
 
-		$contact->set_email( $email );
-		if ( $phone_number != '' ) {
-			$contact->set_phone( $phone_number );
-		}
-		$contact->set_first_name( $first_name );
-		$contact->set_last_name( $last_name );
-		$contact->set_birthday( $birthday );
-		$contact->set_postal_code( $postal_code );
-		$contact->set_address( $address );
-		$contact->set_state( $state );
-		$contact->set_country( $country );
-		$contact->set_city( $city );
-		if ( $email_consent ) {
-			$contact->set_email_consent( 'actual_email_consent_for_gdrp' );
-			$contact->set_email_opt_in( 'where user opted to become subscriber' );
-		}
-
-        $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
-
-        $response = $client->create_contact( $contact );
+$contact->set_email( $email );
+if ( $phone_number != '' ) {
+	$contact->set_phone( $phone_number );
+}
+$contact->set_first_name( $first_name );
+$contact->set_last_name( $last_name );
+$contact->set_birthday( $birthday );
+$contact->set_postal_code( $postal_code );
+$contact->set_address( $address );
+$contact->set_state( $state );
+$contact->set_country( $country );
+$contact->set_city( $city );
+if ( $email_consent ) {
+	$contact->set_email_consent( 'actual_email_consent_for_gdrp' );
+	$contact->set_email_opt_in( 'where user opted to become subscriber' );
+}
+$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+	
+$response = $client->create_contact( $contact );
 ```
+
+#### Customer events
+
+Here is how you can send customer events.
+
+```php
+$contact  = new Contact();
+$contact->set_email( $email );
+
+$event =  new Event();
+$event->set_contact( $contact );
+$event->set_origin( 'api' );
+$event->set_event_name( 'something hapened' );
+$event->add_properties( 'pageUrl', $pageUrl );
+$event->add_properties( 'pageTitle', $pageTitle );
+
+$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+
+$response = $client->send_customer_event($event);
+```
+
+You can send contact identifiers and if contact exists, then event will be attributed for this contact, if not - new contact will be created and event will be attributed to this new contact
 
 #### Error handling
 
-If data provided is invalid or creation fails, then
+If data provided is invalid or contact creation fails, then
 
 ```php
 $response = $client->create_contact($contact)
 ```
 
 Will return `CreateContactResponse`. Depending on your integration logic you should handle the error i.e
+
+```php
+    if ( $response->get_wp_error()->has_errors() ) {
+        error_log( 'Error in after_submission: ' . $response->get_wp_error()->get_error_message());
+        return;
+    }
+```
+
+If data provided is invalid or sending customer event fails, then
+
+```php
+$response = $client->send_customer_event($event);
+```
+
+Will return `SendCustomerEventResponse`. Depending on your integration logic you should handle the error i.e
 
 ```php
     if ( $response->get_wp_error()->has_errors() ) {

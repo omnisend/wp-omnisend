@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend Email Marketing
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.3.26
+ * Version: v1.4.0
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
@@ -23,7 +23,7 @@ use Omnisend\Internal\Connection;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.3.26';
+const OMNISEND_CORE_PLUGIN_VERSION = 'v1.4.0';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
@@ -34,6 +34,7 @@ const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
 // Change for different environment.
 const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
+const OMNISEND_CORE_API_V5      = 'https://api.omnisend.com/v5';
 const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
 
 // Omnisend for Woo plugin.
