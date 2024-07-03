@@ -20,7 +20,6 @@ class Event {
 
 	private $contact          = null;
 	private $event_name       = null;
-	private $event_time       = null;
 	private $event_version    = null;
 	private $origin           = null;
 	private array $properties = array();
@@ -55,19 +54,9 @@ class Event {
 			$error->add( 'origin', 'Not a string.' );
 		}
 
-		if ( $this->event_time != null ) {
-			$dt = DateTime::createFromFormat( 'Y-m-d', $this->event_time );
-			if ( ! $dt ) {
-				$error->add( 'event_time', 'Not valid date format.' );
-			}
-		}
-
-		foreach ( $this->properties as $name => $value ) {
+		foreach ( $this->properties as $name ) {
 			if ( ! is_string( $name ) ) {
 				$error->add( $name, 'Not a string.' );
-			}
-			if ( ! is_string( $value ) ) {
-				$error->add( $value, 'Not a string.' );
 			}
 		}
 
@@ -83,17 +72,6 @@ class Event {
 	 */
 	public function set_event_name( $event_name ): void {
 		$this->event_name = $event_name;
-	}
-
-	/**
-	 * Sets event time. Time should be in RFC3339 (example 2011-01-01T00:00:00Z)
-	 *
-	 * @param $event_time
-	 *
-	 * @return void
-	 */
-	public function set_event_time( $event_time ): void {
-		$this->event_time = $event_time;
 	}
 
 	/**
@@ -166,14 +144,8 @@ class Event {
 			$arr['eventName'] = $this->event_name;
 		}
 
-		if ( $this->event_time ) {
-			$arr['eventTime'] = $this->event_time;
-		}
-
+		$arr['origin'] = 'api';
 		if ( $this->origin ) {
-			if ( $this->origin == null ) {
-				$this->origin = 'api';
-			}
 			$arr['origin'] = $this->origin;
 		}
 

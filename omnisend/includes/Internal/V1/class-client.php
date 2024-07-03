@@ -133,7 +133,6 @@ class Client implements \Omnisend\SDK\V1\Client {
 			$body    = wp_remote_retrieve_body( $response );
 			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
 			$error->add( 'omnisend_api', $err_msg );
-			return new SendCustomerEventResponse( $error );
 		}
 
 		return new SendCustomerEventResponse( $error );
