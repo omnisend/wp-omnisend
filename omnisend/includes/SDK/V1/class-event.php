@@ -20,6 +20,7 @@ class Event {
 
 
 
+
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_time       = null;
@@ -118,9 +119,6 @@ class Event {
 	 * @return void
 	 */
 	public function set_origin( $origin ): void {
-		if ( $origin == null ) {
-			$this->origin = 'api';
-		}
 		$this->origin = $origin;
 	}
 
@@ -176,6 +174,9 @@ class Event {
 		}
 
 		if ( $this->origin ) {
+			if ( $this->origin == null ) {
+				$this->origin = 'api';
+			}
 			$arr['origin'] = $this->origin;
 		}
 
