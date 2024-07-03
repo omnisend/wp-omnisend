@@ -18,6 +18,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  */
 class Contact {
 
+
 	private $id                 = null;
 	private $first_name         = null;
 	private $last_name          = null;
@@ -249,16 +250,16 @@ class Contact {
 
 		if ( $this->email ) {
 			if ( $this->email_consent ) {
-				$email_consent['consent'] = array(
+				$email_cahnnel_consent = array(
 					'channel'   => 'email',
 					'source'    => $this->email_consent,
 					'createdAt' => $time_now,
 					'ip'        => $ip,
 					'userAgent' => $user_agent,
 				);
-			}
 
-			$arr['consents'][] = $email_consent;
+				$arr['consents'][] = $email_cahnnel_consent;
+			}
 		}
 
 		if ( $this->custom_properties ) {
@@ -267,15 +268,15 @@ class Contact {
 
 		if ( $this->phone ) {
 			if ( $this->phone_consent ) {
-				$phone_consent['consent'] = array(
+				$phone_channel_consent = array(
 					'channel'   => 'phone',
 					'source'    => $this->phone_consent,
 					'createdAt' => $time_now,
 					'ip'        => $ip,
 					'userAgent' => $user_agent,
 				);
+				$arr['consents'][]                = $phone_channel_consent;
 			}
-			$arr['consents'][] = $phone_consent;
 		}
 
 		if ( $this->email ) {
