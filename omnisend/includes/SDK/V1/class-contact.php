@@ -37,8 +37,9 @@ class Contact {
 	private $phone_consent = null;
 
 	private $email_opt_in_source = null;
+	private $email_opt_out_source = false;
 	private $phone_opt_in_source = null;
-
+	private $phone_opt_out_source = false;
 	private array $custom_properties = array();
 
 	/**
@@ -162,6 +163,134 @@ class Contact {
 				'channels' => array(
 					'sms' => array(
 						'status'     => $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed',
+						'statusDate' => $time_now,
+					),
+				),
+			);
+			if ( $this->phone_consent ) {
+				$phone_identifier['consent'] = array(
+					'source'    => $this->phone_consent,
+					'createdAt' => $time_now,
+					'ip'        => $ip,
+					'userAgent' => $user_agent,
+				);
+			}
+			$arr['identifiers'][] = $phone_identifier;
+		}
+
+		if ( $this->id ) {
+			$arr['contactID'] = $this->id;
+		}
+
+		if ( $this->first_name ) {
+			$arr['firstName'] = $this->first_name;
+		}
+
+		if ( $this->last_name ) {
+			$arr['lastName'] = $this->last_name;
+		}
+
+		if ( $this->address ) {
+			$arr['address'] = $this->address;
+		}
+
+		if ( $this->city ) {
+			$arr['city'] = $this->city;
+		}
+
+		if ( $this->state ) {
+			$arr['state'] = $this->state;
+		}
+
+		if ( $this->country ) {
+			$arr['country'] = $this->country;
+		}
+
+		if ( $this->postal_code ) {
+			$arr['postalCode'] = $this->postal_code;
+		}
+
+		if ( $this->birthday ) {
+			$arr['birthdate'] = $this->birthday;
+		}
+
+		if ( $this->gender ) {
+			$arr['gender'] = $this->gender;
+		}
+
+		if ( $this->send_welcome_email ) {
+			$arr['sendWelcomeEmail'] = $this->send_welcome_email;
+		}
+
+		return $arr;
+	}
+
+    /**
+	 * Convert contact to array.
+	 *
+	 * If contact is valid it will be transformed to array that can be sent to Omnisend.
+	 *
+	 * @return array
+	 */
+	public function to_array_for_save_contract(): array {
+		if ( $this->validate()->has_errors() ) {
+			return array();
+		}
+
+		$time_now = gmdate( 'c' );
+
+		$user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? 'user agent not found' ) );
+		$ip         = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'ip not found' ) );
+
+		$arr = array(
+			'identifiers' => array(),
+			'tags'        => array_values( array_unique( $this->tags ) ),
+		);
+
+        $email_consent_status = 'subscribed';
+        if( $this->email_opt_out_source ){
+            $email_consent_status = 'unsubscribed';
+        }
+
+        $sms_consent_status = 'subscribed';
+        if( $this->email_opt_out_source ){
+            $sms_consent_status = 'unsubscribed';
+        }
+
+		if ( $this->email ) {
+			$email_identifier = array(
+				'type'     => 'email',
+				'id'       => $this->email,
+				'channels' => array(
+					'email' => array(
+						'status'     => $email_consent_status,
+						'statusDate' => $time_now,
+					),
+				),
+			);
+			if ( $this->email_consent ) {
+				$email_identifier['consent'] = array(
+					'source'    => $this->email_consent,
+					'createdAt' => $time_now,
+					'ip'        => $ip,
+					'userAgent' => $user_agent,
+				);
+			}
+
+			$arr['identifiers'][] = $email_identifier;
+		}
+
+		if ( $this->custom_properties ) {
+			$arr['customProperties'] = $this->custom_properties;
+		}
+
+		if ( $this->phone ) {
+			$phone_identifier = array(
+				'type'     => 'phone',
+				'id'       => $this->phone,
+				'channels' => array(
+					'sms' => array(
+						'status'     => $sms_consent_status,
 						'statusDate' => $time_now,
 					),
 				),
@@ -514,6 +643,19 @@ class Contact {
 		$this->email_opt_in_source = $opt_in_text;
 	}
 
+	/**
+	 * Sets email opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact email as subscribed.
+	 *
+	 * Common format is `form:form_name` or `popup:popup_name`.
+	 *
+	 * @param bool $opt_out
+	 *
+	 * @return void
+	 */
+	public function set_email_opt_out( bool $opt_out ): void {
+		$this->email_opt_out_source = $opt_out;
+	}
+
 
 	/**
 	 * Sets phone opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact phone as subscribed.
@@ -526,6 +668,19 @@ class Contact {
 	 */
 	public function set_phone_opt_in( $opt_in_text ): void {
 		$this->phone_opt_in_source = $opt_in_text;
+	}
+
+    /**
+	 * Sets phone opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact phone as subscribed.
+	 *
+	 * Common format is `form:form_name` or `popup:popup_name`.
+	 *
+	 * @param bool $opt_out
+	 *
+	 * @return void
+	 */
+	public function set_phone_opt_out(bool $opt_out ): void {
+		$this->phone_opt_out_source = $opt_out;
 	}
 
 	/**

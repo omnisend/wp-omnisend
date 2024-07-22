@@ -4,7 +4,7 @@
  *
  * Plugin Name: Omnisend Email Marketing
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.4.1
+ * Version: 1.4.2
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
  * Developer: Omnisend
