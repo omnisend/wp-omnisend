@@ -36,10 +36,10 @@ class Contact {
 	private $email_consent = null;
 	private $phone_consent = null;
 
-	private $email_opt_in_source = null;
-	private $email_opt_out_source = false;
-	private $phone_opt_in_source = null;
-	private $phone_opt_out_source = false;
+	private $email_opt_in_source     = null;
+	private $email_opt_out_source    = false;
+	private $phone_opt_in_source     = null;
+	private $phone_opt_out_source    = false;
 	private array $custom_properties = array();
 
 	/**
@@ -225,7 +225,7 @@ class Contact {
 		return $arr;
 	}
 
-    /**
+	/**
 	 * Convert contact to array.
 	 *
 	 * If contact is valid it will be transformed to array that can be sent to Omnisend.
@@ -247,15 +247,15 @@ class Contact {
 			'tags'        => array_values( array_unique( $this->tags ) ),
 		);
 
-        $email_consent_status = 'subscribed';
-        if( $this->email_opt_out_source ){
-            $email_consent_status = 'unsubscribed';
-        }
+		$email_consent_status = 'subscribed';
+		if ( $this->email_opt_out_source ) {
+			$email_consent_status = 'unsubscribed';
+		}
 
-        $sms_consent_status = 'subscribed';
-        if( $this->email_opt_out_source ){
-            $sms_consent_status = 'unsubscribed';
-        }
+		$sms_consent_status = 'subscribed';
+		if ( $this->email_opt_out_source ) {
+			$sms_consent_status = 'unsubscribed';
+		}
 
 		if ( $this->email ) {
 			$email_identifier = array(
@@ -670,7 +670,7 @@ class Contact {
 		$this->phone_opt_in_source = $opt_in_text;
 	}
 
-    /**
+	/**
 	 * Sets phone opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact phone as subscribed.
 	 *
 	 * Common format is `form:form_name` or `popup:popup_name`.
@@ -679,7 +679,7 @@ class Contact {
 	 *
 	 * @return void
 	 */
-	public function set_phone_opt_out(bool $opt_out ): void {
+	public function set_phone_opt_out( bool $opt_out ): void {
 		$this->phone_opt_out_source = $opt_out;
 	}
 

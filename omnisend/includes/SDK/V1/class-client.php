@@ -33,22 +33,22 @@ interface Client {
 	 */
 	public function send_customer_event( $event ): SendCustomerEventResponse;
 
-    /**
-     * Patch a contact in Omnisend.
-     *
-     * @param string $contact_id
-     * @param Contact $contact
-     *
-     * @return SaveContactResponse
-     */
-    public function save_contact( string $contact_id, Contact $contact ): SaveContactResponse;
+	/**
+	 * Patch a contact in Omnisend.
+	 *
+	 * @param string $contact_id
+	 * @param Contact $contact
+	 *
+	 * @return SaveContactResponse
+	 */
+	public function save_contact( string $contact_id, Contact $contact ): SaveContactResponse;
 
-    /**
-     * Get contact in Omnisend by Email.
-     *
-     * @param string $email
-     *
-     * @return GetContactResponse
-     */
-    public function get_contact( string $email ): GetContactResponse;
+	/**
+	 * Get contact in Omnisend by Email.
+	 *
+	 * @param string $email
+	 *
+	 * @return GetContactResponse
+	 */
+	public function get_contact( string $email ): GetContactResponse;
 }

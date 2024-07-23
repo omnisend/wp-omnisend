@@ -23,27 +23,28 @@ class GetContactResponse {
 
 	private WP_Error $wp_error;
 
-    /**
-     * @param string $contact_id
-     * @param WP_Error $wp_error
-     * @param array $contact
-     */
+	/**
+	 * @param string $contact_id
+	 * @param WP_Error $wp_error
+	 * @param array $contact
+	 */
+
 	public function __construct( string $contact_id, WP_Error $wp_error, array $contact = array() ) {
-		$this->contact_data = $contact;
-        $this->sms_consent = false;
-        $this->email_consent = false;
+		$this->contact_data  = $contact;
+		$this->sms_consent   = false;
+		$this->email_consent = false;
 
-        if( isset( $contact['identifiers'] ) ){
-            foreach ( $contact['identifiers'] as $single_consent ) {
-                if ( isset( $single_consent['channels']['sms']['status'] ) && $single_consent['channels']['sms']['status'] == 'subscribed' ) {
-                    $this->sms_consent = true;
-                }
+		if ( isset( $contact['identifiers'] ) ) {
+			foreach ( $contact['identifiers'] as $single_consent ) {
+				if ( isset( $single_consent['channels']['sms']['status'] ) && $single_consent['channels']['sms']['status'] == 'subscribed' ) {
+					$this->sms_consent = true;
+				}
 
-                if ( isset( $single_consent['channels']['email']['status'] ) && $single_consent['channels']['email']['status'] == 'subscribed' ) {
-                    $this->email_consent = true;
-                }
-            }
-        }
+				if ( isset( $single_consent['channels']['email']['status'] ) && $single_consent['channels']['email']['status'] == 'subscribed' ) {
+					$this->email_consent = true;
+				}
+			}
+		}
 
 		$this->contact_id = $contact_id;
 		$this->wp_error   = $wp_error;
