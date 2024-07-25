@@ -37,9 +37,9 @@ class Contact {
 	private $phone_consent = null;
 
 	private $email_opt_in_source     = null;
-	private $email_status = null;
+	private $email_status            = null;
 	private $phone_opt_in_source     = null;
-	private $phone_status = null;
+	private $phone_status            = null;
 	private array $custom_properties = array();
 
 	/**
@@ -129,15 +129,15 @@ class Contact {
 			'tags'        => array_values( array_unique( $this->tags ) ),
 		);
 
-        $email_consent_status = $this->email_opt_in_source ? 'subscribed' : 'nonSubscribed';
-        if ( $this->email_status == 'unsubscribed' ) {
-            $email_consent_status = 'unsubscribed';
-        }
+		$email_consent_status = $this->email_opt_in_source ? 'subscribed' : 'nonSubscribed';
+		if ( $this->email_status == 'unsubscribed' ) {
+			$email_consent_status = 'unsubscribed';
+		}
 
-        $sms_consent_status = $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed';
-        if ( $this->phone_status == 'unsubscribed' ) {
-            $sms_consent_status = 'unsubscribed';
-        }
+		$sms_consent_status = $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed';
+		if ( $this->phone_status == 'unsubscribed' ) {
+			$sms_consent_status = 'unsubscribed';
+		}
 
 		if ( $this->email ) {
 			$email_identifier = array(
@@ -527,8 +527,8 @@ class Contact {
 	/**
 	 * Sets email opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from email consent.
 	 *
-     * Common format is subscribed, nonsubscribed and unsubscribed
-     *
+	 * Common format is subscribed, nonsubscribed and unsubscribed
+	 *
 	 * @param string $email_status
 	 *
 	 * @return void
@@ -554,8 +554,8 @@ class Contact {
 	/**
 	 * Sets phone opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from phone consent.
 	 *
-     * Common format is subscribed, nonsubscribed and unsubscribed
- *
+	 * Common format is subscribed, nonsubscribed and unsubscribed
+	 *
 	 * @param string $phone_status
 	 *
 	 * @return void
