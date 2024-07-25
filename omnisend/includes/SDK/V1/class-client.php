@@ -35,13 +35,11 @@ interface Client {
 
 	/**
 	 * Patch a contact in Omnisend.
-	 *
-	 * @param string $contact_id
 	 * @param Contact $contact
 	 *
 	 * @return SaveContactResponse
 	 */
-	public function save_contact( string $contact_id, Contact $contact ): SaveContactResponse;
+	public function save_contact( Contact $contact ): SaveContactResponse;
 
 	/**
 	 * Get contact in Omnisend by Email.
@@ -50,5 +48,5 @@ interface Client {
 	 *
 	 * @return GetContactResponse
 	 */
-	public function get_contact( string $email ): GetContactResponse;
+	public function get_contact_by_email( string $email ): GetContactResponse;
 }

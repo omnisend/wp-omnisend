@@ -37,9 +37,9 @@ class Contact {
 	private $phone_consent = null;
 
 	private $email_opt_in_source     = null;
-	private $email_opt_out_source    = false;
+	private $email_status = null;
 	private $phone_opt_in_source     = null;
-	private $phone_opt_out_source    = false;
+	private $phone_status = null;
 	private array $custom_properties = array();
 
 	/**
@@ -129,133 +129,15 @@ class Contact {
 			'tags'        => array_values( array_unique( $this->tags ) ),
 		);
 
-		if ( $this->email ) {
-			$email_identifier = array(
-				'type'     => 'email',
-				'id'       => $this->email,
-				'channels' => array(
-					'email' => array(
-						'status'     => $this->email_opt_in_source ? 'subscribed' : 'nonSubscribed',
-						'statusDate' => $time_now,
-					),
-				),
-			);
-			if ( $this->email_consent ) {
-				$email_identifier['consent'] = array(
-					'source'    => $this->email_consent,
-					'createdAt' => $time_now,
-					'ip'        => $ip,
-					'userAgent' => $user_agent,
-				);
-			}
+        $email_consent_status = $this->email_opt_in_source ? 'subscribed' : 'nonSubscribed';
+        if ( $this->email_status == 'unsubscribed' ) {
+            $email_consent_status = 'unsubscribed';
+        }
 
-			$arr['identifiers'][] = $email_identifier;
-		}
-
-		if ( $this->custom_properties ) {
-			$arr['customProperties'] = $this->custom_properties;
-		}
-
-		if ( $this->phone ) {
-			$phone_identifier = array(
-				'type'     => 'phone',
-				'id'       => $this->phone,
-				'channels' => array(
-					'sms' => array(
-						'status'     => $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed',
-						'statusDate' => $time_now,
-					),
-				),
-			);
-			if ( $this->phone_consent ) {
-				$phone_identifier['consent'] = array(
-					'source'    => $this->phone_consent,
-					'createdAt' => $time_now,
-					'ip'        => $ip,
-					'userAgent' => $user_agent,
-				);
-			}
-			$arr['identifiers'][] = $phone_identifier;
-		}
-
-		if ( $this->id ) {
-			$arr['contactID'] = $this->id;
-		}
-
-		if ( $this->first_name ) {
-			$arr['firstName'] = $this->first_name;
-		}
-
-		if ( $this->last_name ) {
-			$arr['lastName'] = $this->last_name;
-		}
-
-		if ( $this->address ) {
-			$arr['address'] = $this->address;
-		}
-
-		if ( $this->city ) {
-			$arr['city'] = $this->city;
-		}
-
-		if ( $this->state ) {
-			$arr['state'] = $this->state;
-		}
-
-		if ( $this->country ) {
-			$arr['country'] = $this->country;
-		}
-
-		if ( $this->postal_code ) {
-			$arr['postalCode'] = $this->postal_code;
-		}
-
-		if ( $this->birthday ) {
-			$arr['birthdate'] = $this->birthday;
-		}
-
-		if ( $this->gender ) {
-			$arr['gender'] = $this->gender;
-		}
-
-		if ( $this->send_welcome_email ) {
-			$arr['sendWelcomeEmail'] = $this->send_welcome_email;
-		}
-
-		return $arr;
-	}
-
-	/**
-	 * Convert contact to array.
-	 *
-	 * If contact is valid it will be transformed to array that can be sent to Omnisend.
-	 *
-	 * @return array
-	 */
-	public function to_array_for_save_contract(): array {
-		if ( $this->validate()->has_errors() ) {
-			return array();
-		}
-
-		$time_now = gmdate( 'c' );
-
-		$user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? 'user agent not found' ) );
-		$ip         = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'ip not found' ) );
-
-		$arr = array(
-			'identifiers' => array(),
-			'tags'        => array_values( array_unique( $this->tags ) ),
-		);
-
-		$email_consent_status = 'subscribed';
-		if ( $this->email_opt_out_source ) {
-			$email_consent_status = 'unsubscribed';
-		}
-
-		$sms_consent_status = 'subscribed';
-		if ( $this->email_opt_out_source ) {
-			$sms_consent_status = 'unsubscribed';
-		}
+        $sms_consent_status = $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed';
+        if ( $this->phone_status == 'unsubscribed' ) {
+            $sms_consent_status = 'unsubscribed';
+        }
 
 		if ( $this->email ) {
 			$email_identifier = array(
@@ -352,7 +234,6 @@ class Contact {
 
 		return $arr;
 	}
-
 
 	/**
 	 * Convert contact to array for events.
@@ -644,16 +525,16 @@ class Contact {
 	}
 
 	/**
-	 * Sets email opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact email as subscribed.
+	 * Sets email opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from email consent.
 	 *
-	 * Common format is `form:form_name` or `popup:popup_name`.
-	 *
-	 * @param bool $opt_out
+     * Common format is subscribed, nonsubscribed and unsubscribed
+     *
+	 * @param string $email_status
 	 *
 	 * @return void
 	 */
-	public function set_email_opt_out( bool $opt_out ): void {
-		$this->email_opt_out_source = $opt_out;
+	public function set_email_status( string $email_status ): void {
+		$this->email_status = $email_status;
 	}
 
 
@@ -671,20 +552,20 @@ class Contact {
 	}
 
 	/**
-	 * Sets phone opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact phone as subscribed.
+	 * Sets phone opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from phone consent.
 	 *
-	 * Common format is `form:form_name` or `popup:popup_name`.
-	 *
-	 * @param bool $opt_out
+     * Common format is subscribed, nonsubscribed and unsubscribed
+ *
+	 * @param string $phone_status
 	 *
 	 * @return void
 	 */
-	public function set_phone_opt_out( bool $opt_out ): void {
-		$this->phone_opt_out_source = $opt_out;
+	public function set_phone_status( string $phone_status ): void {
+		$this->phone_status = $phone_status;
 	}
 
 	/**
-	 * Sets email concent status. It's needed for GDPR compliance.
+	 * Sets email consent status. It's needed for GDPR compliance.
 	 *
 	 * Common format is `form:form_name` or `popup:popup_name`.
 	 *
@@ -697,7 +578,7 @@ class Contact {
 	}
 
 	/**
-	 * Sets email concent status. It's needed for GDPR compliance.
+	 * Sets email consent status. It's needed for GDPR compliance.
 	 *
 	 * Common format is `form:form_name` or `popup:popup_name`.
 	 *

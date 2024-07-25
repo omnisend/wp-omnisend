@@ -23,7 +23,7 @@ use Omnisend\Internal\Connection;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.4.1';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.4.2';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';

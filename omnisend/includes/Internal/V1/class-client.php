@@ -96,7 +96,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 		return new CreateContactResponse( (string) $arr['contactID'], $error );
 	}
 
-	public function save_contact( string $contact_id, Contact $contact ): SaveContactResponse {
+	public function save_contact( Contact $contact ): SaveContactResponse {
 		$error = new WP_Error();
 
 		if ( $contact instanceof Contact ) {
@@ -112,12 +112,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SaveContactResponse( '', $error );
 		}
 
-		$contractArray = $contact->to_array_for_save_contract();
+		$contractArray = $contact->to_array();
 
-		$response = wp_remote_request(
-			OMNISEND_CORE_API_V5 . '/contacts/' . $contact_id,
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/contacts',
 			array(
-				'method'  => 'PATCH',
 				'body'    => wp_json_encode( $contractArray ),
 				'headers' => array(
 					'Content-Type'          => 'application/json',
@@ -158,7 +157,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 		return new SaveContactResponse( (string) $arr['contactID'], $error );
 	}
 
-	public function get_contact( string $email ): GetContactResponse {
+	public function get_contact_by_email( string $email ): GetContactResponse {
 		$error = new WP_Error();
 
 		$response = wp_remote_get(
