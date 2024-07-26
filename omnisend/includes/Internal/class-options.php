@@ -29,7 +29,8 @@ class Options {
 		return is_string( $api_key ) ? $api_key : '';
 	}
 
-	public static function get_brand_id(): string {
+	public static function get_brand_id(): 
+	string {
 		$brand_id = get_option( self::OPTION_BRAND_ID );
 
 		return is_string( $brand_id ) ? $brand_id : '';
