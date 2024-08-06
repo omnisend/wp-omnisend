@@ -19,9 +19,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Client implements \Omnisend\SDK\V1\Client {
 
-
-
-
 	private string $api_key;
 	private string $plugin_name;
 	private string $plugin_version;
@@ -108,16 +105,15 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$error->merge_from( $this->check_setup() );
 
 		if ( $error->has_errors() ) {
-			var_dump( $error );
 			return new SaveContactResponse( '', $error );
 		}
 
-		$contractArray = $contact->to_array();
+		$contract_array = $contact->to_array();
 
 		$response = wp_remote_post(
 			OMNISEND_CORE_API_V5 . '/contacts',
 			array(
-				'body'    => wp_json_encode( $contractArray ),
+				'body'    => wp_json_encode( $contract_array ),
 				'headers' => array(
 					'Content-Type'          => 'application/json',
 					'X-API-Key'             => $this->api_key,
@@ -175,7 +171,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		if ( is_wp_error( $response ) ) {
             error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
-			return new GetContactResponse( '', $response );
+			return new GetContactResponse( null, $error );
 		}
 
 		$http_code = wp_remote_retrieve_response_code( $response );
@@ -183,23 +179,99 @@ class Client implements \Omnisend\SDK\V1\Client {
 			$body    = wp_remote_retrieve_body( $response );
 			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
 			$error->add( 'omnisend_api', $err_msg );
-			return new GetContactResponse( '', $error );
+			return new GetContactResponse( null, $error );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
 		if ( ! $body ) {
 			$error->add( 'omnisend_api', 'empty response' );
-			return new GetContactResponse( '', $error );
+			return new GetContactResponse( null, $error );
 		}
 
-		$arr = json_decode( $body, true );
+		$contact_data = json_decode( $body, true );
 
-		if ( empty( $arr['contacts'][0]['contactID'] ) ) {
+		if ( empty( $contact_data['contacts'][0]['contactID'] ) ) {
 			$error->add( 'omnisend_api', 'contactID not found in response.' );
-			return new GetContactResponse( '', $error );
+			return new GetContactResponse( null, $error );
 		}
 
-		return new GetContactResponse( $arr['contacts'][0]['contactID'], $error, $arr['contacts'][0] );
+		$contact = new Contact();
+
+		if ( isset( $contact_data['contacts'][0]['contactID'] ) ) {
+			$contact->set_id( $contact_data['contacts'][0]['contactID'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['firstName'] ) ) {
+			$contact->set_first_name( $contact_data['contacts'][0]['firstName'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['email'] ) ) {
+			$contact->set_email( $contact_data['contacts'][0]['email'] );
+			$contact->set_email_opt_in( $contact_data['contacts'][0]['email'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['lastName'] ) ) {
+			$contact->set_last_name( $contact_data['contacts'][0]['lastName'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['country'] ) ) {
+			$contact->set_country( $contact_data['contacts'][0]['country'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['address'] ) ) {
+			$contact->set_address( $contact_data['contacts'][0]['address'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['city'] ) ) {
+			$contact->set_city( $contact_data['contacts'][0]['city'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['state'] ) ) {
+			$contact->set_state( $contact_data['contacts'][0]['state'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['postalCode'] ) ) {
+			$contact->set_postal_code( $contact_data['contacts'][0]['postalCode'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['phone'] ) ) {
+			$contact->set_phone( $contact_data['contacts'][0]['phone'][0] );
+			$contact->set_phone_opt_in( $contact_data['contacts'][0]['phone'][0] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['birthdate'] ) ) {
+			$contact->set_birthday( $contact_data['contacts'][0]['birthdate'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['gender'] ) ) {
+			$contact->set_gender( $contact_data['contacts'][0]['gender'] );
+		}
+
+		if ( isset( $contact_data['contacts'][0]['tags'] ) ) {
+			foreach ( $contact_data['contacts'][0]['tags'] as $tag ) {
+				$contact->add_tag( $tag );
+			}
+		}
+
+		if ( isset( $contact_data['contacts'][0]['customProperties'] ) ) {
+			foreach ( $contact_data['contacts'][0]['customProperties'] as $key => $value ) {
+				$contact->add_custom_property( $key, $value, false );
+			}
+		}
+
+		if ( isset( $contact_data['contacts'][0]['identifiers'] ) ) {
+			foreach ( $contact_data['contacts'][0]['identifiers'] as $single_consent ) {
+				if ( isset( $single_consent['channels']['sms']['status'] ) ) {
+					$contact->set_phone_status( $single_consent['channels']['sms']['status'] );
+				}
+
+				if ( isset( $single_consent['channels']['email']['status'] ) ) {
+					$contact->set_email_status( $single_consent['channels']['email']['status'] );
+				}
+			}
+		}
+
+		return new GetContactResponse( $contact, $error );
 	}
 
 	public function send_customer_event( $event ): SendCustomerEventResponse {

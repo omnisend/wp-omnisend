@@ -45,7 +45,7 @@ class Contact {
 	/**
 	 * Validate contact properties.
 	 *
-	 * It ensures that phone or email is set and that they are valid. In addition other properties are validated if they are expected type and format.
+	 * It ensures that phone or email is set and that they are valid. In addition, other properties are validated if they are expected type and format.
 	 *
 	 * @return WP_Error
 	 */
@@ -200,6 +200,10 @@ class Contact {
 			$arr['lastName'] = $this->last_name;
 		}
 
+		if ( $this->phone ) {
+			$arr['phone'] = $this->phone;
+		}
+
 		if ( $this->address ) {
 			$arr['address'] = $this->address;
 		}
@@ -262,7 +266,7 @@ class Contact {
 			$arr['email'] = $this->email;
 
 			if ( $this->email_consent ) {
-				$email_cahnnel_consent = array(
+				$email_channel_consent = array(
 					'channel'   => 'email',
 					'source'    => $this->email_consent,
 					'createdAt' => $time_now,
@@ -270,17 +274,17 @@ class Contact {
 					'userAgent' => $user_agent,
 				);
 
-				$arr['consents'][] = $email_cahnnel_consent;
+				$arr['consents'][] = $email_channel_consent;
 			}
 
 			if ( $this->email_opt_in_source ) {
-				$email_cahnnel_opt_in = array(
+				$email_chanel_opt_in = array(
 					'channel'   => 'email',
 					'createdAt' => $time_now,
 					'source'    => $this->email_opt_in_source,
 				);
 
-				$arr['optIns'][] = $email_cahnnel_opt_in;
+				$arr['optIns'][] = $email_chanel_opt_in;
 			}
 		}
 
@@ -355,7 +359,6 @@ class Contact {
 
 		return $arr;
 	}
-
 
 	/**
 	 * Sets contact email.
@@ -479,8 +482,7 @@ class Contact {
 	/**
 	 * Sets contact set_phone.
 	 *
-	 * @param $set_phone
-	 *
+	 * @param $phone
 	 * @return void
 	 */
 	public function set_phone( $phone ): void {
@@ -503,8 +505,7 @@ class Contact {
 	 *
 	 * You can find more information https://support.omnisend.com/en/articles/1061818-welcome-email-automation
 	 *
-	 * @param $birthday
-	 *
+	 * @param $send_welcome_email
 	 * @return void
 	 */
 	public function set_welcome_email( $send_welcome_email ): void {
