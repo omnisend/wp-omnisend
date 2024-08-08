@@ -15,37 +15,37 @@ class GetContactResponse {
 
 	private array $contact;
 
-	private $contact_id;
+	private string $contact_id;
 
-	private $first_name;
+	private string $first_name;
 
-	private $last_name;
+	private string $last_name;
 
-	private $email;
+	private string $email;
 
-	private $address;
+	private string $address;
 
-	private $city;
+	private string $city;
 
-	private $state;
+	private string $state;
 
-	private $country;
+	private string $country;
 
-	private $postal_code;
+	private string $postal_code;
 
-	private $phone;
+	private string $phone;
 
-	private $birthday;
+	private string $birthday;
 
-	private $gender;
+	private string $gender;
 
-	private $email_status;
+	private string $email_status;
 
-	private $phone_status;
+	private string $phone_status;
 
-	private $tags;
+	private array $tags;
 
-	private $custom_properties;
+	private array $custom_properties;
 
 	private WP_Error $wp_error;
 

@@ -125,7 +125,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 		);
 
 		if ( is_wp_error( $response ) ) {
-            error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
+            error_log( 'wp_remote_post error: ' . $response->get_error_message() ); // phpcs:ignore
 			return new SaveContactResponse( '', $response );
 		}
 
