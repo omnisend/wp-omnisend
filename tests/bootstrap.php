@@ -7,6 +7,9 @@ include_once dirname( __FILE__ ) .  '/../omnisend/class-omnisend-core-bootstrap.
 
 function register_uninstall_hook() {}
 function add_action() {}
+function do_action(){}
+function add_filter(){}
+function plugin_basename(){}
 function apply_filters() { return array(); }
 function get_option() {}
 function plugin_dir_path() { return dirname( __FILE__ ) .  '/../omnisend/'; }
