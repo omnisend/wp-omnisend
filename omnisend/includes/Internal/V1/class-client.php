@@ -125,11 +125,12 @@ class Client implements \Omnisend\SDK\V1\Client {
 		);
 
 		if ( is_wp_error( $response ) ) {
-            error_log( 'wp_remote_post error: ' . $response->get_error_message() ); // phpcs:ignore
+			error_log( 'wp_remote_post error: ' . $response->get_error_message() );
 			return new SaveContactResponse( '', $response );
 		}
 
 		$http_code = wp_remote_retrieve_response_code( $response );
+
 		if ( $http_code >= 400 ) {
 			$body    = wp_remote_retrieve_body( $response );
 			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
@@ -170,7 +171,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 		);
 
 		if ( is_wp_error( $response ) ) {
-            error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
+            error_log('wp_remote_post error: ' . $response->get_error_message());
+
 			return new GetContactResponse( null, $error );
 		}
 
@@ -179,12 +181,14 @@ class Client implements \Omnisend\SDK\V1\Client {
 			$body    = wp_remote_retrieve_body( $response );
 			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
 			$error->add( 'omnisend_api', $err_msg );
+
 			return new GetContactResponse( null, $error );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
 		if ( ! $body ) {
 			$error->add( 'omnisend_api', 'empty response' );
+
 			return new GetContactResponse( null, $error );
 		}
 
@@ -192,6 +196,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		if ( empty( $contact_data['contacts'][0]['contactID'] ) ) {
 			$error->add( 'omnisend_api', 'contactID not found in response.' );
+
 			return new GetContactResponse( null, $error );
 		}
 
@@ -199,6 +204,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		if ( ! isset( $contact_data['contacts'][0] ) ) {
 			$error->add( 'omnisend_api', 'empty contacts array' );
+
 			return new GetContactResponse( null, $error );
 		}
 		$contact_data = reset( $contact_data['contacts'] );
@@ -237,7 +243,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			error_log('wp_remote_post error: ' . $response->get_error_message()); // phpcs:ignore
+			error_log('wp_remote_post error: ' . $response->get_error_message());
+
 			return new SendCustomerEventResponse( $response );
 		}
 

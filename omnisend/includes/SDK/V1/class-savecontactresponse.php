@@ -14,7 +14,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class SaveContactResponse {
 
 	private string $contact_id;
-
 	private WP_Error $wp_error;
 
 	/**
