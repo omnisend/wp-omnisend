@@ -195,81 +195,14 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new GetContactResponse( null, $error );
 		}
 
-		$contact = new Contact();
+		$contact = ContactFactory::create_contact( $contact_data['contacts'][0] );
 
-		if ( isset( $contact_data['contacts'][0]['contactID'] ) ) {
-			$contact->set_id( $contact_data['contacts'][0]['contactID'] );
+		if ( ! isset( $contact_data['contacts'][0] ) ) {
+			$error->add( 'omnisend_api', 'empty contacts array' );
+			return new GetContactResponse( null, $error );
 		}
-
-		if ( isset( $contact_data['contacts'][0]['firstName'] ) ) {
-			$contact->set_first_name( $contact_data['contacts'][0]['firstName'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['email'] ) ) {
-			$contact->set_email( $contact_data['contacts'][0]['email'] );
-			$contact->set_email_opt_in( $contact_data['contacts'][0]['email'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['lastName'] ) ) {
-			$contact->set_last_name( $contact_data['contacts'][0]['lastName'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['country'] ) ) {
-			$contact->set_country( $contact_data['contacts'][0]['country'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['address'] ) ) {
-			$contact->set_address( $contact_data['contacts'][0]['address'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['city'] ) ) {
-			$contact->set_city( $contact_data['contacts'][0]['city'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['state'] ) ) {
-			$contact->set_state( $contact_data['contacts'][0]['state'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['postalCode'] ) ) {
-			$contact->set_postal_code( $contact_data['contacts'][0]['postalCode'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['phone'] ) ) {
-			$contact->set_phone( $contact_data['contacts'][0]['phone'][0] );
-			$contact->set_phone_opt_in( $contact_data['contacts'][0]['phone'][0] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['birthdate'] ) ) {
-			$contact->set_birthday( $contact_data['contacts'][0]['birthdate'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['gender'] ) ) {
-			$contact->set_gender( $contact_data['contacts'][0]['gender'] );
-		}
-
-		if ( isset( $contact_data['contacts'][0]['tags'] ) ) {
-			foreach ( $contact_data['contacts'][0]['tags'] as $tag ) {
-				$contact->add_tag( $tag );
-			}
-		}
-
-		if ( isset( $contact_data['contacts'][0]['customProperties'] ) ) {
-			foreach ( $contact_data['contacts'][0]['customProperties'] as $key => $value ) {
-				$contact->add_custom_property( $key, $value, false );
-			}
-		}
-
-		if ( isset( $contact_data['contacts'][0]['identifiers'] ) ) {
-			foreach ( $contact_data['contacts'][0]['identifiers'] as $single_consent ) {
-				if ( isset( $single_consent['channels']['sms']['status'] ) ) {
-					$contact->set_phone_status( $single_consent['channels']['sms']['status'] );
-				}
-
-				if ( isset( $single_consent['channels']['email']['status'] ) ) {
-					$contact->set_email_status( $single_consent['channels']['email']['status'] );
-				}
-			}
-		}
+		$contact_data = reset( $contact_data['contacts'] );
+		$contact      = ( new ContactFactory() )->create_contact( $contact_data['contacts'][0] );
 
 		return new GetContactResponse( $contact, $error );
 	}
