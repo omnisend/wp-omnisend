@@ -36,15 +36,16 @@ class Contact {
 	private $email_consent = null;
 	private $phone_consent = null;
 
-	private $email_opt_in_source = null;
-	private $phone_opt_in_source = null;
-
+	private $email_opt_in_source     = null;
+	private $email_status            = null;
+	private $phone_opt_in_source     = null;
+	private $phone_status            = null;
 	private array $custom_properties = array();
 
 	/**
 	 * Validate contact properties.
 	 *
-	 * It ensures that phone or email is set and that they are valid. In addition other properties are validated if they are expected type and format.
+	 * It ensures that phone or email is set and that they are valid. In addition, other properties are validated if they are expected type and format.
 	 *
 	 * @return WP_Error
 	 */
@@ -128,13 +129,23 @@ class Contact {
 			'tags'        => array_values( array_unique( $this->tags ) ),
 		);
 
+		$email_consent_status = $this->email_opt_in_source ? 'subscribed' : 'nonSubscribed';
+		if ( $this->email_status == 'unsubscribed' ) {
+			$email_consent_status = 'unsubscribed';
+		}
+
+		$sms_consent_status = $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed';
+		if ( $this->phone_status == 'unsubscribed' ) {
+			$sms_consent_status = 'unsubscribed';
+		}
+
 		if ( $this->email ) {
 			$email_identifier = array(
 				'type'     => 'email',
 				'id'       => $this->email,
 				'channels' => array(
 					'email' => array(
-						'status'     => $this->email_opt_in_source ? 'subscribed' : 'nonSubscribed',
+						'status'     => $email_consent_status,
 						'statusDate' => $time_now,
 					),
 				),
@@ -161,7 +172,7 @@ class Contact {
 				'id'       => $this->phone,
 				'channels' => array(
 					'sms' => array(
-						'status'     => $this->phone_opt_in_source ? 'subscribed' : 'nonSubscribed',
+						'status'     => $sms_consent_status,
 						'statusDate' => $time_now,
 					),
 				),
@@ -187,6 +198,10 @@ class Contact {
 
 		if ( $this->last_name ) {
 			$arr['lastName'] = $this->last_name;
+		}
+
+		if ( $this->phone ) {
+			$arr['phone'] = $this->phone;
 		}
 
 		if ( $this->address ) {
@@ -224,7 +239,6 @@ class Contact {
 		return $arr;
 	}
 
-
 	/**
 	 * Convert contact to array for events.
 	 *
@@ -252,7 +266,7 @@ class Contact {
 			$arr['email'] = $this->email;
 
 			if ( $this->email_consent ) {
-				$email_cahnnel_consent = array(
+				$email_channel_consent = array(
 					'channel'   => 'email',
 					'source'    => $this->email_consent,
 					'createdAt' => $time_now,
@@ -260,17 +274,17 @@ class Contact {
 					'userAgent' => $user_agent,
 				);
 
-				$arr['consents'][] = $email_cahnnel_consent;
+				$arr['consents'][] = $email_channel_consent;
 			}
 
 			if ( $this->email_opt_in_source ) {
-				$email_cahnnel_opt_in = array(
+				$email_chanel_opt_in = array(
 					'channel'   => 'email',
 					'createdAt' => $time_now,
 					'source'    => $this->email_opt_in_source,
 				);
 
-				$arr['optIns'][] = $email_cahnnel_opt_in;
+				$arr['optIns'][] = $email_chanel_opt_in;
 			}
 		}
 
@@ -345,7 +359,6 @@ class Contact {
 
 		return $arr;
 	}
-
 
 	/**
 	 * Sets contact email.
@@ -469,8 +482,7 @@ class Contact {
 	/**
 	 * Sets contact set_phone.
 	 *
-	 * @param $set_phone
-	 *
+	 * @param $phone
 	 * @return void
 	 */
 	public function set_phone( $phone ): void {
@@ -493,8 +505,7 @@ class Contact {
 	 *
 	 * You can find more information https://support.omnisend.com/en/articles/1061818-welcome-email-automation
 	 *
-	 * @param $birthday
-	 *
+	 * @param $send_welcome_email
 	 * @return void
 	 */
 	public function set_welcome_email( $send_welcome_email ): void {
@@ -514,6 +525,19 @@ class Contact {
 		$this->email_opt_in_source = $opt_in_text;
 	}
 
+	/**
+	 * Sets email opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from email consent.
+	 *
+	 * Common format is subscribed, nonsubscribed and unsubscribed
+	 *
+	 * @param string $email_status
+	 *
+	 * @return void
+	 */
+	public function set_email_status( string $email_status ): void {
+		$this->email_status = $email_status;
+	}
+
 
 	/**
 	 * Sets phone opt in source. It's used to track where contact opted in to receive emails. It's required to mark contact phone as subscribed.
@@ -529,7 +553,20 @@ class Contact {
 	}
 
 	/**
-	 * Sets email concent status. It's needed for GDPR compliance.
+	 * Sets phone opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from phone consent.
+	 *
+	 * Common format is subscribed, nonsubscribed and unsubscribed
+	 *
+	 * @param string $phone_status
+	 *
+	 * @return void
+	 */
+	public function set_phone_status( string $phone_status ): void {
+		$this->phone_status = $phone_status;
+	}
+
+	/**
+	 * Sets email consent status. It's needed for GDPR compliance.
 	 *
 	 * Common format is `form:form_name` or `popup:popup_name`.
 	 *
@@ -542,7 +579,7 @@ class Contact {
 	}
 
 	/**
-	 * Sets email concent status. It's needed for GDPR compliance.
+	 * Sets email consent status. It's needed for GDPR compliance.
 	 *
 	 * Common format is `form:form_name` or `popup:popup_name`.
 	 *
