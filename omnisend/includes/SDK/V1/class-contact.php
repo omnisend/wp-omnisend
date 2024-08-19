@@ -307,13 +307,13 @@ class Contact {
 			}
 
 			if ( $this->phone_opt_in_source ) {
-				$phone_cahnnel_opt_in = array(
+				$phone_channel_opt_in = array(
 					'channel'   => 'phone',
 					'createdAt' => $time_now,
 					'source'    => $this->phone_opt_in_source,
 				);
 
-				$arr['optIns'][] = $phone_cahnnel_opt_in;
+				$arr['optIns'][] = $phone_channel_opt_in;
 			}
 		}
 
@@ -526,9 +526,9 @@ class Contact {
 	}
 
 	/**
-	 * Sets email opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from email consent.
+	 * Sets email status. It's used to track whether contact opted in to receive emails.
 	 *
-	 * Common format is subscribed, nonsubscribed and unsubscribed
+	 * Allowed values are subscribed, nonsubscribed and unsubscribed
 	 *
 	 * @param string $email_status
 	 *
@@ -553,9 +553,9 @@ class Contact {
 	}
 
 	/**
-	 * Sets phone opt out source. It's used to track ether contact should opt out. It's required to unsubscribe from phone consent.
+	 * Sets phone status. It's used to track whether contact opted in to receive sms.
 	 *
-	 * Common format is subscribed, nonsubscribed and unsubscribed
+	 * Allowed values are subscribed, nonsubscribed and unsubscribed
 	 *
 	 * @param string $phone_status
 	 *

@@ -34,7 +34,7 @@ interface Client {
 	public function send_customer_event( $event ): SendCustomerEventResponse;
 
 	/**
-	 * Patch a contact in Omnisend.
+	 * Save a contact in Omnisend.
 	 * @param Contact $contact
 	 *
 	 * @return SaveContactResponse
