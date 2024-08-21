@@ -5,7 +5,7 @@
  * @package OmnisendClient
  */
 
-namespace Omnisend\Internal\V1;
+namespace Omnisend\Internal;
 
 use Omnisend\SDK\V1\Contact;
 
@@ -30,7 +30,6 @@ class ContactFactory {
 
 		if ( isset( $contact_data['email'] ) ) {
 			$contact->set_email( $contact_data['email'] );
-			$contact->set_email_opt_in( $contact_data['email'] );
 		}
 
 		if ( isset( $contact_data['lastName'] ) ) {
@@ -59,7 +58,6 @@ class ContactFactory {
 
 		if ( isset( $contact_data['phone'] ) ) {
 			$contact->set_phone( $contact_data['phone'][0] );
-			$contact->set_phone_opt_in( $contact_data['phone'][0] );
 		}
 
 		if ( isset( $contact_data['birthdate'] ) ) {
@@ -85,11 +83,19 @@ class ContactFactory {
 		if ( isset( $contact_data['identifiers'] ) ) {
 			foreach ( $contact_data['identifiers'] as $single_consent ) {
 				if ( isset( $single_consent['channels']['sms']['status'] ) ) {
-					$contact->set_phone_status( $single_consent['channels']['sms']['status'] );
+					if ( $single_consent['channels']['sms']['status'] == 'subscribed' ) {
+						$contact->set_phone_subscriber();
+					} elseif ( $single_consent['channels']['sms']['status'] == 'unsubscribed' ) {
+						$contact->set_phone_unsubscriber();
+					}
 				}
 
 				if ( isset( $single_consent['channels']['email']['status'] ) ) {
-					$contact->set_email_status( $single_consent['channels']['email']['status'] );
+					if ( $single_consent['channels']['email']['status'] == 'subscribed' ) {
+						$contact->set_email_subscriber();
+					} elseif ( $single_consent['channels']['email']['status'] == 'unsubscribed' ) {
+						$contact->set_email_unsubscriber();
+					}
 				}
 			}
 		}

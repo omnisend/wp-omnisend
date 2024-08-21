@@ -13,6 +13,7 @@ use Omnisend\SDK\V1\Event;
 use Omnisend\SDK\V1\SendCustomerEventResponse;
 use Omnisend\SDK\V1\SaveContactResponse;
 use Omnisend\SDK\V1\GetContactResponse;
+use Omnisend\Internal\ContactFactory;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
@@ -196,13 +197,6 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$contact = ContactFactory::create_contact( $contact_data['contacts'][0] );
-
-		if ( ! isset( $contact_data['contacts'][0] ) ) {
-			$error->add( 'omnisend_api', 'empty contacts array' );
-			return new GetContactResponse( null, $error );
-		}
-		$contact_data = reset( $contact_data['contacts'] );
-		$contact      = ( new ContactFactory() )->create_contact( $contact_data['contacts'][0] );
 
 		return new GetContactResponse( $contact, $error );
 	}
