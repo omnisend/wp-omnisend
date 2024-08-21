@@ -69,6 +69,54 @@ $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integratio
 $response = $client->create_contact( $contact );
 ```
 
+#### Save and update Contact
+
+Here is how you can create new or update existing a basic client & submit contact.
+
+```php
+$contact  = new Contact();
+
+$contact->set_email( $email );
+if ( $phone_number != '' ) {
+	$contact->set_phone( $phone_number );
+}
+$contact->set_first_name( $first_name );
+$contact->set_last_name( $last_name );
+$contact->set_birthday( $birthday );
+$contact->set_postal_code( $postal_code );
+$contact->set_address( $address );
+$contact->set_state( $state );
+$contact->set_country( $country );
+$contact->set_city( $city );
+
+if ( $email_consent ) {
+	$contact->set_email_subscriber();
+} elseif ( $email_consent_unsubscribe ){
+	$contact->set_email_unsubscriber();
+}
+
+if ( $phone_consent ) {
+	$contact->set_phone_subscriber();
+} elseif ( $phone_consent_unsubscribe ){
+	$contact->set_phone_unsubscriber();
+}
+
+$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+	
+$response = $client->save_contact( $contact );
+```
+
+#### Get Contact by email
+
+Here is how you can get Contact information.
+
+```php
+$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
+$response = $this->client->get_contact_by_email( $user_email );
+$email_consent_status = $response->get_contact()->get_email_status();
+$phone_number = $response->get_contact()->get_phone();
+```
+
 #### Customer events
 
 Here is how you can send customer events.
