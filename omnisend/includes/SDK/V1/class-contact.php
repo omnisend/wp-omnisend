@@ -264,7 +264,7 @@ class Contact {
 			}
 
 			if ( $this->email_opt_in_source ) {
-				$email_chanel_opt_in = array(
+				$email_channel_opt_in = array(
 					'channel'   => 'email',
 					'createdAt' => $time_now,
 					'source'    => $this->email_opt_in_source,
