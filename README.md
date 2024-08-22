@@ -71,7 +71,7 @@ $response = $client->create_contact( $contact );
 
 #### Save and update Contact
 
-Here is how you can create new or update existing a basic client & submit contact.
+Here is how you can create new or update existing contact.
 
 ```php
 $contact  = new Contact();
