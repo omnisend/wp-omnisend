@@ -270,7 +270,7 @@ class Contact {
 					'source'    => $this->email_opt_in_source,
 				);
 
-				$arr['optIns'][] = $email_chanel_opt_in;
+				$arr['optIns'][] = $email_channel_opt_in;
 			}
 		}
 
