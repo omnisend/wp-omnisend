@@ -41,33 +41,6 @@ This is done by getting an actual client
 'integration name' - should be your integration name
 'integration version' - should be your integration version
 
-#### Contact Creation
-
-Here is how you can create a basic client & submit contact.
-
-```php
-$contact  = new Contact();
-
-$contact->set_email( $email );
-if ( $phone_number != '' ) {
-	$contact->set_phone( $phone_number );
-}
-$contact->set_first_name( $first_name );
-$contact->set_last_name( $last_name );
-$contact->set_birthday( $birthday );
-$contact->set_postal_code( $postal_code );
-$contact->set_address( $address );
-$contact->set_state( $state );
-$contact->set_country( $country );
-$contact->set_city( $city );
-if ( $email_consent ) {
-	$contact->set_email_consent( 'actual_email_consent_for_gdrp' );
-	$contact->set_email_opt_in( 'where user opted to become subscriber' );
-}
-$client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
-	
-$response = $client->create_contact( $contact );
-```
 
 #### Save and update Contact
 
