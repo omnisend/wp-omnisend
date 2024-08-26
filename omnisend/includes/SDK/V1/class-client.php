@@ -21,7 +21,6 @@ interface Client {
 	 * @param Contact $contact
 	 *
 	 * @return CreateContactResponse
-	 * 
 	 * @deprecated Use save_contact() instead.
 	 */
 	public function create_contact( $contact ): CreateContactResponse;
