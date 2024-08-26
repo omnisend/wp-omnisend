@@ -32,4 +32,21 @@ interface Client {
 	 * @return SendCustomerEventResponse
 	 */
 	public function send_customer_event( $event ): SendCustomerEventResponse;
+
+	/**
+	 * Save a contact in Omnisend.
+	 * @param Contact $contact
+	 *
+	 * @return SaveContactResponse
+	 */
+	public function save_contact( Contact $contact ): SaveContactResponse;
+
+	/**
+	 * Get contact in Omnisend by Email.
+	 *
+	 * @param string $email
+	 *
+	 * @return GetContactResponse
+	 */
+	public function get_contact_by_email( string $email ): GetContactResponse;
 }
