@@ -10,7 +10,7 @@ final class ContactTest extends TestCase
     public function test_validation(): void
     {
         // Test valid contact
-        $contact_data = ['email' => '@example.com'];
+        $contact_data = ['email' => 'test@example.com'];
         $contact = ContactFactory::create_contact($contact_data);
         $this->assertFalse($contact->validate()->has_errors());
 
