@@ -243,15 +243,13 @@ class Connection {
 				);
 			}
 
-			if ( ! $connected ) {
-				Options::disconnect(); // Store was not connected, clean up.
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => 'The connection didn’t go through. Check if the API key is correct.',
-					)
-				);
-			}
+			Options::disconnect(); // Store was not connected, clean up.
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'error'   => 'The connection didn’t go through. Check if the API key is correct.',
+				)
+			);
 		}
 
 		return rest_ensure_response(
