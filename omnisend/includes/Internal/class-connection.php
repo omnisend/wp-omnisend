@@ -247,7 +247,7 @@ class Connection {
 			return rest_ensure_response(
 				array(
 					'success' => false,
-					'error'   => 'The connection didn’t go through. Check if the API key is correct.',
+					'error'   => 'The connection did not go through. Check if the API key is correct.',
 				)
 			);
 		}
