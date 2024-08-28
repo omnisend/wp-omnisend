@@ -37,6 +37,7 @@ class Sync {
 		$wp_user_query = new \WP_User_Query(
 			array(
 				'number'     => $limit,
+				// meta_query is required to work as sync information is stored in contact metadata.
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					'relation' => 'OR',
 					array(

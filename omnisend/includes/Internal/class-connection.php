@@ -41,17 +41,16 @@ class Connection {
 		require_once __DIR__ . '/../../view/landing-page.html';
 	}
 
-	public static function resolve_wordpress_settings() {
+	public static function resolve_wordpress_settings(): void {
 		$url      = 'https://api.omnisend.com/wordpress/settings?version=' . OMNISEND_CORE_PLUGIN_VERSION;
 		$response = wp_remote_get( $url );
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );
 
-			$data = json_decode( $body );
-			// ignore phpcs warning as it's response from API.
-			if ( ! empty( $data->exploreOmnisendLink ) ) { // phpcs:ignore 
-				self::$landing_page_url = $data->exploreOmnisendLink; // phpcs:ignore 
+			$data = json_decode( $body, true );
+			if ( ! empty( $data['exploreOmnisendLink'] ) ) {
+				self::$landing_page_url = $data['exploreOmnisendLink'];
 			}
 		}
 	}
