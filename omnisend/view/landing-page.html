@@ -1,4 +1,7 @@
-<?php use Omnisend\Internal\Connection; ?>
+<?php
+    use Omnisend\Internal\Connection;
+    $nonce = wp_create_nonce( 'show_connection_form' );
+?>
 
 <div class="omnisend-landing-page-header">
     <div class="omnisend-landing-header-container">
@@ -17,9 +20,9 @@
                 <a class="omnisend-button-primary" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
                     Explore Omnisend
                 </a>
-                <a class="omnisend-button" href="admin.php?page=omnisend&action=show_connection_form"> Connect Omnisend </a>
+                <a class="omnisend-button" href="admin.php?page=omnisend&action=show_connection_form&_wpnonce=<?php echo $nonce; ?>"> Connect Omnisend </a>
                 <?php else: ?>
-                <a class="omnisend-button-primary" href="admin.php?page=omnisend&action=show_connection_form"> Connect Omnisend </a>
+                <a class="omnisend-button-primary" href="admin.php?page=omnisend&action=show_connection_form&_wpnonce=<?php echo $nonce; ?>"> Connect Omnisend </a>
                 <?php endif; ?>
             </div>
         </div>
@@ -97,7 +100,7 @@
                     <a class="omnisend-button-green" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
                         Explore Omnisend
                     </a>
-                    <a class="omnisend-button-white" href="admin.php?page=omnisend&action=show_connection_form"> Connect Omnisend </a>
+                    <a class="omnisend-button-white" href="admin.php?page=omnisend&action=show_connection_form&_wpnonce=<?php echo $nonce; ?>"> Connect Omnisend </a>
                 </div>
             </div>
         </div>

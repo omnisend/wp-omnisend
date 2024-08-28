@@ -82,7 +82,6 @@ class Connection {
 		return is_array( $arr ) ? $arr : array();
 	}
 
-
 	public static function show_connected_store_view(): bool {
 		return Options::is_store_connected();
 	}
@@ -90,8 +89,10 @@ class Connection {
 	public static function show_connection_view(): bool {
 		$connected = Options::is_store_connected();
 
-		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'show_connection_form' ) ) {
+				die( 'nonce verification failed: ' . __FILE__ . ':' . __LINE__ );
+			}
 			return true;
 		}
 
