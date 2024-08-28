@@ -28,7 +28,7 @@ const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
 
-const OMNISEND_CORE_CRON_SCHEDULE_EVERY_15_MINUTES = 'omni_send_core_every_15_minutes';
+const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 
 const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
@@ -146,9 +146,9 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function cron_schedules( $schedules ) {
-		$schedules[ OMNISEND_CORE_CRON_SCHEDULE_EVERY_15_MINUTES ] = array(
-			'interval' => 60 * 15,
-			'display'  => __( 'Every 15 minutes', 'omnisend' ),
+		$schedules[ OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE ] = array(
+			'interval' => 60,
+			'display'  => __( 'Every minute', 'omnisend' ),
 		);
 
 		return $schedules;

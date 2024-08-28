@@ -233,7 +233,7 @@ class Connection {
 				Options::set_store_connected();
 
 				if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
-					wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_15_MINUTES, OMNISEND_CORE_CRON_SYNC_CONTACT );
+					wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
 				}
 				return rest_ensure_response(
 					array(
