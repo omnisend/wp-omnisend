@@ -50,7 +50,7 @@ add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 class Omnisend_Core_Bootstrap {
 	public static function load(): void {
 		self::load_react();
-        // we enable cron every minute only for short period of time (after connection) to sync WP users to Omnisend after sync cron is disabled
+		// Cron every minute only for short period of time (after connection) to sync WP users to Omnisend. After sync cron is disabled.
 		add_filter( 'cron_schedules', array( 'Omnisend_Core_Bootstrap', 'cron_schedules' ) ); //phpcs:ignore WordPress.WP.CronInterval.CronSchedulesInterval
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
 		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );

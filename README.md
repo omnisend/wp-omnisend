@@ -85,7 +85,7 @@ Here is how you can get Contact information.
 
 ```php
 $client = \Omnisend\SDK\V1\Omnisend::get_client( 'integration name', 'integration version' );
-$response = $this->client->get_contact_by_email( $user_email );
+$response = $client->get_contact_by_email( $user_email );
 $email_consent_status = $response->get_contact()->get_email_status();
 $phone_number = $response->get_contact()->get_phone();
 ```
@@ -117,7 +117,7 @@ You can send contact identifiers and if contact exists, then event will be attri
 If data provided is invalid or contact creation fails, then
 
 ```php
-$response = $client->create_contact($contact)
+$response = $client->create_contact( $contact )
 ```
 
 Will return `CreateContactResponse`. Depending on your integration logic you should handle the error i.e
@@ -132,14 +132,14 @@ Will return `CreateContactResponse`. Depending on your integration logic you sho
 If data provided is invalid or sending customer event fails, then
 
 ```php
-$response = $client->send_customer_event($event);
+$response = $client->send_customer_event( $event );
 ```
 
 Will return `SendCustomerEventResponse`. Depending on your integration logic you should handle the error i.e
 
 ```php
     if ( $response->get_wp_error()->has_errors() ) {
-        error_log( 'Error in after_submission: ' . $response->get_wp_error()->get_error_message());
+        error_log( 'Error in after_submission: ' . $response->get_wp_error()->get_error_message() );
         return;
     }
 ```
