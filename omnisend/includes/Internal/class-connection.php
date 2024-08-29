@@ -41,17 +41,16 @@ class Connection {
 		require_once __DIR__ . '/../../view/landing-page.html';
 	}
 
-	public static function resolve_wordpress_settings() {
+	public static function resolve_wordpress_settings(): void {
 		$url      = 'https://api.omnisend.com/wordpress/settings?version=' . OMNISEND_CORE_PLUGIN_VERSION;
 		$response = wp_remote_get( $url );
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );
 
-			$data = json_decode( $body );
-			// ignore phpcs warning as it's response from API.
-			if ( ! empty( $data->exploreOmnisendLink ) ) { // phpcs:ignore 
-				self::$landing_page_url = $data->exploreOmnisendLink; // phpcs:ignore 
+			$data = json_decode( $body, true );
+			if ( ! empty( $data['exploreOmnisendLink'] ) ) {
+				self::$landing_page_url = $data['exploreOmnisendLink'];
 			}
 		}
 	}
@@ -83,7 +82,6 @@ class Connection {
 		return is_array( $arr ) ? $arr : array();
 	}
 
-
 	public static function show_connected_store_view(): bool {
 		return Options::is_store_connected();
 	}
@@ -91,8 +89,10 @@ class Connection {
 	public static function show_connection_view(): bool {
 		$connected = Options::is_store_connected();
 
-		// phpcs:disable WordPress.Security.NonceVerification
 		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'show_connection_form' ) ) {
+				die( 'nonce verification failed: ' . __FILE__ . ':' . __LINE__ );
+			}
 			return true;
 		}
 
@@ -205,7 +205,7 @@ class Connection {
 				return rest_ensure_response(
 					array(
 						'success' => false,
-						'error'   => 'The connection didn’t go through. Check if the API key is correct.',
+						'error'   => 'The connection did not go through. Check if the API key is correct.',
 					)
 				);
 			}
@@ -244,15 +244,13 @@ class Connection {
 				);
 			}
 
-			if ( ! $connected ) {
-				Options::disconnect(); // Store was not connected, clean up.
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => 'The connection didn’t go through. Check if the API key is correct.',
-					)
-				);
-			}
+			Options::disconnect(); // Store was not connected, clean up.
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'error'   => 'The connection did not go through. Check if the API key is correct.',
+				)
+			);
 		}
 
 		return rest_ensure_response(
