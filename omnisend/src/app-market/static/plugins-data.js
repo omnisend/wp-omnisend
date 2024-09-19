@@ -49,6 +49,24 @@ export const PLUGINS_DATA = {
 			url: 'https://wordpress.org/plugins/omnisend-for-formidable-forms-add-on/'
 		},
 		{
+			slug: 'omnisend-for-lifterlms-add-on',
+			name: 'Omnisend for LifterLMS Add-On',
+			created_by: 'Omnisend',
+			category_id: 'other',
+			description: 'Sends contacts, new subscribers, their courses & membership levels to Omnisend automatically from LifterLMS',
+			logo: 'https://appmarket-media.omnisend.com/LifterLMS/LifterLMS-image-75382fa163.png',
+			url: 'https://wordpress.org/plugins/omnisend-for-lifterlms-add-on/'
+		},
+		{
+			slug: 'omnisend-for-paid-memberships-pro-add-on',
+			name: 'Omnisend for Paid Memberships Pro Add-On',
+			created_by: 'Omnisend',
+			category_id: 'other',
+			description: 'Sends contacts, new subscribers & their membership levels to Omnisend automatically from Paid Memberships Pro',
+			logo: 'https://appmarket-media.omnisend.com/Paid_Memberships_Pro/Paid_Memberships_Pro-image-ed8ee53588.png',
+			url: 'https://wordpress.org/plugins/omnisend-for-paid-memberships-pro-add-on/'
+		},
+		{
 			slug: 'wp-fusion-lite',
 			name: 'WP Fusion Lite – Marketing Automation and CRM Integration for WordPress',
 			created_by: 'Very Good Plugins',
