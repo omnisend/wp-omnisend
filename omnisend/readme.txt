@@ -125,6 +125,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 * Add new plugins
 
+= 1.5.3 =
+
+* Add new plugins
+
 = 1.5.2 =
 
 * Minor improvements suggested by linter
