@@ -77,7 +77,7 @@ Easily add Omnisend’s signup forms to your WordPress website and automatically
 
 Omnisend’s plugin is easy to use, with a user-friendly interface that allows you to create and manage email campaigns in minutes. With Omnisend’s plugin, you can take your email marketing to the next level.
 
-* Discover apps that’ll help you turn more visitors into loyal subscribers.
+Discover apps that’ll help you turn more visitors into loyal subscribers.
 * Ninja forms
 * Gravity forms
 * Formidable forms
