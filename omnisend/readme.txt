@@ -123,6 +123,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.5.3 =
 
+* Fix phone parsing
+
+= 1.5.3 =
+
 * Add new plugins
 
 = 1.5.2 =
