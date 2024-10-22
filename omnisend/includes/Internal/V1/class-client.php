@@ -154,6 +154,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 	public function get_contact_by_email( string $email ): GetContactResponse {
 		$error = new WP_Error();
+		$email = str_replace( '+', '%2b', $email );
 
 		$response = wp_remote_get(
 			OMNISEND_CORE_API_V5 . '/contacts?email=' . $email,
