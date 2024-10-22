@@ -562,7 +562,7 @@ class Contact {
 	 * @return string
 	 */
 	public function get_phone(): string {
-		return $this->phone ?: '';
+		return is_string( $this->phone ) ? $this->phone : '';
 	}
 
 	/**
