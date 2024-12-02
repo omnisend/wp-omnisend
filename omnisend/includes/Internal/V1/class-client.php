@@ -7,6 +7,7 @@
 
 namespace Omnisend\Internal\V1;
 
+use Omnisend\SDK\V1\ConnectStoreResponse;
 use Omnisend\SDK\V1\Contact;
 use Omnisend\SDK\V1\CreateContactResponse;
 use Omnisend\SDK\V1\Event;
@@ -242,6 +243,59 @@ class Client implements \Omnisend\SDK\V1\Client {
 		return new SendCustomerEventResponse( $error );
 	}
 
+	public function connect_store( $platform ): ConnectStoreResponse {
+		$error = new WP_Error();
+		$error->merge_from( $this->check_setup() );
+
+		if ( ! is_string( $platform ) ) {
+			$error->add( 'platform', 'Platform must be string' );
+		}
+
+		$brand_id = $this->get_brand_id();
+		if ( ! $brand_id ) {
+			$error->add( 'brand_id', 'Unable to get brand_id. Please reinstall Omnisend plugin.' );
+		}
+
+		if ( $error->has_errors() ) {
+			return new ConnectStoreResponse( $error );
+		}
+
+		$data = array(
+			'website'         => site_url(),
+			'platform'        => $platform,
+			'version'         => $this->plugin_version,
+			'phpVersion'      => phpversion(),
+			'platformVersion' => get_bloginfo( 'version' ),
+		);
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V3 . '/accounts/' . $brand_id,
+			array(
+				'body'    => wp_json_encode( $data ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new ConnectStoreResponse( $response );
+		}
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+		}
+
+		return new ConnectStoreResponse( $error );
+	}
+
 	/**
 	 * @return WP_Error
 	 */
@@ -261,5 +315,14 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		return $error;
+	}
+
+	private function get_brand_id(): string {
+		$list = explode( '-', $this->api_key );
+		if ( count( $list ) != 2 ) {
+			return '';
+		}
+
+		return $list[0];
 	}
 }
