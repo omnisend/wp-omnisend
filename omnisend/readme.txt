@@ -121,6 +121,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 1.6.0 =
+
+* Add ability to connect PHP store to Omnisend
+
 = v1.6.0 =
 
 * Add ability to connect PHP store to Omnisend
