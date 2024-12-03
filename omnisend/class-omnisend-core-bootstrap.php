@@ -2,7 +2,7 @@
 /**
  * Omnisend plugin
  *
- * Plugin Name: Omnisend Email Marketing
+ * Plugin Name: Newsletters, Email Marketing, SMS and Popups by Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
  * Version: 1.6.1
  * Author: Omnisend
@@ -85,7 +85,7 @@ class Omnisend_Core_Bootstrap {
 
 	public static function omnisend_app_market() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'omnisend' ) );
 		}
 
 		?>
