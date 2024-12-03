@@ -50,4 +50,14 @@ interface Client {
 	 * @return GetContactResponse
 	 */
 	public function get_contact_by_email( string $email ): GetContactResponse;
+
+	/**
+	 * Connect PHP based ecommerce platform/store to Omnisend.
+	 *
+	 * @param string $platform must be whitelisted (for additional added value) in Omnisend.
+	 * If you're integrating new platform please contact product-team-integrations@omnisend.com
+	 *
+	 * @return ConnectStoreResponse
+	 */
+	public function connect_store( string $platform ): ConnectStoreResponse;
 }
