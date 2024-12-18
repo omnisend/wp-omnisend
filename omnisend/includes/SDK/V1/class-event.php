@@ -17,7 +17,6 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  *
  */
 class Event {
-
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_version    = null;
@@ -32,8 +31,8 @@ class Event {
 	 * @return WP_Error
 	 */
 	public function validate(): WP_Error {
-
 		$error = new WP_Error();
+
 		if ( $this->contact instanceof Contact ) {
 			$error->merge_from( $this->contact->validate() );
 		}
@@ -52,12 +51,6 @@ class Event {
 
 		if ( $this->origin != null && ! is_string( $this->origin ) ) {
 			$error->add( 'origin', 'Not a string.' );
-		}
-
-		foreach ( $this->properties as $name ) {
-			if ( ! is_string( $name ) ) {
-				$error->add( $name, 'Not a string.' );
-			}
 		}
 
 		return $error;
@@ -109,6 +102,17 @@ class Event {
 		}
 
 		$this->properties[ $key ] = $value;
+	}
+
+	/**
+	 * Sets properties
+	 *
+	 * @param array $properties
+	 *
+	 * @return void
+	 */
+	public function set_properties( $properties ): void {
+		$this->properties = $properties;
 	}
 
 	/**
