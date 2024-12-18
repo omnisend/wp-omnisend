@@ -15,6 +15,8 @@ use Omnisend\SDK\V1\SendCustomerEventResponse;
 use Omnisend\SDK\V1\SaveContactResponse;
 use Omnisend\SDK\V1\GetContactResponse;
 use Omnisend\Internal\ContactFactory;
+use Omnisend\SDK\V1\SendBatchResponse;
+use Omnisend\SDK\V1\Batch;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
@@ -294,6 +296,57 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		return new ConnectStoreResponse( $error );
+	}
+
+	public function send_batch( Batch $batch ): SendBatchResponse {
+		$error = new WP_Error();
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new SendBatchResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/batches',
+			array(
+				'body'    => wp_json_encode( $batch->to_array() ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new SendBatchResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new SendBatchResponse( $error );
+		}
+
+		$arr = json_decode( $body, true );
+
+		if ( empty( $arr['batchID'] ) ) {
+			$error->add( 'omnisend_api', 'batchID not found in response.' );
+
+			return new SendBatchResponse( $error );
+		}
+
+		return new SendBatchResponse( $error, $arr['batchID'] );
 	}
 
 	/**
