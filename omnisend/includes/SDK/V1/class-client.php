@@ -60,4 +60,12 @@ interface Client {
 	 * @return ConnectStoreResponse
 	 */
 	public function connect_store( string $platform ): ConnectStoreResponse;
+
+	/**
+	 * Send batch of categories/products/events/contacts
+	 * @param Batch $batch
+	 *
+	 * @return SendBatchResponse
+	 */
+	public function send_batch( Batch $batch ): SendBatchResponse;
 }
