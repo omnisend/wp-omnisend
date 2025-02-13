@@ -17,11 +17,11 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  *
  */
 class Event {
-
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_version    = null;
 	private $origin           = null;
+	private $event_properties = null;
 	private array $properties = array();
 
 	/**
@@ -32,13 +32,13 @@ class Event {
 	 * @return WP_Error
 	 */
 	public function validate(): WP_Error {
-
 		$error = new WP_Error();
+
 		if ( $this->contact instanceof Contact ) {
 			$error->merge_from( $this->contact->validate() );
 		}
 
-		if ( $this->event_name == null ) {
+		if ( $this->event_name == null && empty( $this->event_properties ) ) {
 			$error->add( 'event_name', 'Is required.' );
 		}
 
@@ -54,9 +54,22 @@ class Event {
 			$error->add( 'origin', 'Not a string.' );
 		}
 
-		foreach ( $this->properties as $name ) {
-			if ( ! is_string( $name ) ) {
-				$error->add( $name, 'Not a string.' );
+		if ( $this->event_properties === null ) {
+			foreach ( $this->properties as $name ) {
+				if ( ! is_string( $name ) ) {
+					$error->add( $name, 'Not a string.' );
+				}
+			}
+		}
+
+		if ( $this->event_properties ) {
+			if ( ! method_exists( $this->event_properties, 'validate' ) ||
+				! method_exists( $this->event_properties, 'to_array' ) ||
+				! defined( get_class( $this->event_properties ) . '::EVENT_NAME' )
+			) {
+				$error->add( 'event_properties', 'event property is not Omnisend/SDK/V1/Events property' );
+			} else {
+				$error->merge_from( $this->event_properties->validate() );
 			}
 		}
 
@@ -65,6 +78,8 @@ class Event {
 
 	/**
 	 * Sets event name.
+	 *
+	 * Not needed, if using Omnisend/SDK/V1/Events for "set_event_properties" method
 	 *
 	 * @param $event_name
 	 *
@@ -98,6 +113,10 @@ class Event {
 	}
 
 	/**
+	 * Add properties
+	 *
+	 * Alternative method for "set_event_properties". Should use this, if event is custom
+	 *
 	 * @param $key
 	 * @param $value
 	 *
@@ -109,6 +128,19 @@ class Event {
 		}
 
 		$this->properties[ $key ] = $value;
+	}
+
+	/**
+	 * Sets event properties
+	 *
+	 * Alternative method for "add_properties". Should use this, if event is from "Omnisend/SDK/V1/Events" namespace
+	 *
+	 * @param $event_properties
+	 *
+	 * @return void
+	 */
+	public function set_event_properties( $event_properties ): void {
+		$this->event_properties = $event_properties;
 	}
 
 	/**
@@ -153,8 +185,13 @@ class Event {
 			$arr['eventVersion'] = $this->event_version;
 		}
 
-		if ( $this->properties ) {
+		if ( $this->properties && $this->event_properties === null ) {
 			$arr['properties'] = $this->properties;
+		}
+
+		if ( $this->event_properties ) {
+			$arr['properties'] = $this->event_properties->to_array();
+			$arr['eventName']  = $this->event_properties::EVENT_NAME;
 		}
 
 		return $arr;

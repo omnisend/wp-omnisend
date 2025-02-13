@@ -60,4 +60,84 @@ interface Client {
 	 * @return ConnectStoreResponse
 	 */
 	public function connect_store( string $platform ): ConnectStoreResponse;
+
+	/**
+	 * Send batch of categories/products/events/contacts
+	 * @param Batch $batch
+	 *
+	 * @return SendBatchResponse
+	 */
+	public function send_batch( $batch ): SendBatchResponse;
+
+	/**
+	 * Create category in Omnisend
+	 *
+	 * @param Category $category
+	 *
+	 * @return CreateCategoryResponse
+	 */
+	public function create_category( $category ): CreateCategoryResponse;
+
+	/**
+	 * Update category in Omnisend
+	 *
+	 * @param Category $category
+	 *
+	 * @return CreateCategoryResponse
+	 */
+	public function update_category( $category ): UpdateCategoryResponse;
+
+	/**
+	 * Get category by ID in Omnisend
+	 *
+	 * @param string $category_id
+	 *
+	 * @return GetCategoryResponse
+	 */
+	public function get_category_by_id( string $category_id ): GetCategoryResponse;
+
+	/**
+	 * Delete category by ID in Omnisend
+	 *
+	 * @param string $category_id
+	 *
+	 * @return DeleteCategoryResponse
+	 */
+	public function delete_category_by_id( string $category_id ): DeleteCategoryResponse;
+
+	/**
+	 * Create product in Omnisend
+	 *
+	 * @param Product $product
+	 *
+	 * @return CreateProductResponse
+	 */
+	public function create_product( $product ): CreateProductResponse;
+
+	/**
+	 * Replace product in Omnisend
+	 *
+	 * @param Product $product
+	 *
+	 * @return CreateProductResponse
+	 */
+	public function replace_product( $product ): CreateProductResponse;
+
+	/**
+	 * Get product in Omnisend by product ID
+	 *
+	 * @param string $product_id
+	 *
+	 * @return GetProductResponse
+	 */
+	public function get_product_by_id( string $product_id ): GetProductResponse;
+
+	/**
+	 * Delete product by ID
+	 *
+	 * @param string $product_id
+	 *
+	 * @return DeleteProductResponse
+	 */
+	public function delete_product_by_id( string $product_id ): DeleteProductResponse;
 }
