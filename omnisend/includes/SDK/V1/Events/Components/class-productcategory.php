@@ -15,10 +15,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  * Omnisend ProductCategory class. It should be used with Omnisend LineItem.
  */
 class ProductCategory {
-	private const REQUIRED_PROPERTIES = array(
-		'id',
-	);
-	private const STRING_PROPERTIES   = array(
+	private const STRING_PROPERTIES = array(
 		'id',
 		'title',
 	);
@@ -108,12 +105,12 @@ class ProductCategory {
 	 * @return WP_Error
 	 */
 	private function validate_properties( WP_Error $error ): WP_Error {
-		foreach ( $this as $property_key => $property_value ) {
-			if ( in_array( $property_key, self::REQUIRED_PROPERTIES ) && empty( $property_value ) ) {
-				$error->add( $property_key, $property_key . ' is a required property' );
-			}
+		if ( $this->title === null && $this->id === null ) {
+			$error->add( 'required_properties', 'Title or ID should not be empty' );
+		}
 
-			if ( ! empty( $property_value ) && in_array( $property_key, self::STRING_PROPERTIES ) && ! is_string( $property_value ) ) {
+		foreach ( $this as $property_key => $property_value ) {
+			if ( $property_value !== null && in_array( $property_key, self::STRING_PROPERTIES ) && ! is_string( $property_value ) ) {
 				$error->add( $property_key, $property_key . ' must be a string' );
 			}
 		}

@@ -15,10 +15,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  * Omnisend Tracking class. It should be used with Omnisend Events.
  */
 class Tracking {
-	private const REQUIRED_PROPERTIES = array(
-		'courier_url',
-	);
-	private const STRING_PROPERTIES   = array(
+	private const STRING_PROPERTIES = array(
 		'code',
 		'courier_title',
 		'courier_url',
@@ -129,10 +126,11 @@ class Tracking {
 	 * @return WP_Error
 	 */
 	private function validate_properties( WP_Error $error ): WP_Error {
+		if ( $this->code === null && $this->courier_title === null && $this->courier_url === null ) {
+			$error->add( 'required_properties', 'Tracking code or courier title or courier URL should not be empty' );
+		}
+
 		foreach ( $this as $property_key => $property_value ) {
-			if ( in_array( $property_key, self::REQUIRED_PROPERTIES ) && $property_value === null ) {
-				$error->add( $property_key, $property_key . ' is a required property' );
-			}
 			if ( in_array( $property_key, self::STRING_PROPERTIES ) && $property_value !== null && ! is_string( $property_value ) ) {
 				$error->add( $property_key, $property_key . ' must be a string' );
 			}

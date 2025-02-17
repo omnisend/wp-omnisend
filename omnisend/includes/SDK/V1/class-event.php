@@ -79,20 +79,20 @@ class Event {
 	/**
 	 * Sets event name.
 	 *
-	 * Not needed, if using Omnisend/SDK/V1/Events for "set_event_properties" method
+	 * Not needed, if using Omnisend/SDK/V1/Events for "set_recommended_event" method
 	 *
-	 * @param $event_name
+	 * @param string $event_name
 	 *
 	 * @return void
 	 */
-	public function set_event_name( $event_name ): void {
+	public function set_custom_event_name( $event_name ): void {
 		$this->event_name = $event_name;
 	}
 
 	/**
 	 * Sets event version.
 	 *
-	 * @param $event_version
+	 * @param string $event_version
 	 *
 	 * @return void
 	 */
@@ -100,11 +100,10 @@ class Event {
 		$this->event_version = $event_version;
 	}
 
-
 	/**
 	 * Sets event origin. Default value is api
 	 *
-	 * @param $origin
+	 * @param string $origin
 	 *
 	 * @return void
 	 */
@@ -113,16 +112,33 @@ class Event {
 	}
 
 	/**
-	 * Add properties
+	 * Sets custom event properties
 	 *
-	 * Alternative method for "set_event_properties". Should use this, if event is custom
+	 * Alternative method for "add_custom_event_property".
 	 *
-	 * @param $key
-	 * @param $value
+	 * If event is not custom, use "set_recommended_event" method
+	 *
+	 * @param array $properties
 	 *
 	 * @return void
 	 */
-	public function add_properties( $key, $value ): void {
+	public function set_custom_event_properties( $properties ): void {
+		$this->properties = $properties;
+	}
+
+	/**
+	 * Adds custom event property
+	 *
+	 * Alternative method for "set_custom_event_properties".
+	 *
+	 * If event is not custom, use "set_recommended_event" method
+	 *
+	 * @param string $key
+	 * @param string $value
+	 *
+	 * @return void
+	 */
+	public function add_custom_event_property( $key, $value ): void {
 		if ( $key == '' ) {
 			return;
 		}
@@ -131,22 +147,22 @@ class Event {
 	}
 
 	/**
-	 * Sets event properties
+	 * Sets recommended event properties
 	 *
-	 * Alternative method for "add_properties". Should use this, if event is from "Omnisend/SDK/V1/Events" namespace
+	 * Should use this, if event is from "Omnisend/SDK/V1/Events" namespace
 	 *
-	 * @param $event_properties
+	 * @param Object $event
 	 *
 	 * @return void
 	 */
-	public function set_event_properties( $event_properties ): void {
-		$this->event_properties = $event_properties;
+	public function set_recommended_event( $event ): void {
+		$this->event_properties = $event;
 	}
 
 	/**
 	 * Sets contact.
 	 *
-	 * @param $contact
+	 * @param Contact $contact
 	 *
 	 * @return void
 	 */

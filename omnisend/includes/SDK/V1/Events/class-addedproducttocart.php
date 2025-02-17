@@ -13,9 +13,9 @@ use Omnisend\SDK\V1\Events\Components\LineItem;
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
 /**
- * Omnisend AddToCart class. It should be used with Omnisend Event.
+ * Omnisend AddedProductToCart class. It should be used with Omnisend Event.
  */
-class AddToCart {
+class AddedProductToCart {
 	public const EVENT_NAME = 'added product to cart';
 
 	private const REQUIRED_PROPERTIES = array(
@@ -132,9 +132,9 @@ class AddToCart {
 	}
 
 	/**
-	 * Converts AddToCart to array.
+	 * Converts AddedProductToCart to array.
 	 *
-	 * If AddToCart is valid it will be transformed to array that can be used with event
+	 * If AddedProductToCart is valid it will be transformed to array that can be used with event
 	 *
 	 * @return void
 	 */

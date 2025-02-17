@@ -11,7 +11,7 @@ use Omnisend\SDK\V1\Product;
 
 class ProductFactory {
 	/**
-	 * Create a product object from an array of category data.
+	 * Create a product object from an array of Product data.
 	 *
 	 * @param array $product_data
 	 *
