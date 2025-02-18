@@ -105,7 +105,7 @@ class ProductCategory {
 	 * @return WP_Error
 	 */
 	private function validate_properties( WP_Error $error ): WP_Error {
-		if ( $this->title === null && $this->id === null ) {
+		if ( empty( $this->title ) && empty( $this->id ) ) {
 			$error->add( 'required_properties', 'Title or ID should not be empty' );
 		}
 

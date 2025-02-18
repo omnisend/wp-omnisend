@@ -126,7 +126,7 @@ class Tracking {
 	 * @return WP_Error
 	 */
 	private function validate_properties( WP_Error $error ): WP_Error {
-		if ( $this->code === null && $this->courier_title === null && $this->courier_url === null ) {
+		if ( empty( $this->code ) && empty( $this->courier_title ) && empty( $this->courier_url ) ) {
 			$error->add( 'required_properties', 'Tracking code or courier title or courier URL should not be empty' );
 		}
 
