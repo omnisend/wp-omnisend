@@ -123,6 +123,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.6.3 =
 
+* Update description, screenshots
+
+= 1.6.3 =
+
 * Update description and screenshots
 
 = 1.6.2 =
