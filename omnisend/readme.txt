@@ -123,7 +123,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.7.0 =
 
-* Update SDK functionality
+* SDK changes including:
+* Enable to send batch request
+* Enable to interaction with products (including categories)
 
 = 1.6.3 =
 
