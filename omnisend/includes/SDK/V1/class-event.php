@@ -17,11 +17,11 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
  *
  */
 class Event {
-
 	private $contact          = null;
 	private $event_name       = null;
 	private $event_version    = null;
 	private $origin           = null;
+	private $event_properties = null;
 	private array $properties = array();
 
 	/**
@@ -32,13 +32,13 @@ class Event {
 	 * @return WP_Error
 	 */
 	public function validate(): WP_Error {
-
 		$error = new WP_Error();
+
 		if ( $this->contact instanceof Contact ) {
 			$error->merge_from( $this->contact->validate() );
 		}
 
-		if ( $this->event_name == null ) {
+		if ( $this->event_name == null && empty( $this->event_properties ) ) {
 			$error->add( 'event_name', 'Is required.' );
 		}
 
@@ -54,9 +54,22 @@ class Event {
 			$error->add( 'origin', 'Not a string.' );
 		}
 
-		foreach ( $this->properties as $name ) {
-			if ( ! is_string( $name ) ) {
-				$error->add( $name, 'Not a string.' );
+		if ( $this->event_properties === null ) {
+			foreach ( $this->properties as $name ) {
+				if ( ! is_string( $name ) ) {
+					$error->add( $name, 'Not a string.' );
+				}
+			}
+		}
+
+		if ( $this->event_properties ) {
+			if ( ! method_exists( $this->event_properties, 'validate' ) ||
+				! method_exists( $this->event_properties, 'to_array' ) ||
+				! defined( get_class( $this->event_properties ) . '::EVENT_NAME' )
+			) {
+				$error->add( 'event_properties', 'event property is not Omnisend/SDK/V1/Events property' );
+			} else {
+				$error->merge_from( $this->event_properties->validate() );
 			}
 		}
 
@@ -66,18 +79,20 @@ class Event {
 	/**
 	 * Sets event name.
 	 *
-	 * @param $event_name
+	 * Not needed, if using Omnisend/SDK/V1/Events for "set_recommended_event" method
+	 *
+	 * @param string $event_name
 	 *
 	 * @return void
 	 */
-	public function set_event_name( $event_name ): void {
+	public function set_custom_event_name( $event_name ): void {
 		$this->event_name = $event_name;
 	}
 
 	/**
 	 * Sets event version.
 	 *
-	 * @param $event_version
+	 * @param string $event_version
 	 *
 	 * @return void
 	 */
@@ -85,11 +100,10 @@ class Event {
 		$this->event_version = $event_version;
 	}
 
-
 	/**
 	 * Sets event origin. Default value is api
 	 *
-	 * @param $origin
+	 * @param string $origin
 	 *
 	 * @return void
 	 */
@@ -98,12 +112,33 @@ class Event {
 	}
 
 	/**
-	 * @param $key
-	 * @param $value
+	 * Sets custom event properties
+	 *
+	 * Alternative method for "add_custom_event_property".
+	 *
+	 * If event is not custom, use "set_recommended_event" method
+	 *
+	 * @param array $properties
 	 *
 	 * @return void
 	 */
-	public function add_properties( $key, $value ): void {
+	public function set_custom_event_properties( $properties ): void {
+		$this->properties = $properties;
+	}
+
+	/**
+	 * Adds custom event property
+	 *
+	 * Alternative method for "set_custom_event_properties".
+	 *
+	 * If event is not custom, use "set_recommended_event" method
+	 *
+	 * @param string $key
+	 * @param string $value
+	 *
+	 * @return void
+	 */
+	public function add_custom_event_property( $key, $value ): void {
 		if ( $key == '' ) {
 			return;
 		}
@@ -112,9 +147,22 @@ class Event {
 	}
 
 	/**
+	 * Sets recommended event properties
+	 *
+	 * Should use this, if event is from "Omnisend/SDK/V1/Events" namespace
+	 *
+	 * @param Object $event
+	 *
+	 * @return void
+	 */
+	public function set_recommended_event( $event ): void {
+		$this->event_properties = $event;
+	}
+
+	/**
 	 * Sets contact.
 	 *
-	 * @param $contact
+	 * @param Contact $contact
 	 *
 	 * @return void
 	 */
@@ -153,8 +201,13 @@ class Event {
 			$arr['eventVersion'] = $this->event_version;
 		}
 
-		if ( $this->properties ) {
+		if ( $this->properties && $this->event_properties === null ) {
 			$arr['properties'] = $this->properties;
+		}
+
+		if ( $this->event_properties ) {
+			$arr['properties'] = $this->event_properties->to_array();
+			$arr['eventName']  = $this->event_properties::EVENT_NAME;
 		}
 
 		return $arr;

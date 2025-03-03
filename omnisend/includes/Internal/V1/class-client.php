@@ -13,8 +13,21 @@ use Omnisend\SDK\V1\CreateContactResponse;
 use Omnisend\SDK\V1\Event;
 use Omnisend\SDK\V1\SendCustomerEventResponse;
 use Omnisend\SDK\V1\SaveContactResponse;
+use Omnisend\SDK\V1\CreateCategoryResponse;
+use Omnisend\SDK\V1\UpdateCategoryResponse;
+use Omnisend\SDK\V1\DeleteCategoryResponse;
+use Omnisend\SDK\V1\DeleteProductResponse;
+use Omnisend\SDK\V1\CreateProductResponse;
 use Omnisend\SDK\V1\GetContactResponse;
+use Omnisend\SDK\V1\GetCategoryResponse;
+use Omnisend\SDK\V1\GetProductResponse;
 use Omnisend\Internal\ContactFactory;
+use Omnisend\Internal\CategoryFactory;
+use Omnisend\Internal\ProductFactory;
+use Omnisend\SDK\V1\SendBatchResponse;
+use Omnisend\SDK\V1\Batch;
+use Omnisend\SDK\V1\Category;
+use Omnisend\SDK\V1\Product;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
@@ -294,6 +307,479 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		return new ConnectStoreResponse( $error );
+	}
+
+	public function send_batch( $batch ): SendBatchResponse {
+		$error = new WP_Error();
+		$error->merge_from( $this->check_setup() );
+
+		if ( $batch instanceof Batch ) {
+			$error->merge_from( $batch->validate() );
+		} else {
+			$error->add( 'batch', 'batch is not an instance of Omnisend/SDK/V1/Batch' );
+		}
+
+		if ( $error->has_errors() ) {
+			return new SendBatchResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/batches',
+			array(
+				'body'    => wp_json_encode( $batch->to_array() ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new SendBatchResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new SendBatchResponse( $error );
+		}
+
+		$arr = json_decode( $body, true );
+
+		if ( empty( $arr['batchID'] ) ) {
+			$error->add( 'omnisend_api', 'batchID not found in response.' );
+
+			return new SendBatchResponse( $error );
+		}
+
+		return new SendBatchResponse( $error, $arr['batchID'] );
+	}
+
+	public function get_category_by_id( string $category_id ): GetCategoryResponse {
+		$error = new WP_Error();
+
+		$response = wp_remote_get(
+			OMNISEND_CORE_API_V5 . '/product-categories/' . $category_id,
+			array(
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new GetCategoryResponse( $error );
+		}
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new GetCategoryResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new GetCategoryResponse( $error );
+		}
+
+		$category_data = json_decode( $body, true );
+
+		if ( empty( $category_data['categoryID'] ) ) {
+			$error->add( 'omnisend_api', 'categoryID not found in response.' );
+
+			return new GetCategoryResponse( $error );
+		}
+
+		$category = CategoryFactory::create_category( $category_data );
+
+		return new GetCategoryResponse( $error, $category );
+	}
+
+	public function get_product_by_id( string $product_id ): GetProductResponse {
+		$error = new WP_Error();
+
+		$response = wp_remote_get(
+			OMNISEND_CORE_API_V5 . '/products/' . $product_id,
+			array(
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new GetProductResponse( $error );
+		}
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new GetProductResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new GetProductResponse( $error );
+		}
+
+		$product_data = json_decode( $body, true );
+
+		if ( empty( $product_data['id'] ) ) {
+			$error->add( 'omnisend_api', 'productID not found in response.' );
+
+			return new GetProductResponse( $error );
+		}
+
+		$product = ProductFactory::create_product( $product_data );
+
+		return new GetProductResponse( $error, $product );
+	}
+
+	public function create_category( $category ): CreateCategoryResponse {
+		$error = new WP_Error();
+
+		if ( $category instanceof Category ) {
+			$error->merge_from( $category->validate() );
+		} else {
+			$error->add( 'category', 'Category is not instance of Omnisend\SDK\V1\Category.' );
+		}
+
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new CreateCategoryResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/product-categories',
+			array(
+				'body'    => wp_json_encode( $category->to_array() ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new CreateCategoryResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new CreateCategoryResponse( $error );
+		}
+
+		$arr = json_decode( $body, true );
+
+		if ( empty( $arr['categoryID'] ) ) {
+			$error->add( 'omnisend_api', 'categoryID not found in response.' );
+
+			return new CreateCategoryResponse( $error );
+		}
+
+		return new CreateCategoryResponse( $error, $arr['categoryID'] );
+	}
+
+	public function update_category( $category ): UpdateCategoryResponse {
+		$error = new WP_Error();
+
+		if ( $category instanceof Category ) {
+			$error->merge_from( $category->validate() );
+		} else {
+			$error->add( 'category', 'Category is not instance of Omnisend\SDK\V1\Category.' );
+		}
+
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new UpdateCategoryResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/product-categories/' . $category->get_category_id(),
+			array(
+				'method'  => 'PATCH',
+				'body'    => wp_json_encode( $category->to_array_for_update() ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new UpdateCategoryResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new UpdateCategoryResponse( $error );
+		}
+
+		$arr = json_decode( $body, true );
+
+		if ( empty( $arr['categoryID'] ) ) {
+			$error->add( 'omnisend_api', 'categoryID not found in response.' );
+
+			return new UpdateCategoryResponse( $error );
+		}
+
+		return new UpdateCategoryResponse( $error, $arr['categoryID'] );
+	}
+
+	public function delete_category_by_id( string $category_id ): DeleteCategoryResponse {
+		$error = new WP_Error();
+
+		if ( empty( $category_id ) ) {
+			$error->add( 'category', 'Provided ID should not be empty' );
+		}
+
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new DeleteCategoryResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/product-categories/' . $category_id,
+			array(
+				'method'  => 'DELETE',
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new DeleteCategoryResponse( $error );
+		}
+
+		return new DeleteCategoryResponse( $error, true );
+	}
+
+	public function create_product( $product ): CreateProductResponse {
+		$error = new WP_Error();
+
+		if ( $product instanceof Product ) {
+			$error->merge_from( $product->validate() );
+		} else {
+			$error->add( 'Product', 'Product is not instance of Omnisend\SDK\V1\Product.' );
+		}
+
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new CreateProductResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/products',
+			array(
+				'body'    => wp_json_encode( $product->to_array() ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new CreateProductResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new CreateProductResponse( $error );
+		}
+
+		$arr = json_decode( $body, true );
+
+		if ( empty( $arr['id'] ) ) {
+			$error->add( 'omnisend_api', 'productID not found in response.' );
+
+			return new CreateProductResponse( $error );
+		}
+
+		return new CreateProductResponse( $error, $arr['id'] );
+	}
+
+	public function replace_product( $product ): CreateProductResponse {
+		$error = new WP_Error();
+
+		if ( $product instanceof Product ) {
+			$error->merge_from( $product->validate() );
+		} else {
+			$error->add( 'product', 'Product is not instance of Omnisend\SDK\V1\Product.' );
+		}
+
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new CreateProductResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/products/' . $product->get_id(),
+			array(
+				'method'  => 'PUT',
+				'body'    => wp_json_encode( $product->to_array() ),
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new CreateProductResponse( $error );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( ! $body ) {
+			$error->add( 'omnisend_api', 'empty response' );
+
+			return new CreateProductResponse( $error );
+		}
+
+		$arr = json_decode( $body, true );
+
+		if ( empty( $arr['id'] ) ) {
+			$error->add( 'omnisend_api', 'productID not found in response.' );
+
+			return new CreateProductResponse( $error );
+		}
+
+		return new CreateProductResponse( $error, $arr['id'] );
+	}
+
+	public function delete_product_by_id( string $product_id ): DeleteProductResponse {
+		$error = new WP_Error();
+
+		if ( empty( $product_id ) ) {
+			$error->add( 'product', 'Provided ID should not be empty' );
+		}
+
+		$error->merge_from( $this->check_setup() );
+
+		if ( $error->has_errors() ) {
+			return new DeleteProductResponse( $error );
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V5 . '/products/' . $product_id,
+			array(
+				'method'  => 'DELETE',
+				'headers' => array(
+					'Content-Type'          => 'application/json',
+					'X-API-Key'             => $this->api_key,
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				),
+				'timeout' => 10,
+			)
+		);
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+
+		if ( $http_code >= 400 ) {
+			$body    = wp_remote_retrieve_body( $response );
+			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
+			$error->add( 'omnisend_api', $err_msg );
+
+			return new DeleteProductResponse( $error );
+		}
+
+		return new DeleteProductResponse( $error, true );
 	}
 
 	/**
