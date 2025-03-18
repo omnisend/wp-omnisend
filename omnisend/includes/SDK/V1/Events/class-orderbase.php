@@ -8,6 +8,7 @@
 namespace Omnisend\SDK\V1\Events;
 
 use WP_Error;
+use Omnisend\Internal\Utils;
 use Omnisend\SDK\V1\Events\Components\Address;
 use Omnisend\SDK\V1\Events\Components\LineItem;
 use Omnisend\SDK\V1\Events\Components\Tracking;
@@ -353,7 +354,7 @@ abstract class OrderBase {
 			}
 
 			if ( $property_value !== null && in_array( $property_key, self::NUMERIC_PROPERTIES ) && ! is_numeric( $property_value ) ) {
-				$error->add( $property_key, $property_key . ' must be a string' );
+				$error->add( $property_key, $property_key . ' must be a number' );
 			}
 		}
 
@@ -362,7 +363,7 @@ abstract class OrderBase {
 		}
 
 		if ( $this->tracking !== null && ! $this->tracking instanceof Tracking ) {
-			$error->add( 'Tracking', 'Tracking is not ant instance of Tracking' );
+			$error->add( 'Tracking', 'Tracking is not an instance of Tracking' );
 		}
 
 		if ( $this->address !== null && ! $this->address instanceof Address ) {
@@ -371,7 +372,7 @@ abstract class OrderBase {
 
 		foreach ( $this->discounts as $discount ) {
 			if ( ! $discount instanceof Discount ) {
-				$error->add( 'discounts', 'Discount is not an instance of Discounts' );
+				$error->add( 'discounts', 'Discount is not an instance of Discount' );
 			}
 		}
 
@@ -405,6 +406,12 @@ abstract class OrderBase {
 	private function validate_values( WP_Error $error ): WP_Error {
 		foreach ( $this->discounts as $discount ) {
 			$error->merge_from( $discount->validate() );
+		}
+
+		foreach ( $this->tags as $tag ) {
+			if ( ! Utils::is_valid_tag( $tag ) ) {
+				$error->add( 'tags', 'Tag "' . $tag . '" is not valid. Please cleanup it before setting it.' );
+			}
 		}
 
 		foreach ( $this->line_items as $item ) {
