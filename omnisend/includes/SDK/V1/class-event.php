@@ -19,6 +19,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 class Event {
 	private $contact          = null;
 	private $event_name       = null;
+	private $event_time       = null;
 	private $event_version    = null;
 	private $origin           = null;
 	private $event_properties = null;
@@ -52,6 +53,10 @@ class Event {
 
 		if ( $this->origin != null && ! is_string( $this->origin ) ) {
 			$error->add( 'origin', 'Not a string.' );
+		}
+
+		if ( $this->event_time !== null && ! is_string( $this->event_time ) ) {
+			$error->add( 'event_time', 'Not a string.' );
 		}
 
 		if ( $this->event_properties === null ) {
@@ -109,6 +114,17 @@ class Event {
 	 */
 	public function set_origin( $origin ): void {
 		$this->origin = $origin;
+	}
+
+	/**
+	 * Sets event time, format: "Y-m-d\Th:i:s\Z"
+	 *
+	 * @param string $event_time
+	 *
+	 * @return void
+	 */
+	public function set_event_time( $event_time ): void {
+		$this->event_time = $event_time;
 	}
 
 	/**
@@ -203,6 +219,10 @@ class Event {
 
 		if ( $this->properties && $this->event_properties === null ) {
 			$arr['properties'] = $this->properties;
+		}
+
+		if ( $this->event_time ) {
+			$arr['eventTime'] = $this->event_time;
 		}
 
 		if ( $this->event_properties ) {

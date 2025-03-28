@@ -1,7 +1,7 @@
 <?php
 namespace Omnisend\SDK\V1;
 
-use Omnisend\Internal\V1\ContactFactory;
+use Omnisend\Internal\ContactFactory;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 

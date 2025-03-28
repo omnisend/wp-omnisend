@@ -107,7 +107,7 @@ class ProductVariant {
 	 *
 	 * @return void
 	 */
-	public function set_descripton( $description ): void {
+	public function set_description( $description ): void {
 		$this->description = $description;
 	}
 
@@ -219,7 +219,7 @@ class ProductVariant {
 		);
 
 		if ( ! empty( $this->default_image_url ) ) {
-			$arr['default_image_url'] = $this->default_image_url;
+			$arr['defaultImageUrl'] = $this->default_image_url;
 		}
 
 		if ( ! empty( $this->description ) ) {

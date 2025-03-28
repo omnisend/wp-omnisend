@@ -28,6 +28,7 @@ use Omnisend\SDK\V1\SendBatchResponse;
 use Omnisend\SDK\V1\Batch;
 use Omnisend\SDK\V1\Category;
 use Omnisend\SDK\V1\Product;
+use Omnisend\SDK\V1\Options;
 use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
@@ -37,16 +38,19 @@ class Client implements \Omnisend\SDK\V1\Client {
 	private string $api_key;
 	private string $plugin_name;
 	private string $plugin_version;
+	private ?Options $options;
 
 	/**
 	 * @param string $plugin_name
 	 * @param string $plugin_version
 	 * @param string $api_key
+	 * @param Options|null $options
 	 */
-	public function __construct( string $api_key, string $plugin_name, string $plugin_version ) {
+	public function __construct( string $api_key, string $plugin_name, string $plugin_version, ?Options $options ) {
 		$this->api_key        = $api_key;
 		$this->plugin_name    = substr( $plugin_name, 0, 50 );
 		$this->plugin_version = substr( $plugin_version, 0, 50 );
+		$this->options        = $options;
 	}
 
 
@@ -65,15 +69,26 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new CreateContactResponse( '', $error );
 		}
 
+		$options = array();
+
+		if ( $this->options !== null ) {
+			$options = array(
+				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
+			);
+		}
+
 		$response = wp_remote_post(
 			OMNISEND_CORE_API_V5 . '/contacts',
 			array(
 				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				'headers' => array_merge(
+					array(
+						'Content-Type'          => 'application/json',
+						'X-API-Key'             => $this->api_key,
+						'X-INTEGRATION-NAME'    => $this->plugin_name,
+						'X-INTEGRATION-VERSION' => $this->plugin_version,
+					),
+					$options
 				),
 				'timeout' => 10,
 			)
@@ -122,17 +137,28 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SaveContactResponse( '', $error );
 		}
 
+		$options = array();
+
+		if ( $this->options !== null ) {
+			$options = array(
+				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
+			);
+		}
+
 		$contract_array = $contact->to_array();
 
 		$response = wp_remote_post(
 			OMNISEND_CORE_API_V5 . '/contacts',
 			array(
 				'body'    => wp_json_encode( $contract_array ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				'headers' => array_merge(
+					array(
+						'Content-Type'          => 'application/json',
+						'X-API-Key'             => $this->api_key,
+						'X-INTEGRATION-NAME'    => $this->plugin_name,
+						'X-INTEGRATION-VERSION' => $this->plugin_version,
+					),
+					$options
 				),
 				'timeout' => 10,
 			)

@@ -186,7 +186,7 @@ class StartedCheckout {
 			}
 
 			if ( $property_value !== null && in_array( $property_key, self::NUMERIC_PROPERTIES ) && ! is_numeric( $property_value ) ) {
-				$error->add( $property_key, $property_key . ' must be a string' );
+				$error->add( $property_key, $property_key . ' must be a number' );
 			}
 		}
 
