@@ -186,6 +186,11 @@ A second `phpcbf` script can be run to automatically correct coding standard vio
 
 ## Testing
 
+Tools needed:
+
+-   php (7.4 or greater);
+-   composer (can be installed as described in https://getcomposer.org/doc/00-intro.md#installation-linux-unix-macos);
+
 Run test locally:
 
 ```shell
