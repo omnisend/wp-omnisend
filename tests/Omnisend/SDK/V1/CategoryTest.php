@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1;
 use Omnisend\Internal\CategoryFactory;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../dependencies/dependencies.php' );
+
 final class CategoryTest extends TestCase
 {
     public function test_factory_fails_with_undefined_data(): void {

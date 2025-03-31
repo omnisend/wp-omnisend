@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1\Events;
 use Omnisend\SDK\V1\Events\Components\Tracking;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../../dependencies/dependencies.php' );
+
 final class TrackingTest extends TestCase
 {
     public function test_tracking_fails_with_undefined_data(): void {

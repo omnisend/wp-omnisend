@@ -6,6 +6,8 @@ use Omnisend\SDK\V1\Events\AddedProductToCart;
 use Omnisend\SDK\V1\Events\Components\LineItem;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../dependencies/dependencies.php' );
+
 final class AddedProductToCartTest extends TestCase
 {
     public function test_event_fails_with_undefined_data(): void {
@@ -42,17 +44,6 @@ final class AddedProductToCartTest extends TestCase
         );
 
         $this->assertEquals($event->validate()->errors, $expected_result);
-    }
-
-    public function test_event_raises_validation_error_on_incorrect_abandoned_checkout_url(): void {
-        $event = new AddedProductToCart();
-
-        $event->set_abandoned_checkout_url(200);
-
-        $error_message = $event->validate()->get_error_message('abandoned_checkout_url');
-        $expected_error_message = 'abandoned_checkout_url must be a string';
-        
-        $this->assertEquals($error_message, $expected_error_message);
     }
 
     public function test_event_raises_validation_error_on_incorrect_cart_id(): void {

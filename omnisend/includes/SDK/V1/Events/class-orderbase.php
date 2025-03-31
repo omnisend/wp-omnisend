@@ -363,22 +363,22 @@ abstract class OrderBase {
 		}
 
 		if ( $this->tracking !== null && ! $this->tracking instanceof Tracking ) {
-			$error->add( 'Tracking', 'Tracking is not an instance of Tracking' );
+			$error->add( 'tracking', 'Tracking is not an instance of Omnisend\SDK\V1\Events\Components\Tracking' );
 		}
 
 		if ( $this->address !== null && ! $this->address instanceof Address ) {
-			$error->add( 'Address', 'Address is not an instance of Address' );
+			$error->add( 'address', 'Address is not an instance of Omnisend\SDK\V1\Events\Components\Address' );
 		}
 
 		foreach ( $this->discounts as $discount ) {
 			if ( ! $discount instanceof Discount ) {
-				$error->add( 'discounts', 'Discount is not an instance of Discount' );
+				$error->add( 'discounts', 'Discount is not an instance of Omnisend\SDK\V1\Events\Components\Discount' );
 			}
 		}
 
 		foreach ( $this->line_items as $item ) {
 			if ( ! $item instanceof LineItem ) {
-				$error->add( 'line_item', 'Line Item is not an instance of LineItem' );
+				$error->add( 'line_item', 'Line Item is not an instance of Omnisend\SDK\V1\Events\Components\LineItem' );
 			}
 		}
 

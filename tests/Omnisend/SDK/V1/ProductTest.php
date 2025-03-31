@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1;
 use Omnisend\Internal\ProductFactory;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../dependencies/dependencies.php' );
+
 final class ProductTest extends TestCase
 {
     public function test_factory_fails_with_undefined_data(): void {
@@ -221,7 +223,7 @@ final class ProductTest extends TestCase
                 'https://omnisend.com/media/products/product-6.png',
                 'https://omnisend.com/media/products/product-7.png'
             ),
-            'createdAt' => date('Y-m-d\Th:i:s\Z', '1641328224'),
+            'createdAt' => date('Y-m-d\Th:i:s\Z', strtotime('2022-01-04 08:30:24')),
             'currency' => 'USD',
             'defaultImageUrl' => 'https://omnisend.com/media/products/product.png',
             'description' => 'My description',

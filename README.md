@@ -189,7 +189,7 @@ A second `phpcbf` script can be run to automatically correct coding standard vio
 Run test locally:
 
 ```shell
-./vendor/bin/phpunit
+./vendor/bin/phpunit tests/Omnisend/
 ```
 
 ## Plugin release

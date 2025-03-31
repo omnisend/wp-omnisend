@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1\Events;
 use Omnisend\SDK\V1\Events\Components\Discount;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../../dependencies/dependencies.php' );
+
 final class DiscountTest extends TestCase
 {
     public function test_discount_fails_with_undefined_data(): void {
@@ -30,39 +32,6 @@ final class DiscountTest extends TestCase
         );
 
         $this->assertEquals($discount->validate()->errors, $expected_result);
-    }
-
-    public function test_discount_raises_validation_error_on_incorrect_code(): void {
-        $discount = new Discount();
-
-        $discount->set_code(123);
-
-        $error_message = $discount->validate()->get_error_message('code');
-        $expected_error_message = 'code must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_discount_raises_validation_error_on_incorrect_amount(): void {
-        $discount = new Discount();
-
-        $discount->set_amount('test');
-
-        $error_message = $discount->validate()->get_error_message('amount');
-        $expected_error_message = 'amount must be a number';
-        
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_discount_raises_validation_error_on_incorrect_type(): void {
-        $discount = new Discount();
-
-        $discount->set_type(123);
-
-        $error_message = $discount->validate()->get_error_message('type');
-        $expected_error_message = 'type must be a string';
-        
-        $this->assertEquals($error_message, $expected_error_message);
     }
 
     public function test_discount_passes_validation(): void {

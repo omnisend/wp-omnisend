@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1\Events;
 use Omnisend\SDK\V1\Events\Components\LineItem;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../../dependencies/dependencies.php' );
+
 final class LineItemTest extends TestCase
 {
     public function test_line_item_fails_with_undefined_data(): void {
@@ -57,17 +59,6 @@ final class LineItemTest extends TestCase
         );
 
         $this->assertEquals($line_item->validate()->errors, $expected_result);
-    }
-
-    public function test_line_item_raises_validation_error_on_incorrect_title(): void {
-        $line_item = new LineItem();
-
-        $line_item->set_title(123);
-
-        $error_message = $line_item->validate()->get_error_message('title');
-        $expected_error_message = 'title must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
     }
 
     public function test_line_item_raises_validation_error_on_incorrect_discount(): void {

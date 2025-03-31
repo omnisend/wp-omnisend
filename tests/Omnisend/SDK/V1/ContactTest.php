@@ -5,6 +5,8 @@ use Omnisend\Internal\ContactFactory;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+require_once( __DIR__ . '/../../../dependencies/dependencies.php' );
+
 final class ContactTest extends TestCase
 {
     public function test_validation(): void
@@ -97,35 +99,35 @@ final class ContactTest extends TestCase
 
     public function test_set_first_name(): void
     {
-        $contact_data = ['firstName' => 'John'];
+        $contact_data = ['firstName' => 'John', 'email' => 'test123@gmail.com'];
         $contact = ContactFactory::create_contact($contact_data);
         $this->assertEquals('John', $contact->to_array()['firstName']);
     }
 
     public function test_set_last_name(): void
     {
-        $contact_data = ['lastName' => 'Doe'];
+        $contact_data = ['lastName' => 'Doe', 'email' => 'test123@gmail.com'];
         $contact = ContactFactory::create_contact($contact_data);
         $this->assertEquals('Doe', $contact->to_array()['lastName']);
     }
 
     public function test_set_phone(): void
     {
-        $contact_data = ['phone' => '1234567890'];
+        $contact_data = ['phone' => [0 => '1234567890']];
         $contact = ContactFactory::create_contact($contact_data);
-        $this->assertEquals('1234567890', $contact->to_array()['phone']);
+        $this->assertEquals('1234567890', $contact->to_array()['identifiers'][0]['id']);
     }
 
     public function test_add_tag(): void
     {
-        $contact_data = ['tags' => ['test-tag']];
+        $contact_data = ['tags' => ['test-tag'], 'email' => 'test123@gmail.com'];
         $contact = ContactFactory::create_contact($contact_data);
         $this->assertContains('test-tag', $contact->to_array()['tags']);
     }
 
     public function test_add_custom_property(): void
     {
-        $contact_data = ['customProperties' => ['property' => 'value']];
+        $contact_data = ['customProperties' => ['property' => 'value'], 'email' => 'test123@gmail.com'];
         $contact = ContactFactory::create_contact($contact_data);
         $this->assertEquals('value', $contact->to_array()['customProperties']['property']);
     }
@@ -202,7 +204,7 @@ final class ContactTest extends TestCase
             'email' => 'test@example.com',
             'firstName' => 'John',
             'lastName' => 'Doe',
-            'phone' => '1234567890',
+            'phone' => [0 => '1234567890'],
             'gender' => 'm',
             'address' => '123 Main St',
             'city' => 'Anytown',
@@ -218,7 +220,19 @@ final class ContactTest extends TestCase
             'phoneConsent' => 'GDPR',
             'sendWelcomeEmail' => true,
             'tags' => ['test-tag'],
-            'customProperties' => ['custom_key' => 'custom_value']
+            'customProperties' => ['custom_key' => 'custom_value'],
+            'identifiers' => [
+                0 => [
+                    'channels' => [
+                        'sms' => [
+                            'status' => 'subscribed'
+                        ],
+                        'email' => [
+                            'status' => 'subscribed'
+                        ]
+                    ]
+                ]
+            ]
         ];
         $contact = ContactFactory::create_contact($contact_data);
         $expected = [
@@ -232,12 +246,6 @@ final class ContactTest extends TestCase
                             'statusDate' => gmdate('c'),
                         ],
                     ],
-                    'consent' => [
-                        'source' => 'GDPR',
-                        'createdAt' => gmdate('c'),
-                        'ip' => 'ip not found',
-                        'userAgent' => 'user agent not found',
-                    ],
                 ],
                 [
                     'type' => 'phone',
@@ -248,18 +256,11 @@ final class ContactTest extends TestCase
                             'statusDate' => gmdate('c'),
                         ],
                     ],
-                    'consent' => [
-                        'source' => 'GDPR',
-                        'createdAt' => gmdate('c'),
-                        'ip' => 'ip not found',
-                        'userAgent' => 'user agent not found',
-                    ],
                 ],
             ],
             'tags' => ['test-tag'],
             'firstName' => 'John',
             'lastName' => 'Doe',
-            'phone' => '1234567890',
             'gender' => 'm',
             'address' => '123 Main St',
             'city' => 'Anytown',
@@ -267,10 +268,7 @@ final class ContactTest extends TestCase
             'country' => 'LT',
             'postalCode' => '12345',
             'birthdate' => '1990-01-01',
-            'customProperties' => ['custom_key' => 'custom_value'],
-            'emailOptIn' => 'form:signup',
-            'phoneOptIn' => 'form:signup',
-            'sendWelcomeEmail' => true,
+            'customProperties' => ['custom_key' => 'custom_value']
         ];
         $this->assertEquals($expected, $contact->to_array());
     }

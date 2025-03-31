@@ -10,6 +10,8 @@ use Omnisend\SDK\V1\Events\Components\Tracking;
 use Omnisend\SDK\V1\Events\Components\LineItem;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../dependencies/dependencies.php' );
+
 final class PlacedOrderTest extends TestCase
 {
     public function test_event_fails_with_undefined_data(): void {
@@ -71,10 +73,10 @@ final class PlacedOrderTest extends TestCase
             'total_price' => array('total_price must be a number'),
             'total_tax' => array('total_tax must be a number'),
             'subtotal_tax_included' => array('Subtotal tax included should be a boolean'),
-            'Tracking' => array('Tracking is not an instance of Tracking'),
-            'Address' => array('Address is not an instance of Address'),
-            'discounts' => array('Discount is not an instance of Discount'),
-            'line_item' => array('Line Item is not an instance of LineItem')
+            'tracking' => array('Tracking is not an instance of Omnisend\SDK\V1\Events\Components\Tracking'),
+            'address' => array('Address is not an instance of Omnisend\SDK\V1\Events\Components\Address'),
+            'discounts' => array('Discount is not an instance of Omnisend\SDK\V1\Events\Components\Discount'),
+            'line_item' => array('Line Item is not an instance of Omnisend\SDK\V1\Events\Components\LineItem')
         );
 
         $this->assertEquals($event->validate()->errors, $expected_result);
@@ -85,8 +87,8 @@ final class PlacedOrderTest extends TestCase
 
         $event->set_address('omnisend');
 
-        $error_message = $event->validate()->get_error_message('Address');
-        $expected_error_message = 'Address is not an instance of Address';
+        $error_message = $event->validate()->get_error_message('address');
+        $expected_error_message = 'Address is not an instance of Omnisend\SDK\V1\Events\Components\Address';
 
         $this->assertEquals($error_message, $expected_error_message);
     }
@@ -118,8 +120,8 @@ final class PlacedOrderTest extends TestCase
         
         $event->set_tracking('test');
 
-        $error_message = $event->validate()->get_error_message('Tracking');
-        $expected_error_message = 'Tracking is not an instance of Tracking';
+        $error_message = $event->validate()->get_error_message('tracking');
+        $expected_error_message = 'Tracking is not an instance of Omnisend\SDK\V1\Events\Components\Tracking';
 
         $this->assertEquals($error_message, $expected_error_message);
     }
@@ -132,7 +134,7 @@ final class PlacedOrderTest extends TestCase
         $event->add_discount(null);
 
         $error_message = $event->validate()->get_error_message('discounts');
-        $expected_error_message = 'Discount is not an instance of Discount';
+        $expected_error_message = 'Discount is not an instance of Omnisend\SDK\V1\Events\Components\Discount';
 
         $this->assertEquals($error_message, $expected_error_message);
     }
@@ -144,7 +146,7 @@ final class PlacedOrderTest extends TestCase
         $event->add_line_item(array('id' => 123, 'title' => 'my product'));
 
         $error_message = $event->validate()->get_error_message('line_item');
-        $expected_error_message = 'Line Item is not an instance of LineItem';
+        $expected_error_message = 'Line Item is not an instance of Omnisend\SDK\V1\Events\Components\LineItem';
 
         $this->assertEquals($error_message, $expected_error_message);
     }
@@ -178,7 +180,7 @@ final class PlacedOrderTest extends TestCase
         $tracking = new Tracking();
         $discount = new Discount();
 
-        $event->set_created_at(date('Y-m-d\Th:i:s\Z', '1641328224'));
+        $event->set_created_at(date('Y-m-d\Th:i:s\Z', strtotime('2023-01-01 13:34:27')));
         $event->set_currency('EUR');
         $event->set_fulfillment_status('delivered');
         $event->set_note('Can courier leave my order by the porch ?');
@@ -260,7 +262,7 @@ final class PlacedOrderTest extends TestCase
         $line_item->set_variant_image_url('https://omnisend.com/images/image-2.png');
         $line_item->set_variant_title('my product - extended warranty 3 years');
 
-        $event->set_created_at(date('Y-m-d\Th:i:s\Z', '1641328224'));
+        $event->set_created_at(date('Y-m-d\Th:i:s\Z', strtotime('2022-01-04 08:30:24')));
         $event->set_currency('EUR');
         $event->set_fulfillment_status('delivered');
         $event->set_note('Can courier leave my order by the porch ?');

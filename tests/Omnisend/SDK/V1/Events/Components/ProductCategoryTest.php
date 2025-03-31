@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1\Events;
 use Omnisend\SDK\V1\Events\Components\ProductCategory;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../../dependencies/dependencies.php' );
+
 final class ProductCategoryTest extends TestCase
 {
     public function test_category_fails_with_undefined_data(): void {

@@ -6,6 +6,8 @@ use Omnisend\SDK\V1\Events\StartedCheckout;
 use Omnisend\SDK\V1\Events\Components\LineItem;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../dependencies/dependencies.php' );
+
 final class StartedCheckoutTest extends TestCase
 {
     public function test_event_fails_with_undefined_data(): void {

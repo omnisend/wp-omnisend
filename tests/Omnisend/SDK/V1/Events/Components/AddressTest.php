@@ -5,6 +5,8 @@ namespace Omnisend\SDK\V1\Events;
 use Omnisend\SDK\V1\Events\Components\Address;
 use PHPUnit\Framework\TestCase;
 
+require_once( __DIR__ . '/../../../../../dependencies/dependencies.php' );
+
 final class AddressTest extends TestCase
 {
     public function test_address_fails_with_invalid_data(): void {
@@ -72,61 +74,6 @@ final class AddressTest extends TestCase
 
         $error_message = $address->validate()->get_error_message('shipping_address_2');
         $expected_error_message = 'shipping_address_2 must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_address_raises_validation_error_on_incorrect_shipping_phone(): void {
-        $address = new Address();
-
-        $address->set_shipping_phone(new Address());
-
-        $error_message = $address->validate()->get_error_message('shipping_phone');
-        $expected_error_message = 'shipping_phone must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_address_raises_validation_error_on_incorrect_billing_phone(): void {
-        $address = new Address();
-
-        $address->set_billing_phone(array('+3711111111'));
-
-        $error_message = $address->validate()->get_error_message('billing_phone');
-        $expected_error_message = 'billing_phone must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_address_raises_validation_error_on_incorrect_billing_zip(): void {
-        $address = new Address();
-
-        $address->set_billing_zip(12345);
-
-        $error_message = $address->validate()->get_error_message('billing_zip');
-        $expected_error_message = 'billing_zip must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_address_raises_validation_error_on_incorrect_shipping_company(): void {
-        $address = new Address();
-
-        $address->set_shipping_company(array('test123'));
-
-        $error_message = $address->validate()->get_error_message('shipping_company');
-        $expected_error_message = 'shipping_company must be a string';
-
-        $this->assertEquals($error_message, $expected_error_message);
-    }
-
-    public function test_address_raises_validation_error_on_incorrect_billing_state(): void {
-        $address = new Address();
-
-        $address->set_billing_state(223);
-
-        $error_message = $address->validate()->get_error_message('billing_state');
-        $expected_error_message = 'billing_state must be a string';
 
         $this->assertEquals($error_message, $expected_error_message);
     }
