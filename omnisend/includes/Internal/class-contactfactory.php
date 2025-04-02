@@ -56,7 +56,7 @@ class ContactFactory {
 			$contact->set_postal_code( $contact_data['postalCode'] );
 		}
 
-		if ( isset( $contact_data['phone'] ) ) {
+		if ( isset( $contact_data['phone'] ) && isset( $contact_data['phone'][0] ) ) {
 			$contact->set_phone( $contact_data['phone'][0] );
 		}
 

@@ -81,7 +81,7 @@ class ProductFactory {
 			$product->set_status( $product_data['status'] );
 		}
 
-		if ( isset( $product_data['tags'] ) ) {
+		if ( isset( $product_data['tags'] ) && is_array( $product_data['tags'] ) ) {
 			foreach ( $product_data['tags'] as $tag ) {
 				$product->add_tag( $tag );
 			}
