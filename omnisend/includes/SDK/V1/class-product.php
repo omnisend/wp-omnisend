@@ -166,7 +166,7 @@ class Product {
 	 *
 	 * @return void
 	 */
-	public function set_descripton( $description ): void {
+	public function set_description( $description ): void {
 		$this->description = $description;
 	}
 

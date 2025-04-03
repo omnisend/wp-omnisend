@@ -370,7 +370,7 @@ class LineItem {
 			$arr['productSKU'] = $this->sku;
 		}
 
-		if ( $this->tags !== null ) {
+		if ( ! empty( $this->tags ) ) {
 			$arr['productTags'] = array_values( array_unique( $this->tags ) );
 		}
 

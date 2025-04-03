@@ -8,6 +8,7 @@
 namespace Omnisend\Internal;
 
 use Omnisend\SDK\V1\Product;
+use Omnisend\SDK\V1\ProductVariant;
 
 class ProductFactory {
 	/**
@@ -28,7 +29,25 @@ class ProductFactory {
 
 		if ( isset( $product_data['variants'] ) && is_array( $product_data['variants'] ) ) {
 			foreach ( $product_data['variants'] as $variant ) {
-				$product->add_variant( $variant );
+				$omnisend_variant = new ProductVariant();
+
+				$omnisend_variant->set_id( isset( $variant['id'] ) ? $variant['id'] : null );
+				$omnisend_variant->set_title( isset( $variant['title'] ) ? $variant['title'] : null );
+				$omnisend_variant->set_sku( isset( $variant['sku'] ) ? $variant['sku'] : null );
+				$omnisend_variant->set_price( isset( $variant['price'] ) ? $variant['price'] : null );
+				$omnisend_variant->set_strike_through_price( isset( $variant['strikeThroughPrice'] ) ? $variant['strikeThroughPrice'] : null );
+				$omnisend_variant->set_url( isset( $variant['url'] ) ? $variant['url'] : null );
+				$omnisend_variant->set_status( isset( $variant['status'] ) ? $variant['status'] : null );
+				$omnisend_variant->set_description( isset( $variant['description'] ) ? $variant['description'] : null );
+				$omnisend_variant->set_default_image_url( isset( $variant['defaultImageUrl'] ) ? $variant['defaultImageUrl'] : null );
+
+				if ( isset( $variant['images'] ) && ! empty( $variant['images'] ) ) {
+					foreach ( $variant['images'] as $image ) {
+						$omnisend_variant->add_image( $image );
+					}
+				}
+
+				$product->add_variant( $omnisend_variant );
 			}
 		}
 
@@ -51,7 +70,7 @@ class ProductFactory {
 		}
 
 		if ( isset( $product_data['description'] ) ) {
-			$product->set_descripton( $product_data['description'] );
+			$product->set_description( $product_data['description'] );
 		}
 
 		if ( isset( $product_data['id'] ) ) {
@@ -62,7 +81,7 @@ class ProductFactory {
 			$product->set_status( $product_data['status'] );
 		}
 
-		if ( isset( $product_data['tags'] ) ) {
+		if ( isset( $product_data['tags'] ) && is_array( $product_data['tags'] ) ) {
 			foreach ( $product_data['tags'] as $tag ) {
 				$product->add_tag( $tag );
 			}

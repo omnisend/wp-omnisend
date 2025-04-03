@@ -1,0 +1,1 @@
+This directory is not for unit tests, file: "dependencies.php" should be included in each new test from this directory as prerequisite to run tests.

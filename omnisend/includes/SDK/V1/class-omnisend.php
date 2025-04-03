@@ -7,7 +7,9 @@
 
 namespace Omnisend\SDK\V1;
 
+use Omnisend\Internal\V1\Client;
 use Omnisend\Internal\Options;
+use Omnisend\SDK\V1\Options as UserOptions;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
@@ -18,10 +20,14 @@ class Omnisend {
 	 *
 	 * @param $plugin string plugin using client name
 	 * @param $version string plugin using client version
+	 * @param $options null|UserOptions plugin using additional options
+	 *
 	 * @return Client
 	 */
-	public static function get_client( $plugin, $version ): Client {
-		return new \Omnisend\Internal\V1\Client( Options::get_api_key(), (string) $plugin, (string) $version );
+	public static function get_client( $plugin, $version, $options = null ): Client {
+		$options = ( $options instanceof UserOptions ) ? $options : null;
+
+		return new Client( Options::get_api_key(), (string) $plugin, (string) $version, $options );
 	}
 
 	/**
