@@ -15,7 +15,7 @@ class Connection {
 
 	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
 
-    private static $signup_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
+	private static $signup_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -33,9 +33,9 @@ class Connection {
 
 		if ( self::show_connection_view() ) {
 			?>
-            <script type="text/javascript">
-                var plugin_omnisend_signup_url = "<?php echo self::get_signup_url(); ?>";
-            </script>
+			<script type="text/javascript">
+				var plugin_omnisend_signup_url = "<?php echo esc_url_raw( self::get_signup_url() ); ?>";
+			</script>
 			<div id="omnisend-connection"></div>
 			<?php
 			return;
@@ -178,14 +178,14 @@ class Connection {
 	 * @return string
 	 */
 	private static function get_signup_url(): string {
-		$filtered_url = apply_filters('omnisend_signup_wp_link', self::$signup_url);
-		$naked_domain = self::get_naked_domain($filtered_url);
+		$filtered_url = apply_filters( 'omnisend_signup_wp_link', self::$signup_url );
+		$naked_domain = self::get_naked_domain( $filtered_url );
 
-		if ($naked_domain === 'omnisend.com') {
+		if ( $naked_domain === 'omnisend.com' ) {
 			return $filtered_url;
 		}
 
-		return self::$signup_url;
+		return esc_url( self::$signup_url );
 	}
 
 	/**
@@ -194,19 +194,19 @@ class Connection {
 	 * @param string $url The URL to extract the naked domain from.
 	 * @return string|null The naked domain or null if not found.
 	 */
-	private static function get_naked_domain(string $url): ?string {
-		$parsed_url = parse_url($url);
+	private static function get_naked_domain( string $url ): ?string {
+		$parsed_url = wp_parse_url( $url );
 
-		if (isset($parsed_url['host'])) {
-			$host = $parsed_url['host'];
-			$parts = explode('.', $host);
-			$part_count = count($parts);
+		if ( isset( $parsed_url['host'] ) ) {
+			$host       = $parsed_url['host'];
+			$parts      = explode( '.', $host );
+			$part_count = count( $parts );
 
-			if ($part_count <= 1) {
+			if ( $part_count <= 1 ) {
 				return $host;
 			}
 
-			return $parts[$part_count - 2] . '.' . $parts[$part_count - 1];
+			return $parts[ $part_count - 2 ] . '.' . $parts[ $part_count - 1 ];
 		}
 
 		return null;
