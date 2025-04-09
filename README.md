@@ -203,3 +203,11 @@ To release a new version of the plugin, you need to:
 
 1. Run action `Update Plugin Version` - this will create PR with version upgrade in all necessary places.
 2. Get PR approved and merge it. Actions `Create GH Release` and `Release plugin` will be triggered automatically on merge.
+
+## UI Changes
+
+Plugin uses React. If you want to make changes run following commands in "omnisend" directory:
+
+1. Install dependency `npm install`
+2. For local development `npm start`
+3. To release changes you need to build `npm run build`
