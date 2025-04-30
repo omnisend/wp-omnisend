@@ -23,8 +23,8 @@ class OAuthClient {
             'redirect_uris' => array(admin_url('admin.php?page=omnisend&oauth_callback=1')),
             'token_endpoint_auth_method' => 'client_secret_post',
             'grant_types' => array('authorization_code', 'refresh_token'),
-            'scope' => 'contacts events products',
-            'software_id' => 'omnisend',
+            'scope' => 'contacts.read contacts.write events.read events.write products.read products.write',
+            'software_id' => 'wordpress',
             'software_version' => OMNISEND_CORE_PLUGIN_VERSION
         );
 
@@ -64,7 +64,7 @@ class OAuthClient {
             'response_type' => 'code',
             'client_id' => $client_id,
             'redirect_uri' => $redirect_uri,
-            'scope' => 'contacts events products'
+            'scope' => 'contacts.read contacts.write events.read events.write products.read products.write'
         ));
     }
 
