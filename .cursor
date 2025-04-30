@@ -7,7 +7,7 @@
           "prefix": "Omnisend"
         },
         "class": {
-          "format": "PascalCase",
+          "format": ["PascalCase", "Snake_Pascal_Case"],
           "suffix": ""
         },
         "method": {
@@ -116,9 +116,9 @@
       "max_line_length": 100,
       "file_naming": {
         "php": {
-          "class": "class-{name}.php",
-          "interface": "interface-{name}.php",
-          "trait": "trait-{name}.php"
+          "class": ["class-{name}.php", "{name}.php"],
+          "interface": ["interface-{name}.php", "{name}.php"],
+          "trait": ["trait-{name}.php", "{name}.php"]
         },
         "js": {
           "component": "{name}.js",
