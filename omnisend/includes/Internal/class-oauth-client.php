@@ -74,7 +74,7 @@ class OAuthClient {
      * @param string $code
      * @return array|WP_Error
      */
-    public static function get_access_token($code) {
+    public static function get_access_token() {
         $token_endpoint = OMNISEND_CORE_API_V3 . '/oauth2/token';
         $client_id = Options::get_oauth_client_id();
         $client_secret = Options::get_oauth_client_secret();
@@ -108,7 +108,7 @@ class OAuthClient {
             ));
             return $body;
         }
-
+        //todo check code
         return new \WP_Error('token_failed', 'Failed to get access token');
     }
 
