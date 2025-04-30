@@ -16,12 +16,12 @@ class OAuthClient {
      * @return array|WP_Error
      */
     public static function register_client() {
-        $registration_endpoint = OMNISEND_CORE_API_V3 . '/oauth/register';
+        $registration_endpoint = OMNISEND_CORE_API_V3 . '/oauth2/register';
         
         $registration_data = array(
             'client_name' => 'WordPress Omnisend Plugin',
             'redirect_uris' => array(admin_url('admin.php?page=omnisend&oauth_callback=1')),
-            'token_endpoint_auth_method' => 'client_secret_basic',
+            'token_endpoint_auth_method' => 'client_secret_post',
             'grant_types' => array('authorization_code', 'refresh_token'),
             'scope' => 'contacts events products',
             'software_id' => 'omnisend',
@@ -60,7 +60,7 @@ class OAuthClient {
         $client_id = Options::get_oauth_client_id();
         $redirect_uri = urlencode(admin_url('admin.php?page=omnisend&oauth_callback=1'));
         
-        return OMNISEND_CORE_API_V3 . '/oauth/authorize?' . http_build_query(array(
+        return OMNISEND_CORE_API_V3 . '/oauth2/authorize?' . http_build_query(array(
             'response_type' => 'code',
             'client_id' => $client_id,
             'redirect_uri' => $redirect_uri,
@@ -75,19 +75,21 @@ class OAuthClient {
      * @return array|WP_Error
      */
     public static function get_access_token($code) {
-        $token_endpoint = OMNISEND_CORE_API_V3 . '/oauth/token';
+        $token_endpoint = OMNISEND_CORE_API_V3 . '/oauth2/token';
         $client_id = Options::get_oauth_client_id();
         $client_secret = Options::get_oauth_client_secret();
+        $redirect_uri = admin_url('admin.php?page=omnisend&oauth_callback=1');
         
         $response = wp_remote_post($token_endpoint, array(
             'headers' => array(
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret)
+                'Content-Type' => 'application/x-www-form-urlencoded'
             ),
             'body' => array(
+                'client_id' => $client_id,
+                'client_secret' => $client_secret,
                 'grant_type' => 'authorization_code',
                 'code' => $code,
-                'redirect_uri' => admin_url('admin.php?page=omnisend&oauth_callback=1')
+                'redirect_uri' => $redirect_uri
             ),
             'timeout' => 30
         ));
@@ -116,17 +118,18 @@ class OAuthClient {
      * @return array|WP_Error
      */
     public static function refresh_access_token() {
-        $token_endpoint = OMNISEND_CORE_API_V3 . '/oauth/token';
+        $token_endpoint = OMNISEND_CORE_API_V3 . '/oauth2/token';
         $client_id = Options::get_oauth_client_id();
         $client_secret = Options::get_oauth_client_secret();
         $refresh_token = Options::get_oauth_refresh_token();
         
         $response = wp_remote_post($token_endpoint, array(
             'headers' => array(
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret)
+                'Content-Type' => 'application/x-www-form-urlencoded'
             ),
             'body' => array(
+                'client_id' => $client_id,
+                'client_secret' => $client_secret,
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $refresh_token
             ),
