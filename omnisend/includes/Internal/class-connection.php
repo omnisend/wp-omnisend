@@ -119,7 +119,7 @@ class Connection {
 			'client_id' => Options::get_oauth_client_id(),
 			'redirect_uri' => self::get_oauth_callback_url(),
 			'state' => $state,
-			'scope' => 'read write'
+			'scope' => 'contacts.read contacts.write events.read events.write products.read products.write'
 		);
 
 		return self::$oauth_authorize_url . '?' . http_build_query($params);
