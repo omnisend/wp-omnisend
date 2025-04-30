@@ -1,0 +1,130 @@
+{
+  "rules": {
+    "php": {
+      "style": {
+        "namespace": {
+          "format": "PascalCase",
+          "prefix": "Omnisend"
+        },
+        "class": {
+          "format": "PascalCase",
+          "suffix": ""
+        },
+        "method": {
+          "format": "snake_case",
+          "static_prefix": "self::"
+        },
+        "constant": {
+          "format": "SCREAMING_SNAKE_CASE",
+          "prefix": "OMNISEND_"
+        },
+        "property": {
+          "format": "snake_case",
+          "private_prefix": ""
+        },
+        "parameter": {
+          "format": "snake_case"
+        },
+        "variable": {
+          "format": "snake_case"
+        }
+      },
+      "documentation": {
+        "required": true,
+        "format": "PHPDoc",
+        "class": {
+          "required": true,
+          "tags": ["@package"]
+        },
+        "method": {
+          "required": true,
+          "param_types": true,
+          "return_type": true
+        }
+      },
+      "structure": {
+        "namespace_declaration": "first_line",
+        "use_declarations": "after_namespace",
+        "constants": "before_properties",
+        "properties": "before_methods",
+        "methods": {
+          "order": [
+            "public_static",
+            "public",
+            "protected_static",
+            "protected",
+            "private_static",
+            "private"
+          ]
+        }
+      },
+      "security": {
+        "direct_access_check": {
+          "required": true,
+          "pattern": "defined( 'ABSPATH' ) || die( 'no direct access' );"
+        }
+      }
+    },
+    "javascript": {
+      "style": {
+        "component": {
+          "format": "PascalCase",
+          "suffix": ""
+        },
+        "function": {
+          "format": "camelCase"
+        },
+        "constant": {
+          "format": "SCREAMING_SNAKE_CASE"
+        },
+        "variable": {
+          "format": "camelCase"
+        },
+        "parameter": {
+          "format": "camelCase"
+        }
+      },
+      "imports": {
+        "order": [
+          "react",
+          "@wordpress/element",
+          "@wordpress/components",
+          "local_components",
+          "styles"
+        ],
+        "grouping": true
+      },
+      "components": {
+        "type": "functional",
+        "export": "default",
+        "props_destructuring": true
+      },
+      "state": {
+        "prefer_hooks": true,
+        "naming": {
+          "state": "camelCase",
+          "setter": "set{StateName}"
+        }
+      }
+    },
+    "general": {
+      "indentation": {
+        "style": "tab",
+        "size": 1
+      },
+      "line_ending": "lf",
+      "max_line_length": 100,
+      "file_naming": {
+        "php": {
+          "class": "class-{name}.php",
+          "interface": "interface-{name}.php",
+          "trait": "trait-{name}.php"
+        },
+        "js": {
+          "component": "{name}.js",
+          "util": "{name}.js"
+        }
+      }
+    }
+  }
+} 

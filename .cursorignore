@@ -1,0 +1,37 @@
+# Ignoruoti node_modules
+node_modules/
+
+# Ignoruoti build failus
+build/
+dist/
+
+# Ignoruoti vendor katalogą
+vendor/
+
+# Ignoruoti .git katalogą
+.git/
+
+# Ignoruoti IDE failus
+.idea/
+.vscode/
+
+# Ignoruoti laikinąsias failus
+*.log
+*.tmp
+*.temp
+
+# Ignoruoti konfigūracijos failus
+.env
+.env.*
+config.php
+
+# Ignoruoti dokumentacijos failus
+docs/
+*.md
+
+# Ignoruoti test failus
+tests/
+*.test.js
+*.spec.js
+*.test.php
+*.spec.php 
