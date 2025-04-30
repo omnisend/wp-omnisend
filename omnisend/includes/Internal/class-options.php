@@ -31,9 +31,7 @@ class Options {
 	private const OPTION_OAUTH_TOKEN_EXPIRY              = 'omni_send_oauth_token_expiry';
 
 	public static function get_api_key(): string {
-		$api_key = get_option( self::OPTION_API_KEY );
-
-		return is_string( $api_key ) ? $api_key : '';
+		return get_option( self::OPTION_API_KEY, '' );
 	}
 
 	public static function get_brand_id(): string {
@@ -43,10 +41,12 @@ class Options {
 	}
 
 	public static function set_api_key( $api_key ): bool {
-		if ( ! is_string( $api_key ) ) {
+		if ( empty( $api_key ) || ! self::is_api_key_fallback_allowed() ) {
 			return false;
 		}
 
+		// When setting API key, clear OAuth tokens
+		self::clear_oauth_tokens();
 		return update_option( self::OPTION_API_KEY, $api_key );
 	}
 
@@ -67,66 +67,60 @@ class Options {
 	}
 
 	public static function is_connected(): bool {
-		// Check OAuth first
-		if (self::has_valid_oauth_token()) {
-			return true;
-		}
-
-		// Fall back to API key check
-		return self::is_store_connected() && self::get_api_key();
+		return self::has_valid_oauth_token() || self::is_api_key_fallback_allowed();
 	}
 
 	// OAuth methods
 	public static function get_oauth_client_id(): string {
-		$client_id = get_option(self::OPTION_OAUTH_CLIENT_ID);
-		return is_string($client_id) ? $client_id : '';
+		return get_option( self::OPTION_OAUTH_CLIENT_ID, '' );
 	}
 
 	public static function get_oauth_client_secret(): string {
-		$client_secret = get_option(self::OPTION_OAUTH_CLIENT_SECRET);
-		return is_string($client_secret) ? $client_secret : '';
+		return get_option( self::OPTION_OAUTH_CLIENT_SECRET, '' );
 	}
 
 	public static function get_oauth_access_token(): string {
-		$access_token = get_option(self::OPTION_OAUTH_ACCESS_TOKEN);
-		return is_string($access_token) ? $access_token : '';
+		return get_option( self::OPTION_OAUTH_ACCESS_TOKEN, '' );
 	}
 
 	public static function get_oauth_refresh_token(): string {
-		$refresh_token = get_option(self::OPTION_OAUTH_REFRESH_TOKEN);
-		return is_string($refresh_token) ? $refresh_token : '';
+		return get_option( self::OPTION_OAUTH_REFRESH_TOKEN, '' );
 	}
 
 	public static function get_oauth_token_expiry(): int {
-		$expiry = get_option(self::OPTION_OAUTH_TOKEN_EXPIRY);
-		return is_numeric($expiry) ? intval($expiry) : 0;
+		return get_option( self::OPTION_OAUTH_TOKEN_EXPIRY, 0 );
 	}
 
-	public static function set_oauth_credentials(array $credentials): bool {
-		if (!isset($credentials['client_id']) || !isset($credentials['client_secret'])) {
+	public static function set_oauth_credentials( $client_id, $client_secret ): bool {
+		if ( empty( $client_id ) || empty( $client_secret ) ) {
 			return false;
 		}
 
-		update_option(self::OPTION_OAUTH_CLIENT_ID, $credentials['client_id']);
-		update_option(self::OPTION_OAUTH_CLIENT_SECRET, $credentials['client_secret']);
+		update_option( self::OPTION_OAUTH_CLIENT_ID, $client_id );
+		update_option( self::OPTION_OAUTH_CLIENT_SECRET, $client_secret );
 		return true;
 	}
 
-	public static function set_oauth_tokens(array $tokens): bool {
-		if (!isset($tokens['access_token']) || !isset($tokens['refresh_token']) || !isset($tokens['expires_in'])) {
-			return false;
+	public static function set_oauth_tokens( $access_token, $refresh_token, $expiry ): bool {
+		// When setting OAuth tokens, clear API key for new users
+		if ( ! self::is_api_key_fallback_allowed() ) {
+			delete_option( self::OPTION_API_KEY );
 		}
-
-		update_option(self::OPTION_OAUTH_ACCESS_TOKEN, $tokens['access_token']);
-		update_option(self::OPTION_OAUTH_REFRESH_TOKEN, $tokens['refresh_token']);
-		update_option(self::OPTION_OAUTH_TOKEN_EXPIRY, time() + $tokens['expires_in']);
+		
+		update_option( self::OPTION_OAUTH_ACCESS_TOKEN, $access_token );
+		update_option( self::OPTION_OAUTH_REFRESH_TOKEN, $refresh_token );
+		update_option( self::OPTION_OAUTH_TOKEN_EXPIRY, $expiry );
 		return true;
 	}
 
 	public static function has_valid_oauth_token(): bool {
 		$access_token = self::get_oauth_access_token();
+		if ( empty( $access_token ) ) {
+			return false;
+		}
+
 		$expiry = self::get_oauth_token_expiry();
-		return !empty($access_token) && $expiry > time();
+		return $expiry && time() < $expiry;
 	}
 
 	public static function get_landing_page_last_visit_time(): int {
@@ -165,26 +159,24 @@ class Options {
 	}
 
 	public static function disconnect(): void {
-		// Delete API key and related options
-		delete_option( self::OPTION_API_KEY );
-		delete_option( self::OPTION_BRAND_ID );
-		delete_option( self::OPTION_STORE_CONNECTED );
-
-		// Delete OAuth options
-		delete_option( self::OPTION_OAUTH_CLIENT_ID );
-		delete_option( self::OPTION_OAUTH_CLIENT_SECRET );
-		delete_option( self::OPTION_OAUTH_ACCESS_TOKEN );
-		delete_option( self::OPTION_OAUTH_REFRESH_TOKEN );
-		delete_option( self::OPTION_OAUTH_TOKEN_EXPIRY );
-
-		// Delete landing page options
-		delete_option( self::OPTION_LANDING_PAGE_VISITED );
-		delete_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME );
-		delete_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE );
-		delete_metadata( 'user', '0', UserMetaData::LAST_SYNC, '', true );
+		// Only clear API key if it's not an existing user
+		if ( ! self::is_api_key_fallback_allowed() ) {
+			delete_option( self::OPTION_API_KEY );
+		}
+		self::clear_oauth_tokens();
 	}
 
 	public static function delete_all(): void {
 		self::disconnect();
+	}
+
+	private static function clear_oauth_tokens(): void {
+		delete_option( self::OPTION_OAUTH_ACCESS_TOKEN );
+		delete_option( self::OPTION_OAUTH_REFRESH_TOKEN );
+		delete_option( self::OPTION_OAUTH_TOKEN_EXPIRY );
+	}
+
+	public static function is_api_key_fallback_allowed(): bool {
+		return ! empty( self::get_api_key() );
 	}
 }

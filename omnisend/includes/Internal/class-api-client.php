@@ -10,6 +10,9 @@ namespace Omnisend\Internal;
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class ApiClient {
+    private static $plugin_name = 'wp-omnisend';
+    private static $plugin_version = '1.0.0';
+
     /**
      * Make API request
      *
@@ -18,16 +21,21 @@ class ApiClient {
      * @return array|WP_Error
      */
     public static function request($endpoint, $args = array()) {
-        $access_token = OAuthClient::get_valid_access_token();
-        if (is_wp_error($access_token)) {
-            return $access_token;
+        // Get authentication headers
+        $auth_headers = Authentication::get_auth_headers();
+        if (is_wp_error($auth_headers)) {
+            return $auth_headers;
         }
 
         $defaults = array(
             'method' => 'GET',
-            'headers' => array(
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $access_token
+            'headers' => array_merge(
+                array(
+                    'Content-Type' => 'application/json',
+                    'X-INTEGRATION-NAME' => self::$plugin_name,
+                    'X-INTEGRATION-VERSION' => self::$plugin_version
+                ),
+                $auth_headers
             ),
             'timeout' => 30
         );
@@ -41,18 +49,27 @@ class ApiClient {
             return $response;
         }
 
-        $body = json_decode(wp_remote_retrieve_body($response), true);
+        $body = wp_remote_retrieve_body($response);
         $code = wp_remote_retrieve_response_code($response);
 
         if ($code >= 400) {
-            return new \WP_Error(
-                'api_error',
-                isset($body['message']) ? $body['message'] : 'API request failed',
-                array('status' => $code)
-            );
+            $err_msg = "HTTP error: {$code} - " . wp_remote_retrieve_response_message($response);
+            if ($body) {
+                $err_msg .= " - {$body}";
+            }
+            return new \WP_Error('api_error', $err_msg, array('status' => $code));
         }
 
-        return $body;
+        if (!$body) {
+            return new \WP_Error('api_error', 'Empty response from API');
+        }
+
+        $data = json_decode($body, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return new \WP_Error('api_error', 'Invalid JSON response: ' . json_last_error_msg());
+        }
+
+        return $data;
     }
 
     /**
