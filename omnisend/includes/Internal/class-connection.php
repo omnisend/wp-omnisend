@@ -13,13 +13,13 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Connection {
 
-	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
+	public static $landing_page_url = 'https://app.omnisend.work/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
 
-	private static $signup_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
+	private static $signup_url = 'https://app.omnisend.work/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
 
 	// OAuth endpoints
-	private static $oauth_authorize_url = 'https://app.omnisend.com/oauth2/authorize';
-	private static $oauth_token_url = 'https://app.omnisend.com/oauth2/token';
+	private static $oauth_authorize_url = 'https://app.omnisend.work/oauth2/authorize';
+	private static $oauth_token_url = 'https://app.omnisend.work/oauth2/token';
 	private static $oauth_callback_url = '';
 
 	public static function display(): void {

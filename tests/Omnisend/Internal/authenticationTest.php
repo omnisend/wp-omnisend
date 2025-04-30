@@ -9,9 +9,12 @@ namespace Omnisend\Tests\Internal;
 
 use Omnisend\Internal\Authentication;
 use Omnisend\Internal\Options;
+use PHPUnit\Framework\TestCase;
 use WP_Error;
 
-class Authentication_Test extends \WP_UnitTestCase {
+
+//todo fix tests
+class AuthenticationTest  extends TestCase {
     private $original_options = array();
 
     public function setUp(): void {
