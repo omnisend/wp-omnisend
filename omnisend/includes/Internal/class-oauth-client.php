@@ -24,7 +24,7 @@ class OAuthClient {
             'token_endpoint_auth_method' => 'client_secret_basic',
             'grant_types' => array('authorization_code', 'refresh_token'),
             'scope' => 'contacts events products',
-            'software_id' => 'wp-omnisend',
+            'software_id' => 'omnisend',
             'software_version' => OMNISEND_CORE_PLUGIN_VERSION
         );
 
