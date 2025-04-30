@@ -209,15 +209,7 @@ class Connection {
 	}
 
 	public static function show_connection_view(): bool {
-		$connected = Options::is_connected();
-
-		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
-			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'show_connection_form' ) ) {
-				die( 'nonce verification failed: ' . __FILE__ . ':' . __LINE__ );
-			}
-			return true;
-		}
-
+		// We're using the OAuth flow now, so we don't need to check for show_connection_form
 		return false;
 	}
 
