@@ -236,6 +236,15 @@
       "description": "Create popups within minutes. Collect emails, promote sales",
       "logo": "https://appmarket-media.omnisend.com/getsitecontrol/getsitecontrol_logo.svg",
       "url": "https://wordpress.org/plugins/getsitecontrol/"
+    },
+    {
+      "slug": "omnisend-for-surecart-add-on",
+      "name": "Omnisend for SureCart Add-On",
+      "created_by": "Omnisend",
+      "category_id": "other",
+      "description": "A SureCart add-on to sync Products/Categories/Orders/Contacts with Omnisend. In collaboration with SureCart plugin, it also enables better customer tracking",
+      "logo": "https://appmarket-media.omnisend.com/surecart/surecart_logo.svg",
+      "url": "https://wordpress.org/plugins/omnisend-for-surecart-add-on/"
     }
   ]
 }
