@@ -18,7 +18,7 @@ Newsletters, Email Marketing, Email Automation, Forms, Pop Up, SMS by Omnisend
 
 Email Marketing by Omnisend lets you use the power of email marketing and newsletters to connect with your audience like never before.
 
-More than 125,000 brands worldwide trust Omnisend to turn visitors into subscribers with signup forms and landing pages, send beautifully designed emails, manage customer relationships, and more.
+More than 150,000 brands worldwide trust Omnisend to turn visitors into subscribers with signup forms and landing pages, send beautifully designed emails, manage customer relationships, and more.
 
 With its powerful integration capabilities, Email Marketing by Omnisend works seamlessly with popular WordPress form plugins, letting you make your messages even more relevant and engaging.
 
