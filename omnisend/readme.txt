@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.6
+Stable tag: 1.7.7
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -116,10 +116,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Send emails, newsletters & SMS campaigns
 4. Access all features on the generous free-forever plan
 5. Grow your audience with popups incl exit-intent, signup forms & spin-to-win
-6. Fast support, available 24/77. Actionable insights to help create more personalized messages
+6. Fast support, available 24/7. Actionable insights to help create more personalized messages
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.7.7 =
+
+* Added option to support delivery of basic WP emails 
 
 = 1.7.6 =
 

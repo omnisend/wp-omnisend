@@ -14,6 +14,7 @@ define( 'NOTIFICATION_DELAYED', 'delayed' );
 define( 'NOTIFICATION_DISABLED', 'disabled' );
 
 class Options {
+	public const OPTION_EMAIL_SERVICE = 'omni_send_core_email_service_opt_in';
 
 	// omni_send instead of omnisend used to distinct and not interfere with Omnisend for Woo plugin.
 	private const OPTION_API_KEY                         = 'omni_send_core_api_key';
@@ -110,5 +111,9 @@ class Options {
 
 	public static function delete_all(): void {
 		self::disconnect();
+	}
+
+	public static function get_email_service_option_value(): bool {
+		return (bool) get_option( self::OPTION_EMAIL_SERVICE );
 	}
 }

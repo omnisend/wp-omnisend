@@ -1,4 +1,5 @@
 import { Flex, Button } from '@wordpress/components';
+import EmailServiceCheckbox from './email-service-checkbox';
 
 const ConnectedPageLayout = () => {
 	const navigateToExternalUrl = (url) => {
@@ -50,6 +51,9 @@ const ConnectedPageLayout = () => {
 						Explore Omnisend add-ons
 					</Button>
 				</Flex>
+				<div>
+					<EmailServiceCheckbox />
+				</div>
 			</Flex>
 		</>
 	);
