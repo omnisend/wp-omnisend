@@ -3,8 +3,9 @@ import { CheckboxControl } from "@wordpress/components";
 import apiFetch from "@wordpress/api-fetch";
 
 const EmailServiceCheckbox = () => {
+  const [isInitialMount, setIsInitialMount] = useState(true);
   const [checked, setChecked] = useState(
-    omnisend_connected.omni_send_core_email_service_opt_in
+    window.omnisend_connected?.omni_send_core_email_service_opt_in || false
   );
 
   const updateOption = (value) => {
@@ -16,6 +17,12 @@ const EmailServiceCheckbox = () => {
   };
 
   useEffect(() => {
+    if (isInitialMount) {
+      setIsInitialMount(false);
+
+      return;
+    }
+
     updateOption(checked ? 1 : 0);
   }, [checked]);
 

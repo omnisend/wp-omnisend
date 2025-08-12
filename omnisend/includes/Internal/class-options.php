@@ -106,6 +106,7 @@ class Options {
 		delete_option( self::OPTION_LANDING_PAGE_VISITED );
 		delete_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME );
 		delete_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE );
+		delete_option( self::OPTION_EMAIL_SERVICE );
 		delete_metadata( 'user', '0', UserMetaData::LAST_SYNC, '', true );
 	}
 

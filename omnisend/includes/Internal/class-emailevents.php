@@ -37,6 +37,11 @@ class EmailEvents {
 		}
 
 		$reset_key = get_password_reset_key( $user );
+
+		if ( is_wp_error( $reset_key ) ) {
+			return;
+		}
+
 		$reset_url = add_query_arg(
 			array(
 				'action' => 'rp',
@@ -103,9 +108,9 @@ class EmailEvents {
 	 * @return void
 	 */
 	public function user_password_changed_event( WP_User $user ): void {
-		$request_uri = $this->get_request_uri();
+		global $pagenow;
 
-		if ( strpos( $request_uri, 'wp-login.php' ) === false ) {
+		if ( $pagenow !== 'wp-login.php' ) {
 			return;
 		}
 
@@ -125,9 +130,9 @@ class EmailEvents {
 	 * @return void
 	 */
 	public function user_email_change_event( int $user_id, WP_User $old_user_data, array $user_data ): void {
-		$request_uri = $this->get_request_uri();
+		global $pagenow;
 
-		if ( ! is_admin() || strpos( $request_uri, 'profile.php' ) === false ) {
+		if ( ! is_admin() || $pagenow !== 'profile.php' ) {
 			return;
 		}
 
@@ -164,9 +169,9 @@ class EmailEvents {
 	 * @return void
 	 */
 	public function user_email_changed_event( int $user_id, WP_User $old_user_data, array $user_data ): void {
-		$request_uri = $this->get_request_uri();
+		global $pagenow;
 
-		if ( ! is_admin() || strpos( $request_uri, 'profile.php' ) === false ) {
+		if ( ! is_admin() || $pagenow !== 'profile.php' ) {
 			return;
 		}
 
@@ -217,14 +222,5 @@ class EmailEvents {
 		$event->set_contact( $contact );
 
 		return $event;
-	}
-
-	/**
-	 * Returns sanitized and unslashed request URI
-	 *
-	 * @return string
-	 */
-	private function get_request_uri(): string {
-		return sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 	}
 }
