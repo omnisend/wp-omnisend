@@ -212,6 +212,11 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function hide_notices(): void {
+		// Prevent output during problematic scenarios.
+		if ( headers_sent() || wp_doing_ajax() || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ) {
+			return;
+		}
+
 		$screen = get_current_screen();
 		if ( $screen && ( $screen->id === 'toplevel_page_omnisend' || $screen->id === 'omnisend-email-marketing_page_omnisend-app-market' ) ) {
 			echo '<style>[class*="notice"]:not([class*="components"], .omnisend-notice, .notice), .notice:not(.omnisend-notice) { display: none !important; }</style>';
@@ -219,6 +224,16 @@ class Omnisend_Core_Bootstrap {
 	}
 
 	public static function admin_notices(): void {
+		// Prevent output during problematic scenarios.
+		if ( headers_sent() || wp_doing_ajax() || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ) {
+			return;
+		}
+
+		// Additional safety check - ensure we're in proper admin context.
+		if ( ! is_admin() || ! function_exists( 'get_current_screen' ) ) {
+			return;
+		}
+
 		if ( Options::is_connected() && self::is_omnisend_woocommerce_plugin_active() && ! get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION ) ) {
 			echo '<div class="notice notice-error omnisend-notice"><p>Since you have already connected the <strong>Omnisend</strong> plugin, to use <strong>Omnisend for Woocommerce</strong> please contact <a href=mailto:"support@omnisend.com">customer support</a>.</p></div>';
 		} elseif ( ! Options::is_connected() && ( is_plugin_active( 'woocommerce/woocommerce.php' ) || self::is_omnisend_woocommerce_plugin_active() ) && ! self::is_omnisend_woocommerce_plugin_connected() ) {
