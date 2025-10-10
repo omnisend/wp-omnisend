@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.5
+Stable tag: 1.7.7
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,7 +18,7 @@ Newsletters, Email Marketing, Email Automation, Forms, Pop Up, SMS by Omnisend
 
 Email Marketing by Omnisend lets you use the power of email marketing and newsletters to connect with your audience like never before.
 
-More than 125,000 brands worldwide trust Omnisend to turn visitors into subscribers with signup forms and landing pages, send beautifully designed emails, manage customer relationships, and more.
+More than 150,000 brands worldwide trust Omnisend to turn visitors into subscribers with signup forms and landing pages, send beautifully designed emails, manage customer relationships, and more.
 
 With its powerful integration capabilities, Email Marketing by Omnisend works seamlessly with popular WordPress form plugins, letting you make your messages even more relevant and engaging.
 
@@ -120,6 +120,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.7.7 =
+
+* Improve connection flow
+
+= 1.7.6 =
+
+* Update description and screenshots
 
 = 1.7.5 =
 
