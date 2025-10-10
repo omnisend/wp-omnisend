@@ -9,13 +9,16 @@
         "build": "wp-scripts build",
         "lint:js": "wp-scripts lint-js"
     },
+    "dependencies": {
+        "form-data": "4.0.4"
+    },
     "peerDependencies": {
         "react": "^18.0.0",
         "react-dom": "^18.0.0"
     },
     "devDependencies": {
         "@wordpress/eslint-plugin": "^17.10.0",
-        "@wordpress/scripts": "^30.14.0",
+        "@wordpress/scripts": "^30.25.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-jsdoc": "^48.2.1",
         "eslint-plugin-prettier": "^5.1.3",
