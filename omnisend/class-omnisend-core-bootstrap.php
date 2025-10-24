@@ -61,6 +61,23 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
 		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
+		add_action(
+			'init',
+			function () {
+				register_setting(
+					'omni_send_core_email_service',
+					Options::OPTION_EMAIL_SERVICE,
+					array(
+						'type'         => 'boolean',
+						'show_in_rest' => true,
+					)
+				);
+
+				if ( Options::get_email_service_option_value() ) {
+					new EmailEvents();
+				}
+			}
+		);
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 
@@ -79,24 +96,6 @@ class Omnisend_Core_Bootstrap {
 			add_action( 'profile_update', 'Omnisend\Internal\Sync::identify_user_by_id' );
 
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
-
-			add_action(
-				'init',
-				function () {
-					register_setting(
-						'omni_send_core_email_service',
-						Options::OPTION_EMAIL_SERVICE,
-						array(
-							'type'         => 'boolean',
-							'show_in_rest' => true,
-						)
-					);
-
-					if ( Options::get_email_service_option_value() ) {
-						new EmailEvents();
-					}
-				}
-			);
 		}
 		self::migrate_options();
 	}
