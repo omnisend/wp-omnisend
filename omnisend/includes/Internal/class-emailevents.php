@@ -29,17 +29,17 @@ class EmailEvents {
 	 *
 	 * @return void
 	 */
-	public function new_user_event( array $message, WP_User $user ): void {
+	public function new_user_event( array $message, WP_User $user ): array {
 		$user_email = (string) $user->user_email;
 
 		if ( empty( $user_email ) ) {
-			return;
+			return $message;
 		}
 
 		$reset_key = get_password_reset_key( $user );
 
 		if ( is_wp_error( $reset_key ) ) {
-			return;
+			return $message;
 		}
 
 		$reset_url = add_query_arg(
@@ -71,6 +71,8 @@ class EmailEvents {
 
 			$this->send_event( $event );
 		}
+
+		return $message;
 	}
 
 	/**
@@ -83,7 +85,7 @@ class EmailEvents {
 	 *
 	 * @return void
 	 */
-	public function user_password_change_event( string $message, string $key, string $user_login, WP_User $user_data ): void {
+	public function user_password_change_event( string $message, string $key, string $user_login, WP_User $user_data ): string {
 		$reset_url = add_query_arg(
 			array(
 				'action' => 'rp',
@@ -98,6 +100,8 @@ class EmailEvents {
 		$event->add_custom_event_property( 'reset_url', $reset_url );
 
 		$this->send_event( $event );
+
+		return $message;
 	}
 
 	/**
