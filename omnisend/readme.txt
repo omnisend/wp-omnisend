@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.7
+Stable tag: 1.7.9
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -121,9 +121,17 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
-= 1.7.7 =
+= 1.7.9 =
 
 * Added option to support delivery of basic WP emails 
+
+= 1.7.8 =
+
+* security improvements
+
+= 1.7.7 =
+
+* Improve connection flow
 
 = 1.7.6 =
 
