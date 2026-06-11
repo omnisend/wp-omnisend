@@ -13,9 +13,14 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Connection {
 
-	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
+	public static $landing_page_url = 'https://app.omnisend.work/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
 
-	private static $signup_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
+	private static $signup_url = 'https://app.omnisend.work/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
+
+	// OAuth endpoints
+	private static $oauth_authorize_url = 'https://app.omnisend.work/oauth2/authorize';
+	private static $oauth_token_url = 'https://app.omnisend.work/oauth2/token';
+	private static $oauth_callback_url = '';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -23,6 +28,12 @@ class Connection {
 		}
 
 		Options::set_landing_page_visited();
+
+		// Handle OAuth callback
+		if (isset($_GET['code']) && isset($_GET['state'])) {
+			self::handle_oauth_callback();
+			return;
+		}
 
 		if ( self::show_connected_store_view() ) {
 			?>
@@ -35,6 +46,7 @@ class Connection {
 			?>
 			<script type="text/javascript">
 				var plugin_omnisend_signup_url = "<?php echo esc_url_raw( self::get_signup_url() ); ?>";
+				var plugin_omnisend_oauth_url = "<?php echo esc_url_raw( self::get_oauth_url() ); ?>";
 			</script>
 			<div id="omnisend-connection"></div>
 			<?php
@@ -44,6 +56,111 @@ class Connection {
 		self::resolve_wordpress_settings();
 
 		require_once __DIR__ . '/../../view/landing-page.html';
+	}
+
+	/**
+	 * Handle OAuth callback
+	 */
+	private static function handle_oauth_callback(): void {
+		if (!wp_verify_nonce($_GET['state'], 'omnisend_oauth')) {
+			wp_die('Invalid OAuth state');
+		}
+
+		$code = sanitize_text_field($_GET['code']);
+		$response = wp_remote_post(
+			self::$oauth_token_url,
+			array(
+				'body' => array(
+					'grant_type' => 'authorization_code',
+					'code' => $code,
+					'redirect_uri' => self::get_oauth_callback_url(),
+					'client_id' => Options::get_oauth_client_id(),
+					'client_secret' => Options::get_oauth_client_secret()
+				),
+				'timeout' => 30
+			)
+		);
+
+		if (is_wp_error($response)) {
+			wp_die('Failed to get OAuth tokens: ' . $response->get_error_message());
+		}
+
+		$body = json_decode(wp_remote_retrieve_body($response), true);
+		if (empty($body['access_token'])) {
+			wp_die('Invalid OAuth response');
+		}
+
+		// Save tokens
+		Options::set_oauth_tokens(
+			$body['access_token'],
+			$body['refresh_token'],
+			time() + $body['expires_in']
+		);
+
+		// Get account data
+		$account_data = self::get_account_data_with_oauth($body['access_token']);
+		if (!empty($account_data['brandID'])) {
+			Options::set_brand_id($account_data['brandID']);
+			Options::set_store_connected();
+		}
+
+		// Redirect to connection page
+		wp_redirect(admin_url('admin.php?page=omnisend'));
+		exit;
+	}
+
+	/**
+	 * Get OAuth authorization URL
+	 */
+	private static function get_oauth_url(): string {
+		$state = wp_create_nonce('omnisend_oauth');
+		$params = array(
+			'response_type' => 'code',
+			'client_id' => Options::get_oauth_client_id(),
+			'redirect_uri' => self::get_oauth_callback_url(),
+			'state' => $state,
+			'scope' => 'contacts.read contacts.write events.read events.write products.read products.write'
+		);
+
+		return self::$oauth_authorize_url . '?' . http_build_query($params);
+	}
+
+	/**
+	 * Get OAuth callback URL
+	 */
+	private static function get_oauth_callback_url(): string {
+		if (empty(self::$oauth_callback_url)) {
+			self::$oauth_callback_url = admin_url('admin.php?page=omnisend');
+		}
+		return self::$oauth_callback_url;
+	}
+
+	/**
+	 * Get account data using OAuth token
+	 */
+	private static function get_account_data_with_oauth($access_token): array {
+		$response = wp_remote_get(
+			OMNISEND_CORE_API_V3 . '/accounts',
+			array(
+				'headers' => array(
+					'Content-Type' => 'application/json',
+					'Authorization' => 'Bearer ' . $access_token
+				),
+				'timeout' => 10
+			)
+		);
+
+		if (is_wp_error($response)) {
+			return array();
+		}
+
+		$body = wp_remote_retrieve_body($response);
+		if (empty($body)) {
+			return array();
+		}
+
+		$arr = json_decode($body, true);
+		return is_array($arr) ? $arr : array();
 	}
 
 	public static function resolve_wordpress_settings(): void {
@@ -88,19 +205,11 @@ class Connection {
 	}
 
 	public static function show_connected_store_view(): bool {
-		return Options::is_store_connected();
+		return Options::is_connected();
 	}
 
 	public static function show_connection_view(): bool {
-		$connected = Options::is_store_connected();
-
-		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
-			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'show_connection_form' ) ) {
-				die( 'nonce verification failed: ' . __FILE__ . ':' . __LINE__ );
-			}
-			return true;
-		}
-
+		// We're using the OAuth flow now, so we don't need to check for show_connection_form
 		return false;
 	}
 

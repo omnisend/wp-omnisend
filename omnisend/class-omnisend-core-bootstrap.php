@@ -20,6 +20,7 @@
 
 use Omnisend\Internal\Options;
 use Omnisend\Internal\Connection;
+use Omnisend\Internal\AjaxHandlers;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
@@ -54,6 +55,9 @@ class Omnisend_Core_Bootstrap {
 		add_filter( 'cron_schedules', array( 'Omnisend_Core_Bootstrap', 'cron_schedules' ) ); //phpcs:ignore WordPress.WP.CronInterval.CronSchedulesInterval
 		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
 		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );
+
+		// Initialize AJAX handlers
+		AjaxHandlers::init();
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
