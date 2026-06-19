@@ -3,9 +3,9 @@ Plugin Name: Newsletters, Email Marketing, SMS and Popups by Omnisend
 Contributors: Omnisend
 Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.7.10
+Stable tag: 1.7.11
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -120,6 +120,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.7.11 =
+
+* Tested up to WordPress 7.0
 
 = 1.7.10 =
 
