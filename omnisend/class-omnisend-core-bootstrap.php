@@ -34,7 +34,6 @@ const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
 // Change for different environment.
-const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
 const OMNISEND_CORE_API         = 'https://api.omnisend.com/api';
 const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
 

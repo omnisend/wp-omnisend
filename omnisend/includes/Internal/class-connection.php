@@ -62,11 +62,12 @@ class Connection {
 
 	private static function get_account_data( $api_key ): array {
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V3 . '/accounts',
+			OMNISEND_CORE_API . '/brands/current',
 			array(
 				'headers' => array(
-					'Content-Type' => 'application/json',
-					'X-API-Key'    => $api_key,
+					'Content-Type'     => 'application/json',
+					'Authorization'    => 'Omnisend-API-Key ' . $api_key,
+					'Omnisend-Version' => '2026-03-15',
 				),
 				'timeout' => 10,
 			)
@@ -114,12 +115,13 @@ class Connection {
 		);
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V3 . '/accounts',
+			OMNISEND_CORE_API . '/accounts',
 			array(
 				'body'    => wp_json_encode( $data ),
 				'headers' => array(
-					'Content-Type' => 'application/json',
-					'X-API-Key'    => $api_key,
+					'Content-Type'     => 'application/json',
+					'Authorization'    => 'Omnisend-API-Key ' . $api_key,
+					'Omnisend-Version' => '2026-03-15',
 				),
 				'timeout' => 10,
 			)
@@ -141,7 +143,7 @@ class Connection {
 
 		$arr = json_decode( $body, true );
 
-		return ! empty( $arr['verified'] );
+		return ! empty( $arr['connected'] );
 	}
 
 	public static function connect_with_omnisend_for_woo_plugin(): void {
@@ -259,7 +261,7 @@ class Connection {
 				);
 			}
 
-			if ( $response['verified'] === true && $response['platform'] !== $wordpress_platform ) {
+			if ( ! empty( $response['connected'] ) && $response['platform'] !== $wordpress_platform ) {
 				return rest_ensure_response(
 					array(
 						'success' => false,
