@@ -53,6 +53,16 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$this->options        = $options;
 	}
 
+	private function get_request_headers(): array {
+		return array(
+			'Content-Type'          => 'application/json',
+			'Authorization'         => 'Omnisend-API-Key ' . $this->api_key,
+			'Omnisend-Version'      => '2026-03-15',
+			'X-INTEGRATION-NAME'    => $this->plugin_name,
+			'X-INTEGRATION-VERSION' => $this->plugin_version,
+		);
+	}
+
 
 	public function create_contact( $contact ): CreateContactResponse {
 		$error = new WP_Error();
@@ -78,18 +88,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/contacts',
+			OMNISEND_CORE_API . '/contacts',
 			array(
 				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array_merge(
-					array(
-						'Content-Type'          => 'application/json',
-						'X-API-Key'             => $this->api_key,
-						'X-INTEGRATION-NAME'    => $this->plugin_name,
-						'X-INTEGRATION-VERSION' => $this->plugin_version,
-					),
-					$options
-				),
+				'headers' => array_merge( $this->get_request_headers(), $options ),
 				'timeout' => 10,
 			)
 		);
@@ -114,12 +116,12 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		$arr = json_decode( $body, true );
 
-		if ( empty( $arr['contactID'] ) ) {
+		if ( empty( $arr['id'] ) ) {
 			$error->add( 'omnisend_api', 'contactID not found in response.' );
 			return new CreateContactResponse( '', $error );
 		}
 
-		return new CreateContactResponse( (string) $arr['contactID'], $error );
+		return new CreateContactResponse( (string) $arr['id'], $error );
 	}
 
 	public function save_contact( Contact $contact ): SaveContactResponse {
@@ -148,18 +150,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$contract_array = $contact->to_array();
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/contacts',
+			OMNISEND_CORE_API . '/contacts',
 			array(
 				'body'    => wp_json_encode( $contract_array ),
-				'headers' => array_merge(
-					array(
-						'Content-Type'          => 'application/json',
-						'X-API-Key'             => $this->api_key,
-						'X-INTEGRATION-NAME'    => $this->plugin_name,
-						'X-INTEGRATION-VERSION' => $this->plugin_version,
-					),
-					$options
-				),
+				'headers' => array_merge( $this->get_request_headers(), $options ),
 				'timeout' => 10,
 			)
 		);
@@ -184,12 +178,12 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		$arr = json_decode( $body, true );
 
-		if ( empty( $arr['contactID'] ) ) {
+		if ( empty( $arr['id'] ) ) {
 			$error->add( 'omnisend_api', 'contactID not found in response.' );
 			return new SaveContactResponse( '', $error );
 		}
 
-		return new SaveContactResponse( (string) $arr['contactID'], $error );
+		return new SaveContactResponse( (string) $arr['id'], $error );
 	}
 
 	public function get_contact_by_email( string $email ): GetContactResponse {
@@ -197,14 +191,9 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$email = str_replace( '+', '%2b', $email );
 
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V5 . '/contacts?email=' . $email,
+			OMNISEND_CORE_API . '/contacts?email=' . $email,
 			array(
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -229,7 +218,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		$contact_data = json_decode( $body, true );
 
-		if ( empty( $contact_data['contacts'][0]['contactID'] ) ) {
+		if ( empty( $contact_data['contacts'][0]['id'] ) ) {
 			$error->add( 'omnisend_api', 'contactID not found in response.' );
 			return new GetContactResponse( null, $error );
 		}
@@ -255,15 +244,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/events',
+			OMNISEND_CORE_API . '/events',
 			array(
 				'body'    => wp_json_encode( $event->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -350,15 +334,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/batches',
+			OMNISEND_CORE_API . '/batches',
 			array(
 				'body'    => wp_json_encode( $batch->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -396,14 +375,9 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$error = new WP_Error();
 
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V5 . '/product-categories/' . $category_id,
+			OMNISEND_CORE_API . '/product-categories/' . $category_id,
 			array(
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -447,14 +421,9 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$error = new WP_Error();
 
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V5 . '/products/' . $product_id,
+			OMNISEND_CORE_API . '/products/' . $product_id,
 			array(
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -510,15 +479,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/product-categories',
+			OMNISEND_CORE_API . '/product-categories',
 			array(
 				'body'    => wp_json_encode( $category->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -568,16 +532,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/product-categories/' . $category->get_category_id(),
+			OMNISEND_CORE_API . '/product-categories/' . $category->get_category_id(),
 			array(
 				'method'  => 'PATCH',
 				'body'    => wp_json_encode( $category->to_array_for_update() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -625,15 +584,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/product-categories/' . $category_id,
+			OMNISEND_CORE_API . '/product-categories/' . $category_id,
 			array(
 				'method'  => 'DELETE',
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -667,15 +621,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/products',
+			OMNISEND_CORE_API . '/products',
 			array(
 				'body'    => wp_json_encode( $product->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -725,16 +674,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/products/' . $product->get_id(),
+			OMNISEND_CORE_API . '/products/' . $product->get_id(),
 			array(
 				'method'  => 'PUT',
 				'body'    => wp_json_encode( $product->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
@@ -782,15 +726,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/products/' . $product_id,
+			OMNISEND_CORE_API . '/products/' . $product_id,
 			array(
 				'method'  => 'DELETE',
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);

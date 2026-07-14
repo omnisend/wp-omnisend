@@ -162,8 +162,8 @@ class Category {
 			$error->add( 'category_id', 'Category ID must be under 100 characters' );
 		}
 
-		if ( strlen( $this->title ) > 100 ) {
-			$error->add( 'title', 'Title must be under 100 characters' );
+		if ( strlen( $this->title ) > 255 ) {
+			$error->add( 'title', 'Title must be under 255 characters' );
 		}
 
 		return $error;
