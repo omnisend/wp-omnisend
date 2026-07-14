@@ -292,15 +292,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 		);
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V3 . '/accounts/' . $brand_id,
+			OMNISEND_CORE_API . '/accounts/' . $brand_id,
 			array(
 				'body'    => wp_json_encode( $data ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
