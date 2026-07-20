@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.7.11
+Stable tag: 1.8.0
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -120,6 +120,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.8.0 =
+
+* Suggest privacy policy text via the WordPress privacy policy content API.
+* Update WordPress.org banner assets.
 
 = 1.7.11 =
 
