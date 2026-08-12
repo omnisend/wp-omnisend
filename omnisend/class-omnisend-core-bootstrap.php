@@ -4,7 +4,7 @@
  *
  * Plugin Name: Newsletters, Email Marketing, SMS and Popups by Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.7.11
+ * Version: 1.8.0
  * Requires PHP: 7.4
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
@@ -24,7 +24,7 @@ use Omnisend\Internal\Connection;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.7.11';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.8.0';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
@@ -62,6 +62,7 @@ class Omnisend_Core_Bootstrap {
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
+		add_action( 'admin_init', 'Omnisend_Core_Bootstrap::add_privacy_policy_content' );
 
 		if ( ! self::is_omnisend_woocommerce_plugin_active() || ! self::is_omnisend_woocommerce_plugin_connected() ) {
 			add_action( 'wp_footer', 'Omnisend\Internal\Snippet::add' );
@@ -82,6 +83,25 @@ class Omnisend_Core_Bootstrap {
 		self::migrate_options();
 	}
 
+
+	public static function add_privacy_policy_content(): void {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+
+		$content =
+			'<p>' . esc_html__( 'The Omnisend plugin syncs your registered WordPress users to Omnisend for email and SMS marketing purposes. This includes each user’s email address, first and last name, and WordPress roles.', 'omnisend' ) . '</p>' .
+			'<p>' . esc_html__( 'This data is transmitted to and stored by Omnisend, a third-party service, and is retained there according to Omnisend’s data retention practices for as long as your contact record exists. Existing users are synced to Omnisend after the plugin is connected, and contacts are also created or updated when users register, log in, or update their profile.', 'omnisend' ) . '</p>' .
+			'<p>' . esc_html__( 'The plugin also loads an Omnisend tracking snippet that sets cookies in visitors’ browsers to identify contacts and track their activity on the site.', 'omnisend' ) . '</p>' .
+			'<p>' . sprintf(
+				/* translators: 1: Omnisend Privacy Policy URL, 2: Omnisend Terms of Use URL */
+				esc_html__( 'You have the right to request access to, export of, or deletion of your personal data. For details on how Omnisend processes personal data and how to exercise these rights, see Omnisend’s Privacy Policy at %1$s and Terms of Use at %2$s.', 'omnisend' ),
+				'<a href="https://www.omnisend.com/privacy/" target="_blank">https://www.omnisend.com/privacy/</a>',
+				'<a href="https://www.omnisend.com/terms" target="_blank">https://www.omnisend.com/terms</a>'
+			) . '</p>';
+
+		wp_add_privacy_policy_content( OMNISEND_CORE_PLUGIN_NAME, wp_kses_post( $content ) );
+	}
 
 	public static function omnisend_app_market() {
 		if ( ! current_user_can( 'manage_options' ) ) {
