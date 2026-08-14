@@ -45,7 +45,7 @@ final class CategoryTest extends TestCase
         $category = CategoryFactory::create_category($category_data);
 
         $error_message = $category->validate()->get_error_message('title');
-        $expected_error_message = 'Title must be under 100 characters';
+        $expected_error_message = 'Title must be under 255 characters';
 
         $this->assertEquals($error_message, $expected_error_message);
     }

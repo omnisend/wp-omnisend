@@ -8,6 +8,7 @@
 namespace Omnisend\Internal;
 
 use Omnisend_Core_Bootstrap;
+use WP_Error;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
@@ -60,7 +61,10 @@ class Connection {
 		}
 	}
 
-	private static function get_account_data( $api_key ): array {
+	/**
+	 * @return array|WP_Error Brand data or an error describing the transport, status or body failure.
+	 */
+	private static function get_account_data( $api_key ) {
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/brands/current',
 			array(
@@ -73,19 +77,34 @@ class Connection {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			return array();
+		return ApiResponse::parse( $response );
+	}
+
+	/**
+	 * Maps API failures to messages an administrator can act on.
+	 */
+	private static function get_connection_error_message( WP_Error $error ): string {
+		switch ( $error->get_error_code() ) {
+			case ApiResponse::ERROR_UNAUTHORIZED:
+				return 'The API key was rejected by Omnisend. Check if the API key is correct.';
+			case ApiResponse::ERROR_FORBIDDEN:
+				return 'This API key is missing required permissions (brands.read). Create a new API key with store connection permissions.';
+			case ApiResponse::ERROR_VERSION_RETIRED:
+				return 'This Omnisend plugin version uses a retired Omnisend API version. Please update the plugin.';
+			case ApiResponse::ERROR_RATE_LIMITED:
+				return 'Omnisend is rate limiting requests from this store. Please wait a moment and try again.';
+			case ApiResponse::ERROR_SERVER:
+				return 'Omnisend service is temporarily unavailable. Please try again later.';
+			case ApiResponse::ERROR_TRANSPORT:
+			case 'http_request_failed':
+				return 'Could not reach Omnisend API from this site. Check your server network or firewall settings. Details: ' . $error->get_error_message();
+			case ApiResponse::ERROR_EMPTY_BODY:
+			case ApiResponse::ERROR_INVALID_JSON:
+			case ApiResponse::ERROR_UNEXPECTED_SHAPE:
+				return 'Omnisend API returned an unexpected response. Details: ' . $error->get_error_message();
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( empty( $body ) ) {
-			return array();
-		}
-
-		$arr = json_decode( $body, true );
-
-		return is_array( $arr ) ? $arr : array();
+		return 'The connection did not go through. Details: ' . $error->get_error_message();
 	}
 
 	public static function show_connected_store_view(): bool {
@@ -105,7 +124,10 @@ class Connection {
 		return false;
 	}
 
-	private static function connect_store( $api_key ): bool {
+	/**
+	 * @return true|WP_Error True when the store is connected, otherwise an error describing the failure.
+	 */
+	private static function connect_store( $api_key ) {
 		$data = array(
 			'website'         => site_url(),
 			'platform'        => 'wordpress',
@@ -127,23 +149,17 @@ class Connection {
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			return false;
+		$arr = ApiResponse::parse( $response );
+
+		if ( is_wp_error( $arr ) ) {
+			return $arr;
 		}
 
-		$http_code = wp_remote_retrieve_response_code( $response );
-		if ( $http_code >= 400 ) {
-			return false;
+		if ( empty( $arr['connected'] ) ) {
+			return ApiResponse::unexpected_shape_error( 'connected' );
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			return false;
-		}
-
-		$arr = json_decode( $body, true );
-
-		return ! empty( $arr['connected'] );
+		return true;
 	}
 
 	public static function connect_with_omnisend_for_woo_plugin(): void {
@@ -161,7 +177,7 @@ class Connection {
 		}
 
 		$response = self::get_account_data( $api_key );
-		if ( empty( $response['brandID'] ) ) {
+		if ( is_wp_error( $response ) || empty( $response['brandID'] ) ) {
 			return;
 		}
 
@@ -250,13 +266,32 @@ class Connection {
 		if ( ! $connected && ! empty( $_POST['api_key'] ) ) {
 			$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ) );
 			$response = self::get_account_data( $api_key );
+
+			if ( is_wp_error( $response ) ) {
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => self::get_connection_error_message( $response ),
+					)
+				);
+			}
+
 			$brand_id = ! empty( $response['brandID'] ) ? $response['brandID'] : '';
 
 			if ( ! $brand_id ) {
 				return rest_ensure_response(
 					array(
 						'success' => false,
-						'error'   => 'The connection did not go through. Check if the API key is correct.',
+						'error'   => 'Omnisend API did not return a brand for this API key. Check if the API key is correct.',
+					)
+				);
+			}
+
+			if ( ! isset( $response['platform'] ) || ! is_string( $response['platform'] ) ) {
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => self::get_connection_error_message( ApiResponse::unexpected_shape_error( 'platform' ) ),
 					)
 				);
 			}
@@ -277,6 +312,16 @@ class Connection {
 
 			if ( $response['platform'] === '' ) {
 				$connected = self::connect_store( $api_key );
+
+				if ( is_wp_error( $connected ) ) {
+					Options::disconnect(); // Store was not connected, clean up.
+					return rest_ensure_response(
+						array(
+							'success' => false,
+							'error'   => self::get_connection_error_message( $connected ),
+						)
+					);
+				}
 			}
 
 			if ( $connected ) {
@@ -299,7 +344,7 @@ class Connection {
 			return rest_ensure_response(
 				array(
 					'success' => false,
-					'error'   => 'The connection did not go through. Check if the API key is correct.',
+					'error'   => 'The connection did not go through. This Omnisend account is connected to another platform (' . $response['platform'] . ').',
 				)
 			);
 		}
