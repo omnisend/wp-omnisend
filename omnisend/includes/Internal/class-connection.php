@@ -68,11 +68,7 @@ class Connection {
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/brands/current',
 			array(
-				'headers' => array(
-					'Content-Type'     => 'application/json',
-					'Authorization'    => 'Omnisend-API-Key ' . $api_key,
-					'Omnisend-Version' => '2026-03-15',
-				),
+				'headers' => ApiRequest::headers( $api_key ),
 				'timeout' => 10,
 			)
 		);
@@ -140,11 +136,7 @@ class Connection {
 			OMNISEND_CORE_API . '/accounts',
 			array(
 				'body'    => wp_json_encode( $data ),
-				'headers' => array(
-					'Content-Type'     => 'application/json',
-					'Authorization'    => 'Omnisend-API-Key ' . $api_key,
-					'Omnisend-Version' => '2026-03-15',
-				),
+				'headers' => ApiRequest::headers( $api_key ),
 				'timeout' => 10,
 			)
 		);
@@ -155,8 +147,12 @@ class Connection {
 			return $arr;
 		}
 
-		if ( empty( $arr['connected'] ) ) {
+		if ( ! isset( $arr['connected'] ) || ! is_bool( $arr['connected'] ) ) {
 			return ApiResponse::unexpected_shape_error( 'connected' );
+		}
+
+		if ( $arr['connected'] !== true ) {
+			return ApiResponse::unexpected_value_error( 'connected', 'is false, so the store was not connected' );
 		}
 
 		return true;
@@ -292,6 +288,15 @@ class Connection {
 					array(
 						'success' => false,
 						'error'   => self::get_connection_error_message( ApiResponse::unexpected_shape_error( 'platform' ) ),
+					)
+				);
+			}
+
+			if ( isset( $response['connected'] ) && ! is_bool( $response['connected'] ) ) {
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => self::get_connection_error_message( ApiResponse::unexpected_value_error( 'connected', 'is not a boolean' ) ),
 					)
 				);
 			}
