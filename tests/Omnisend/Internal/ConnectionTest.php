@@ -22,6 +22,7 @@ final class ConnectionTest extends TestCase
     protected function tearDown(): void
     {
         $_POST = array();
+        $_GET = array();
     }
 
     private function connection_error(): string
@@ -47,7 +48,26 @@ final class ConnectionTest extends TestCase
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.read scope."}'));
 
-        $this->assertStringContainsString('missing required permissions (brands.read)', $this->connection_error());
+        $error = $this->connection_error();
+
+        $this->assertStringContainsString('missing required permissions (brands.read)', $error);
+        $this->assertStringContainsString('paste it here to reconnect', $error);
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_missing_permissions_leaves_the_connection_form_available_for_another_key(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.read scope."}'));
+
+        $this->connection_error();
+
+        $_GET = array(
+            'action' => 'show_connection_form',
+            '_wpnonce' => 'nonce',
+        );
+
+        $this->assertTrue(Connection::show_connection_view());
+        $this->assertFalse(Connection::show_connected_store_view());
     }
 
     public function test_retired_api_version(): void
@@ -129,9 +149,9 @@ final class ConnectionTest extends TestCase
     public function test_store_connect_failure_reports_api_error(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.write scope."}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"This action requires the \'accounts.write\' permission."}'));
 
-        $this->assertStringContainsString('missing required permissions', $this->connection_error());
+        $this->assertStringContainsString('missing required permissions (accounts.write)', $this->connection_error());
         $this->assertFalse(Options::is_store_connected());
     }
 
