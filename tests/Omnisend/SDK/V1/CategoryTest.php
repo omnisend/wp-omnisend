@@ -67,6 +67,57 @@ final class CategoryTest extends TestCase
         $this->assertEquals($error_message, $expected_error_message);
     }
 
+    public function test_title_of_255_characters_passes_validation(): void {
+        $category_data = array(
+            'categoryID' => 'C1234',
+            'title' => str_repeat('a', 255)
+        );
+
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertFalse($category->validate()->has_errors());
+    }
+
+    public function test_title_of_256_characters_fails_validation(): void {
+        $category_data = array(
+            'categoryID' => 'C1234',
+            'title' => str_repeat('a', 256)
+        );
+
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertEquals('Title must be under 255 characters', $category->validate()->get_error_message('title'));
+    }
+
+    public function test_category_id_of_100_characters_passes_validation(): void {
+        $category_data = array(
+            'categoryID' => str_repeat('c', 100),
+            'title' => 'Beauty products'
+        );
+
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertFalse($category->validate()->has_errors());
+    }
+
+    public function test_category_id_of_101_characters_fails_validation(): void {
+        $category_data = array(
+            'categoryID' => str_repeat('c', 101),
+            'title' => 'Beauty products'
+        );
+
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertEquals('Category ID must be under 100 characters', $category->validate()->get_error_message('category_id'));
+    }
+
+    public function test_to_array_for_update_contains_only_title(): void {
+        $category_data = array('categoryID' => 'C1234', 'title' => 'Beauty products');
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertEquals(array('title' => 'Beauty products'), $category->to_array_for_update());
+    }
+
     public function test_factory_passes_validation(): void {
         $category_data = array('categoryID' => 'C1234', 'title' => 'Beauty products');
         $category = CategoryFactory::create_category($category_data);
@@ -76,7 +127,7 @@ final class CategoryTest extends TestCase
         $category = $category->to_array();
         
         $expected_result = array(
-            'categoryId' => 'C1234',
+            'categoryID' => 'C1234',
             'title' => 'Beauty products'
         );
 

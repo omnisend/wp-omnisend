@@ -19,6 +19,8 @@ class Batch {
 	public const POST_METHOD = 'POST';
 	public const PUT_METHOD  = 'PUT';
 
+	private const MAX_ITEMS = 100;
+
 	private const REQUIRED_PROPERTIES = array(
 		'items',
 		'method',
@@ -169,15 +171,15 @@ class Batch {
 	private function validate_properties( WP_Error $error ): WP_Error {
 		foreach ( $this as $property_key => $property_value ) {
 			if ( in_array( $property_key, self::REQUIRED_PROPERTIES ) && empty( $property_value ) ) {
-				$error->add( $property, $property_key . ' is a required property.' );
+				$error->add( $property_key, $property_key . ' is a required property.' );
 			}
 
 			if ( $property_value !== null && in_array( $property_key, self::STRING_PROPERTIES ) && ! is_string( $property_value ) ) {
-				$error->add( $property, $property_key . ' must be a string.' );
+				$error->add( $property_key, $property_key . ' must be a string.' );
 			}
 
 			if ( $property_value !== null && in_array( $property_key, self::ARRAY_PROPERTIES ) && ! is_array( $property_value ) ) {
-				$error->add( $property, $property_key . ' must be an array.' );
+				$error->add( $property_key, $property_key . ' must be an array.' );
 			}
 		}
 
@@ -192,6 +194,10 @@ class Batch {
 	 * @return WP_Error $error
 	 */
 	private function validate_items( WP_Error $error ): WP_Error {
+		if ( empty( $this->items ) ) {
+			return $error;
+		}
+
 		$type = get_class( reset( $this->items ) );
 
 		if ( ! array_key_exists( $type, self::ENDPOINT_MAPPINGS ) ) {
@@ -223,8 +229,12 @@ class Batch {
 	 * @return WP_Error $error
 	 */
 	private function validate_values( WP_Error $error ): WP_Error {
-		if ( empty( $this->items ) || count( $this->items ) > 1000 ) {
-			$error->add( 'items', sprintf( 'Items are empty or batch size limit: %s was exceeded', 1000 ) );
+		if ( empty( $this->items ) || count( $this->items ) > self::MAX_ITEMS ) {
+			$error->add( 'items', sprintf( 'Items are empty or batch size limit: %s was exceeded', self::MAX_ITEMS ) );
+		}
+
+		if ( ! in_array( $this->method, self::AVAILABLE_METHODS ) ) {
+			$error->add( 'method', sprintf( 'Method must be one of the following: %s', implode( ',', self::AVAILABLE_METHODS ) ) );
 		}
 
 		return $error;
