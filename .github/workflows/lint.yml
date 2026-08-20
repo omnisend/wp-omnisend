@@ -3,6 +3,9 @@ run-name: PHP Standards 🔀 ${{ github.ref_name }}
 
 on: push
 
+permissions:
+  contents: read
+
 jobs:
   Lint:
     name: Lint
