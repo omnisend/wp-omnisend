@@ -1,0 +1,233 @@
+<?php
+namespace Omnisend\Internal;
+
+use PHPUnit\Framework\TestCase;
+use WP_Http_Test_Stub;
+use WP_Redirect_Test_Exception;
+
+require_once( __DIR__ . '/../../dependencies/dependencies.php' );
+
+final class OAuthConnectionTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        WP_Http_Test_Stub::reset();
+        wp_test_reset_options();
+        $GLOBALS['wp_test_nonce_valid'] = true;
+        $_GET = array();
+    }
+
+    protected function tearDown(): void
+    {
+        $_GET = array();
+        unset($GLOBALS['wp_test_nonce_valid']);
+    }
+
+    private function registration_response(): array
+    {
+        return WP_Http_Test_Stub::response(201, '{"client_id":"client-1","client_secret":"secret-1"}');
+    }
+
+    private function token_response(string $access_token = 'access-1', string $refresh_token = 'refresh-1', int $expires_in = 2592000): array
+    {
+        return WP_Http_Test_Stub::response(200, json_encode(array(
+            'access_token' => $access_token,
+            'refresh_token' => $refresh_token,
+            'expires_in' => $expires_in,
+        )));
+    }
+
+    /**
+     * Production code exits after redirecting, so the redirect surfaces as an exception in tests.
+     */
+    private function handle_oauth_request(): void
+    {
+        try {
+            Connection::handle_oauth_request();
+        } catch (WP_Redirect_Test_Exception $exception) {
+            return;
+        }
+
+        $this->fail('Handling an OAuth request did not redirect.');
+    }
+
+    private function start_connect(): void
+    {
+        $_GET = array('omnisend_oauth' => 'connect', '_wpnonce' => 'nonce');
+        $this->handle_oauth_request();
+    }
+
+    private function complete_callback(): void
+    {
+        $_GET = array(
+            'omnisend_oauth' => 'callback',
+            'code' => 'auth-code',
+            'state' => get_transient('omni_send_core_oauth_state'),
+        );
+        $this->handle_oauth_request();
+    }
+
+    private function last_redirect(): string
+    {
+        $redirects = $GLOBALS['wp_test_redirects'];
+
+        return $redirects ? $redirects[count($redirects) - 1] : '';
+    }
+
+    private function oauth_error(): string
+    {
+        $error = get_transient('omni_send_core_oauth_error');
+
+        return is_string($error) ? $error : '';
+    }
+
+    public function test_connect_registers_the_client_and_redirects_to_the_consent_screen(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+
+        $this->start_connect();
+
+        $registration = WP_Http_Test_Stub::$requests[0];
+        $this->assertEquals('https://app.omnisend.com/oauth2/register', $registration['url']);
+
+        $body = json_decode($registration['args']['body'], true);
+        $this->assertEquals('WordPress', $body['client_name']);
+        $this->assertEquals(array('authorization_code', 'refresh_token'), $body['grant_types']);
+        $this->assertEquals(
+            array('https://example.com/wp-admin/admin.php?page=omnisend&omnisend_oauth=callback'),
+            $body['redirect_uris']
+        );
+
+        $this->assertEquals('client-1', Options::get_oauth_client_id());
+
+        $redirect = $this->last_redirect();
+        $this->assertStringStartsWith('https://app.omnisend.com/oauth2/authorize?', $redirect);
+        $this->assertStringContainsString('client_id=client-1', $redirect);
+        $this->assertStringContainsString('response_type=code', $redirect);
+        $this->assertStringContainsString('brands.write', urldecode($redirect));
+        $this->assertStringContainsString('state=' . get_transient('omni_send_core_oauth_state'), $redirect);
+    }
+
+    public function test_registration_failure_is_reported_and_does_not_start_the_flow(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(400, '{"title":"invalid_client_metadata"}'));
+
+        $this->start_connect();
+
+        $this->assertStringContainsString('did not go through', $this->oauth_error());
+        $this->assertEquals('', Options::get_oauth_client_id());
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_callback_exchanges_the_code_and_connects_the_store_with_the_access_token(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1"}'));
+
+        $this->complete_callback();
+
+        $this->assertEquals('', $this->oauth_error());
+        $this->assertTrue(Options::is_store_connected());
+        $this->assertEquals('brand-1', Options::get_brand_id());
+        $this->assertEquals(Options::AUTH_MODE_OAUTH, Options::get_auth_mode());
+        $this->assertEquals('', Options::get_api_key());
+
+        $token_request = WP_Http_Test_Stub::$requests[1];
+        $this->assertEquals('https://app.omnisend.com/oauth2/token', $token_request['url']);
+        $this->assertEquals('authorization_code', $token_request['args']['body']['grant_type']);
+        $this->assertEquals('auth-code', $token_request['args']['body']['code']);
+        $this->assertEquals('secret-1', $token_request['args']['body']['client_secret']);
+
+        $connect_request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('https://api.omnisend.com/api/brands/current', $connect_request['url']);
+        $this->assertEquals('POST', $connect_request['method']);
+        $this->assertEquals('Bearer access-1', $connect_request['args']['headers']['Authorization']);
+        $this->assertEquals('2026-03-15', $connect_request['args']['headers']['Omnisend-Version']);
+    }
+
+    public function test_callback_with_mismatched_state_does_not_exchange_the_code(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        $requests_before = count(WP_Http_Test_Stub::$requests);
+
+        $_GET = array(
+            'omnisend_oauth' => 'callback',
+            'code' => 'auth-code',
+            'state' => 'not-the-state-we-sent',
+        );
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('did not match this site', $this->oauth_error());
+        $this->assertCount($requests_before, WP_Http_Test_Stub::$requests);
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_connect_with_failed_nonce_verification_does_not_start_the_flow(): void
+    {
+        $GLOBALS['wp_test_nonce_valid'] = false;
+
+        $_GET = array('omnisend_oauth' => 'connect', '_wpnonce' => 'nonce');
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('could not be verified', $this->oauth_error());
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_authorization_denied_by_omnisend_is_reported(): void
+    {
+        $_GET = array('omnisend_oauth' => 'callback', 'error' => 'access_denied');
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('access_denied', $this->oauth_error());
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_brand_of_another_platform_is_not_connected(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"shopify"}'));
+
+        $this->complete_callback();
+
+        $this->assertStringContainsString('connected to another platform (shopify)', $this->oauth_error());
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_rejected_brand_write_leaves_the_store_disconnected(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.write scope."}'));
+
+        $this->complete_callback();
+
+        $this->assertStringContainsString('missing required permissions (brands.write)', $this->oauth_error());
+        $this->assertFalse(Options::is_store_connected());
+        $this->assertEquals('', Options::get_oauth_access_token());
+    }
+
+    public function test_token_response_without_access_token_is_rejected(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"refresh_token":"refresh-1","expires_in":3600}'));
+
+        $this->complete_callback();
+
+        $this->assertStringContainsString('access_token not found in response.', $this->oauth_error());
+        $this->assertEquals('', Options::get_oauth_access_token());
+    }
+}

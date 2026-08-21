@@ -1,116 +1,197 @@
 <?php
+namespace Omnisend\Internal;
 
-namespace Omnisend\Tests\Unit\Internal;
-
-use Omnisend\Internal\Connection;
 use PHPUnit\Framework\TestCase;
+use WP_Error;
+use WP_Http_Test_Stub;
 
 require_once( __DIR__ . '/../../dependencies/dependencies.php' );
 
-if ( ! defined( 'OMNISEND_CORE_PLUGIN_VERSION' ) ) {
-	define( 'OMNISEND_CORE_PLUGIN_VERSION', '1.8.1' );
-}
-
 final class ConnectionTest extends TestCase
 {
-	private $default_landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
+    protected function setUp(): void
+    {
+        WP_Http_Test_Stub::reset();
+        wp_test_reset_options();
+        $_POST = array(
+            'action_nonce' => 'nonce',
+            'api_key' => 'brandid-secret',
+        );
+    }
 
-	protected function setUp(): void
-	{
-		parent::setUp();
+    protected function tearDown(): void
+    {
+        $_POST = array();
+        $_GET = array();
+    }
 
-		Connection::$landing_page_url = $this->default_landing_page_url;
-		$GLOBALS['omnisend_test_http_response'] = array(
-			'body'     => '',
-			'response' => array(
-				'code' => 200,
-			),
-		);
-	}
+    private function connection_error(): string
+    {
+        $response = Connection::omnisend_post_connection();
 
-	protected function tearDown(): void
-	{
-		Connection::$landing_page_url = $this->default_landing_page_url;
-		unset( $GLOBALS['omnisend_test_http_response'] );
+        $this->assertFalse($response['success']);
 
-		parent::tearDown();
-	}
+        return $response['error'];
+    }
 
-	public function test_landing_page_url_is_applied_from_wordpress_settings(): void
-	{
-		$landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=explore';
-		$GLOBALS['omnisend_test_http_response'] = array(
-			'body'     => json_encode(
-				array(
-					'exploreOmnisendLink' => $landing_page_url,
-				)
-			),
-			'response' => array(
-				'code' => 200,
-			),
-		);
+    public function test_unauthorized_api_key(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(401, '{"title":"Unauthorized"}'));
 
-		Connection::resolve_wordpress_settings();
+        $this->assertEquals(
+            'The API key was rejected by Omnisend. Check if the API key is correct.',
+            $this->connection_error()
+        );
+    }
 
-		$this->assertSame( $landing_page_url, Connection::$landing_page_url );
-	}
+    public function test_missing_permissions_is_not_reported_as_invalid_api_key(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.read scope."}'));
 
-	public function test_wp_error_keeps_default_landing_page_url(): void
-	{
-		$GLOBALS['omnisend_test_http_response'] = new \WP_Error( 'request_failed' );
+        $error = $this->connection_error();
 
-		Connection::resolve_wordpress_settings();
+        $this->assertStringContainsString('missing required permissions (brands.read)', $error);
+        $this->assertStringContainsString('paste it here to reconnect', $error);
+        $this->assertFalse(Options::is_store_connected());
+    }
 
-		$this->assertSame( $this->default_landing_page_url, Connection::$landing_page_url );
-	}
+    public function test_missing_permissions_leaves_the_connection_form_available_for_another_key(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.read scope."}'));
 
-	public function test_http_error_keeps_default_landing_page_url(): void
-	{
-		$GLOBALS['omnisend_test_http_response'] = array(
-			'body'     => '{"exploreOmnisendLink":"https://app.omnisend.com/explore"}',
-			'response' => array(
-				'code' => 500,
-			),
-		);
+        $this->connection_error();
 
-		Connection::resolve_wordpress_settings();
+        $_GET = array(
+            'action' => 'show_connection_form',
+            '_wpnonce' => 'nonce',
+        );
 
-		$this->assertSame( $this->default_landing_page_url, Connection::$landing_page_url );
-	}
+        $this->assertTrue(Connection::show_connection_view());
+        $this->assertFalse(Connection::show_connected_store_view());
+    }
 
-	public function test_empty_body_keeps_default_landing_page_url(): void
-	{
-		$GLOBALS['omnisend_test_http_response']['body'] = '';
+    public function test_retired_api_version(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(410, '{"title":"Gone"}'));
 
-		Connection::resolve_wordpress_settings();
+        $this->assertStringContainsString('retired Omnisend API version', $this->connection_error());
+    }
 
-		$this->assertSame( $this->default_landing_page_url, Connection::$landing_page_url );
-	}
+    public function test_rate_limited(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(429, '{"title":"Too many requests","retryAfter":30}'));
 
-	public function test_malformed_json_keeps_default_landing_page_url(): void
-	{
-		$GLOBALS['omnisend_test_http_response']['body'] = '{malformed';
+        $this->assertStringContainsString('rate limiting', $this->connection_error());
+    }
 
-		Connection::resolve_wordpress_settings();
+    public function test_network_failure(): void
+    {
+        WP_Http_Test_Stub::queue(new WP_Error('http_request_failed', 'cURL error 28: timeout'));
 
-		$this->assertSame( $this->default_landing_page_url, Connection::$landing_page_url );
-	}
+        $error = $this->connection_error();
+        $this->assertStringContainsString('Could not reach Omnisend API', $error);
+        $this->assertStringContainsString('timeout', $error);
+    }
 
-	public function test_missing_explore_link_keeps_default_landing_page_url(): void
-	{
-		$GLOBALS['omnisend_test_http_response']['body'] = '{"otherSetting":"value"}';
+    public function test_server_error(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(503, ''));
 
-		Connection::resolve_wordpress_settings();
+        $this->assertStringContainsString('temporarily unavailable', $this->connection_error());
+    }
 
-		$this->assertSame( $this->default_landing_page_url, Connection::$landing_page_url );
-	}
+    public function test_malformed_json(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":'));
 
-	public function test_non_omnisend_domain_keeps_default_landing_page_url(): void
-	{
-		$GLOBALS['omnisend_test_http_response']['body'] = '{"exploreOmnisendLink":"https://example.com/explore"}';
+        $this->assertStringContainsString('unexpected response', $this->connection_error());
+    }
 
-		Connection::resolve_wordpress_settings();
+    public function test_empty_body(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, ''));
 
-		$this->assertSame( $this->default_landing_page_url, Connection::$landing_page_url );
-	}
+        $this->assertStringContainsString('unexpected response', $this->connection_error());
+    }
+
+    public function test_missing_brand_id(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"platform":""}'));
+
+        $this->assertStringContainsString('did not return a brand for this API key', $this->connection_error());
+    }
+
+    public function test_missing_platform_field(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1"}'));
+
+        $this->assertStringContainsString('platform not found in response.', $this->connection_error());
+    }
+
+    public function test_already_connected_to_other_platform(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"shopify","connected":true}'));
+
+        $this->assertStringContainsString('already connected to non-WordPress site', $this->connection_error());
+    }
+
+    public function test_already_connected_wordpress_store_succeeds(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"wordpress"}'));
+
+        $response = Connection::omnisend_post_connection();
+
+        $this->assertTrue($response['success']);
+        $this->assertEquals('brand-1', Options::get_brand_id());
+        $this->assertTrue(Options::is_store_connected());
+    }
+
+    public function test_already_connected_wordpress_store_keeps_authenticating_with_its_api_key(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"wordpress"}'));
+
+        $response = Connection::omnisend_post_connection();
+
+        $this->assertTrue($response['success']);
+        $this->assertEquals(Options::AUTH_MODE_API_KEY, Options::get_auth_mode());
+
+        $request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('Omnisend-API-Key brandid-secret', $request['args']['headers']['Authorization']);
+        $this->assertEquals('2026-03-15', $request['args']['headers']['Omnisend-Version']);
+    }
+
+    public function test_api_key_connect_of_brand_without_store_uses_the_retained_v3_account_write(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"verified":true}'));
+
+        $response = Connection::omnisend_post_connection();
+
+        $this->assertTrue($response['success']);
+        $this->assertTrue(Options::is_store_connected());
+        $this->assertEquals(Options::AUTH_MODE_API_KEY, Options::get_auth_mode());
+
+        $request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('https://api.omnisend.com/v3/accounts', $request['url']);
+        $this->assertEquals('brandid-secret', $request['args']['headers']['X-API-Key']);
+        $this->assertArrayNotHasKey('Authorization', $request['args']['headers']);
+        $this->assertEquals('wordpress', json_decode($request['args']['body'], true)['platform']);
+    }
+
+    public function test_api_key_connect_of_brand_without_store_fails_when_omnisend_does_not_verify_it(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"verified":false}'));
+
+        $this->assertStringContainsString('verified in response', $this->connection_error());
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_non_boolean_connected_in_brand_response_is_rejected(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"shopify","connected":"true"}'));
+
+        $this->assertStringContainsString('connected in response is not a boolean.', $this->connection_error());
+        $this->assertFalse(Options::is_store_connected());
+    }
 }

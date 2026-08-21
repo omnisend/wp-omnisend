@@ -76,7 +76,7 @@ final class ProductTest extends TestCase
         $product = ProductFactory::create_product($product_data);
 
         $error_message = $product->validate()->get_error_message('title');
-        $expected_error_message = 'Title must be under 100 characters';
+        $expected_error_message = 'Title must be under 255 characters';
 
         $this->assertEquals($error_message, $expected_error_message);
     }
@@ -307,5 +307,239 @@ final class ProductTest extends TestCase
         );
 
         $this->assertEquals($product, $expected_result);
+    }
+
+    public function test_title_of_255_characters_passes_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('title' => str_repeat('a', 255))));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
+    public function test_title_of_256_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('title' => str_repeat('a', 256))));
+
+        $this->assertEquals('Title must be under 255 characters', $product->validate()->get_error_message('title'));
+    }
+
+    public function test_description_of_1000_characters_passes_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('description' => str_repeat('a', 1000))));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
+    public function test_description_of_1001_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('description' => str_repeat('a', 1001))));
+
+        $this->assertEquals('Description must be under 1000 characters', $product->validate()->get_error_message('description'));
+    }
+
+    public function test_id_of_101_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('id' => str_repeat('p', 101))));
+
+        $this->assertEquals('ID must be under 100 characters', $product->validate()->get_error_message('id'));
+    }
+
+    public function test_id_with_unsupported_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('id' => 'product 1')));
+
+        $this->assertEquals(
+            'ID must contain only letters, numbers, underscores and dashes',
+            $product->validate()->get_error_message('id')
+        );
+    }
+
+    public function test_url_of_1001_characters_fails_validation(): void {
+        $url = 'https://omnisend.com/products/' . str_repeat('a', 1000);
+        $product = ProductFactory::create_product($this->product_data(array('url' => $url)));
+
+        $this->assertEquals('Url must be under 1000 characters', $product->validate()->get_error_message('url'));
+    }
+
+    public function test_default_image_url_of_1001_characters_fails_validation(): void {
+        $image_url = 'https://omnisend.com/media/' . str_repeat('a', 1000) . '.png';
+        $product = ProductFactory::create_product($this->product_data(array('defaultImageUrl' => $image_url)));
+
+        $this->assertEquals(
+            'Default image URL must be under 1000 characters',
+            $product->validate()->get_error_message('default_image_url')
+        );
+    }
+
+    public function test_300_images_pass_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('images' => $this->image_urls(300))));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
+    public function test_301_images_fail_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('images' => $this->image_urls(301))));
+
+        $this->assertEquals('Images must not exceed 300 items', $product->validate()->get_error_message('images'));
+    }
+
+    public function test_image_that_is_not_url_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('images' => array('media/product.png'))));
+
+        $this->assertEquals(
+            'Image "media/product.png" must contain a valid URL',
+            $product->validate()->get_error_message('images')
+        );
+    }
+
+    public function test_100_category_ids_pass_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('categoryIDs' => $this->category_ids(100))));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
+    public function test_101_category_ids_fail_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('categoryIDs' => $this->category_ids(101))));
+
+        $this->assertEquals(
+            'Category IDs must not exceed 100 items',
+            $product->validate()->get_error_message('category_ids')
+        );
+    }
+
+    public function test_category_id_of_201_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('categoryIDs' => array(str_repeat('c', 201)))));
+
+        $this->assertEquals(
+            'Category ID must be under 200 characters',
+            $product->validate()->get_error_message('category_ids')
+        );
+    }
+
+    public function test_category_id_with_unsupported_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('categoryIDs' => array('category 1'))));
+
+        $this->assertEquals(
+            'Category ID "category 1" must contain only letters, numbers, underscores and dashes',
+            $product->validate()->get_error_message('category_ids')
+        );
+    }
+
+    public function test_101_tags_fail_validation(): void {
+        $tags = array();
+
+        for ($i = 0; $i < 101; $i++) {
+            $tags[] = 'tag-' . $i;
+        }
+
+        $product = ProductFactory::create_product($this->product_data(array('tags' => $tags)));
+
+        $this->assertEquals('Tags must not exceed 100 items', $product->validate()->get_error_message('tags'));
+    }
+
+    public function test_product_without_variants_fails_validation(): void {
+        $product_data = $this->product_data();
+        unset($product_data['variants']);
+
+        $product = ProductFactory::create_product($product_data);
+
+        $this->assertEquals('Product must have at least 1 variant', $product->validate()->get_error_message('variants'));
+    }
+
+    public function test_500_variants_pass_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('variants' => $this->variants(500))));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
+    public function test_501_variants_fail_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('variants' => $this->variants(501))));
+
+        $this->assertEquals('Variants must not exceed 500 items', $product->validate()->get_error_message('variants'));
+    }
+
+    public function test_type_of_101_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('type' => str_repeat('t', 101))));
+
+        $this->assertEquals('Type must be under 100 characters', $product->validate()->get_error_message('type'));
+    }
+
+    public function test_vendor_of_101_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('vendor' => str_repeat('v', 101))));
+
+        $this->assertEquals('Vendor must be under 100 characters', $product->validate()->get_error_message('vendor'));
+    }
+
+    public function test_currency_that_is_not_three_characters_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('currency' => 'US')));
+
+        $this->assertEquals('Currency code must be 3 characters long', $product->validate()->get_error_message('currency'));
+    }
+
+    public function test_created_at_in_unsupported_format_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('createdAt' => '2022-01-04 08:30:24')));
+
+        $this->assertEquals(
+            'created_at must be in Y-m-d\TH:i:s\Z format',
+            $product->validate()->get_error_message('created_at')
+        );
+    }
+
+    public function test_updated_at_in_unsupported_format_fails_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('updatedAt' => '2022-01-04T08:30:24+02:00')));
+
+        $this->assertEquals(
+            'updated_at must be in Y-m-d\TH:i:s\Z format',
+            $product->validate()->get_error_message('updated_at')
+        );
+    }
+
+    public function test_updated_at_in_api_format_passes_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('updatedAt' => '2022-01-04T08:30:24Z')));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
+    private function product_data(array $overrides = array()): array {
+        $product_data = array(
+            'currency' => 'USD',
+            'id' => 'product-1',
+            'status' => 'inStock',
+            'title' => 'My product',
+            'url' => 'https://omnisend.com/products/my-product',
+            'variants' => $this->variants(1),
+        );
+
+        return array_merge($product_data, $overrides);
+    }
+
+    private function variants(int $count): array {
+        $variants = array();
+
+        for ($i = 0; $i < $count; $i++) {
+            $variants[] = array(
+                'id' => 'product-1-variant-' . $i,
+                'price' => 9.99,
+                'status' => 'inStock',
+                'title' => 'My variant',
+                'url' => 'https://omnisend.com/products/my-product',
+            );
+        }
+
+        return $variants;
+    }
+
+    private function image_urls(int $count): array {
+        $images = array();
+
+        for ($i = 0; $i < $count; $i++) {
+            $images[] = 'https://omnisend.com/media/products/product-' . $i . '.png';
+        }
+
+        return $images;
+    }
+
+    private function category_ids(int $count): array {
+        $category_ids = array();
+
+        for ($i = 0; $i < $count; $i++) {
+            $category_ids[] = 'category-' . $i;
+        }
+
+        return $category_ids;
     }
 }
