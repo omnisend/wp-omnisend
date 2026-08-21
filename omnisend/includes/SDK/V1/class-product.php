@@ -591,16 +591,24 @@ class Product {
 			$error->add( 'id', 'ID must be under 100 characters' );
 		}
 
-		if ( strlen( $this->title ) > 100 ) {
-			$error->add( 'title', 'Title must be under 100 characters' );
+		if ( ! Utils::is_valid_identifier( (string) $this->id ) ) {
+			$error->add( 'id', 'ID must contain only letters, numbers, underscores and dashes' );
+		}
+
+		if ( strlen( $this->title ) > 255 ) {
+			$error->add( 'title', 'Title must be under 255 characters' );
 		}
 
 		if ( ! ctype_upper( $this->currency ) ) {
 			$error->add( 'currency', 'Currency code must be all uppercase' );
 		}
 
-		if ( $this->description !== null && strlen( $this->description ) > 300 ) {
-			$error->add( 'description', 'Description must be under 300 characters' );
+		if ( strlen( $this->currency ) !== 3 ) {
+			$error->add( 'currency', 'Currency code must be 3 characters long' );
+		}
+
+		if ( $this->description !== null && strlen( $this->description ) > 1000 ) {
+			$error->add( 'description', 'Description must be under 1000 characters' );
 		}
 
 		if ( $this->type !== null && strlen( $this->type ) > 100 ) {
@@ -615,8 +623,64 @@ class Product {
 			$error->add( 'default_image_url', 'Default image must contain a valid URL' );
 		}
 
+		if ( ! empty( $this->default_image_url ) && strlen( $this->default_image_url ) > 1000 ) {
+			$error->add( 'default_image_url', 'Default image URL must be under 1000 characters' );
+		}
+
 		if ( ! filter_var( $this->url, FILTER_VALIDATE_URL ) ) {
 			$error->add( 'url', 'Url must contain a valid URL' );
+		}
+
+		if ( strlen( $this->url ) > 1000 ) {
+			$error->add( 'url', 'Url must be under 1000 characters' );
+		}
+
+		if ( count( $this->images ) > 300 ) {
+			$error->add( 'images', 'Images must not exceed 300 items' );
+		}
+
+		foreach ( $this->images as $image ) {
+			if ( ! filter_var( $image, FILTER_VALIDATE_URL ) ) {
+				$error->add( 'images', 'Image "' . $image . '" must contain a valid URL' );
+			}
+
+			if ( strlen( $image ) > 1000 ) {
+				$error->add( 'images', 'Image URL must be under 1000 characters' );
+			}
+		}
+
+		if ( count( $this->category_ids ) > 100 ) {
+			$error->add( 'category_ids', 'Category IDs must not exceed 100 items' );
+		}
+
+		foreach ( $this->category_ids as $category_id ) {
+			if ( strlen( $category_id ) > 200 ) {
+				$error->add( 'category_ids', 'Category ID must be under 200 characters' );
+			}
+
+			if ( ! Utils::is_valid_identifier( (string) $category_id ) ) {
+				$error->add( 'category_ids', 'Category ID "' . $category_id . '" must contain only letters, numbers, underscores and dashes' );
+			}
+		}
+
+		if ( count( $this->tags ) > 100 ) {
+			$error->add( 'tags', 'Tags must not exceed 100 items' );
+		}
+
+		if ( count( $this->variants ) < 1 ) {
+			$error->add( 'variants', 'Product must have at least 1 variant' );
+		}
+
+		if ( count( $this->variants ) > 500 ) {
+			$error->add( 'variants', 'Variants must not exceed 500 items' );
+		}
+
+		if ( $this->created_at !== null && ! Utils::is_valid_api_date_time( $this->created_at ) ) {
+			$error->add( 'created_at', 'created_at must be in Y-m-d\TH:i:s\Z format' );
+		}
+
+		if ( $this->updated_at !== null && ! Utils::is_valid_api_date_time( $this->updated_at ) ) {
+			$error->add( 'updated_at', 'updated_at must be in Y-m-d\TH:i:s\Z format' );
 		}
 
 		return $error;

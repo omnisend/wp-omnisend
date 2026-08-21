@@ -68,11 +68,7 @@ class Connection {
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/brands/current',
 			array(
-				'headers' => array(
-					'Content-Type'     => 'application/json',
-					'Authorization'    => 'Omnisend-API-Key ' . $api_key,
-					'Omnisend-Version' => '2026-03-15',
-				),
+				'headers' => ApiRequest::headers( $api_key ),
 				'timeout' => 10,
 			)
 		);
@@ -82,13 +78,15 @@ class Connection {
 
 	/**
 	 * Maps API failures to messages an administrator can act on.
+	 *
+	 * @param string $required_permission Permission the rejected request needed, when known.
 	 */
-	private static function get_connection_error_message( WP_Error $error ): string {
+	private static function get_connection_error_message( WP_Error $error, string $required_permission = '' ): string {
 		switch ( $error->get_error_code() ) {
 			case ApiResponse::ERROR_UNAUTHORIZED:
 				return 'The API key was rejected by Omnisend. Check if the API key is correct.';
 			case ApiResponse::ERROR_FORBIDDEN:
-				return 'This API key is missing required permissions (brands.read). Create a new API key with store connection permissions.';
+				return self::get_missing_permission_message( $required_permission );
 			case ApiResponse::ERROR_VERSION_RETIRED:
 				return 'This Omnisend plugin version uses a retired Omnisend API version. Please update the plugin.';
 			case ApiResponse::ERROR_RATE_LIMITED:
@@ -105,6 +103,17 @@ class Connection {
 		}
 
 		return 'The connection did not go through. Details: ' . $error->get_error_message();
+	}
+
+	/**
+	 * The API gateway rejects the key before Omnisend sees the request, so the failing request has to name the permission it needed.
+	 *
+	 * @param string $required_permission Permission the rejected request needed, when known.
+	 */
+	private static function get_missing_permission_message( string $required_permission ): string {
+		$permission = $required_permission === '' ? '' : ' (' . $required_permission . ')';
+
+		return 'This API key is missing required permissions' . $permission . '. In Omnisend create a new API key with store connection permissions and paste it here to reconnect.';
 	}
 
 	public static function show_connected_store_view(): bool {
@@ -140,11 +149,7 @@ class Connection {
 			OMNISEND_CORE_API . '/accounts',
 			array(
 				'body'    => wp_json_encode( $data ),
-				'headers' => array(
-					'Content-Type'     => 'application/json',
-					'Authorization'    => 'Omnisend-API-Key ' . $api_key,
-					'Omnisend-Version' => '2026-03-15',
-				),
+				'headers' => ApiRequest::headers( $api_key ),
 				'timeout' => 10,
 			)
 		);
@@ -155,8 +160,12 @@ class Connection {
 			return $arr;
 		}
 
-		if ( empty( $arr['connected'] ) ) {
+		if ( ! isset( $arr['connected'] ) || ! is_bool( $arr['connected'] ) ) {
 			return ApiResponse::unexpected_shape_error( 'connected' );
+		}
+
+		if ( $arr['connected'] !== true ) {
+			return ApiResponse::unexpected_value_error( 'connected', 'is false, so the store was not connected' );
 		}
 
 		return true;
@@ -271,7 +280,7 @@ class Connection {
 				return rest_ensure_response(
 					array(
 						'success' => false,
-						'error'   => self::get_connection_error_message( $response ),
+						'error'   => self::get_connection_error_message( $response, 'brands.read' ),
 					)
 				);
 			}
@@ -292,6 +301,15 @@ class Connection {
 					array(
 						'success' => false,
 						'error'   => self::get_connection_error_message( ApiResponse::unexpected_shape_error( 'platform' ) ),
+					)
+				);
+			}
+
+			if ( isset( $response['connected'] ) && ! is_bool( $response['connected'] ) ) {
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => self::get_connection_error_message( ApiResponse::unexpected_value_error( 'connected', 'is not a boolean' ) ),
 					)
 				);
 			}
@@ -318,7 +336,7 @@ class Connection {
 					return rest_ensure_response(
 						array(
 							'success' => false,
-							'error'   => self::get_connection_error_message( $connected ),
+							'error'   => self::get_connection_error_message( $connected, 'accounts.write' ),
 						)
 					);
 				}

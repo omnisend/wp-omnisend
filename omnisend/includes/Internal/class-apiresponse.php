@@ -79,6 +79,14 @@ class ApiResponse {
 		return self::error( self::ERROR_NOT_FOUND, "{$entity} not found." );
 	}
 
+	/**
+	 * @param string $field Field the caller found in the response with an unusable value.
+	 * @param string $detail What is wrong with the value.
+	 */
+	public static function unexpected_value_error( string $field, string $detail ): WP_Error {
+		return self::error( self::ERROR_UNEXPECTED_SHAPE, "{$field} in response {$detail}." );
+	}
+
 	private static function status_error( int $status, string $reason, $data, string $body ): WP_Error {
 		$problem = self::problem_details( $data );
 
