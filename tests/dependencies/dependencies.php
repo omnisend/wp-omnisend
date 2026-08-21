@@ -34,6 +34,7 @@ function require_classes($directory) {
 /* START | Fix WordPress requirements */
 require_once(__DIR__ . '/list/class-wp-error.php');
 require_once(__DIR__ . '/list/formatting.php');
+require_once(__DIR__ . '/list/http.php');
 
 function do_action($args) {
     return;
