@@ -156,5 +156,32 @@ final class ConnectionTest extends TestCase
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{}'));
 
         $this->assertStringContainsString('connected not found in response.', $this->connection_error());
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_store_connect_with_connected_false_does_not_connect(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"connected":false}'));
+
+        $this->assertStringContainsString('connected in response is false, so the store was not connected.', $this->connection_error());
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_store_connect_with_non_boolean_connected_does_not_connect(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"connected":"false"}'));
+
+        $this->assertStringContainsString('connected not found in response.', $this->connection_error());
+        $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_non_boolean_connected_in_brand_response_is_rejected(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"shopify","connected":"true"}'));
+
+        $this->assertStringContainsString('connected in response is not a boolean.', $this->connection_error());
+        $this->assertFalse(Options::is_store_connected());
     }
 }

@@ -21,6 +21,7 @@ use Omnisend\SDK\V1\CreateProductResponse;
 use Omnisend\SDK\V1\GetContactResponse;
 use Omnisend\SDK\V1\GetCategoryResponse;
 use Omnisend\SDK\V1\GetProductResponse;
+use Omnisend\Internal\ApiRequest;
 use Omnisend\Internal\ApiResponse;
 use Omnisend\Internal\ContactFactory;
 use Omnisend\Internal\CategoryFactory;
@@ -55,12 +56,12 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	private function get_request_headers(): array {
-		return array(
-			'Content-Type'          => 'application/json',
-			'Authorization'         => 'Omnisend-API-Key ' . $this->api_key,
-			'Omnisend-Version'      => '2026-03-15',
-			'X-INTEGRATION-NAME'    => $this->plugin_name,
-			'X-INTEGRATION-VERSION' => $this->plugin_version,
+		return ApiRequest::headers(
+			$this->api_key,
+			array(
+				'X-INTEGRATION-NAME'    => $this->plugin_name,
+				'X-INTEGRATION-VERSION' => $this->plugin_version,
+			)
 		);
 	}
 

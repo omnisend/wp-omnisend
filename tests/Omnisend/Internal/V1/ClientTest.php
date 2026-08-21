@@ -35,6 +35,8 @@ final class ClientTest extends TestCase
         $this->assertEquals('https://api.omnisend.com/api/contacts', $request['url']);
         $this->assertEquals('Omnisend-API-Key brandid-secret', $request['args']['headers']['Authorization']);
         $this->assertEquals('2026-03-15', $request['args']['headers']['Omnisend-Version']);
+        $this->assertEquals('test-plugin', $request['args']['headers']['X-INTEGRATION-NAME']);
+        $this->assertEquals('1.0.0', $request['args']['headers']['X-INTEGRATION-VERSION']);
     }
 
     public function test_create_contact_reports_missing_id_as_unexpected_shape(): void
@@ -89,6 +91,7 @@ final class ClientTest extends TestCase
 
         $response = $this->client()->get_contact_by_email('test@example.com');
 
+        $this->assertNull($response->get_contact());
         $error = $response->get_wp_error();
         $this->assertEquals('http_request_failed', $error->get_error_code());
         $this->assertStringContainsString('timeout', $error->get_error_message());

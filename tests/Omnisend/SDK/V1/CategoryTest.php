@@ -50,6 +50,23 @@ final class CategoryTest extends TestCase
         $this->assertEquals($error_message, $expected_error_message);
     }
 
+    public function test_factory_accepts_title_at_length_limit(): void {
+        $category_data = array('categoryID' => 'C1234', 'title' => str_repeat('a', 255));
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertFalse($category->validate()->has_errors());
+    }
+
+    public function test_factory_rejects_title_over_length_limit(): void {
+        $category_data = array('categoryID' => 'C1234', 'title' => str_repeat('a', 256));
+        $category = CategoryFactory::create_category($category_data);
+
+        $this->assertEquals(
+            'Title must be under 255 characters',
+            $category->validate()->get_error_message('title')
+        );
+    }
+
     public function test_factory_raises_validation_error_on_long_category_id(): void {
         $category_data = array(
             'categoryID' => '
