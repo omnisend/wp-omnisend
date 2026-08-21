@@ -47,18 +47,47 @@ class Connection {
 		require_once __DIR__ . '/../../view/landing-page.html';
 	}
 
+	/**
+	 * Resolve landing page settings from the wordpress-backend Cloudflare Worker.
+	 *
+	 * This endpoint is intentionally retained because it is served by the
+	 * wordpress-backend Cloudflare Worker in the omnisend/wp-omnisend-backend
+	 * repository rather than the versioned Omnisend public API, so it is outside
+	 * the /api migration.
+	 */
 	public static function resolve_wordpress_settings(): void {
 		$url      = 'https://api.omnisend.com/wordpress/settings?version=' . OMNISEND_CORE_PLUGIN_VERSION;
-		$response = wp_remote_get( $url );
+		$response = wp_remote_get(
+			$url,
+			array(
+				'timeout' => 10,
+			)
+		);
 
-		if ( ! is_wp_error( $response ) ) {
-			$body = wp_remote_retrieve_body( $response );
-
-			$data = json_decode( $body, true );
-			if ( ! empty( $data['exploreOmnisendLink'] ) ) {
-				self::$landing_page_url = $data['exploreOmnisendLink'];
-			}
+		if ( is_wp_error( $response ) ) {
+			return;
 		}
+
+		$http_code = wp_remote_retrieve_response_code( $response );
+		if ( $http_code >= 400 ) {
+			return;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		if ( empty( $body ) ) {
+			return;
+		}
+
+		$data = json_decode( $body, true );
+		if ( ! is_array( $data ) || ! isset( $data['exploreOmnisendLink'] ) || ! is_string( $data['exploreOmnisendLink'] ) || empty( $data['exploreOmnisendLink'] ) ) {
+			return;
+		}
+
+		if ( self::get_naked_domain( $data['exploreOmnisendLink'] ) !== 'omnisend.com' ) {
+			return;
+		}
+
+		self::$landing_page_url = $data['exploreOmnisendLink'];
 	}
 
 	/**

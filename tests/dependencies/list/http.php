@@ -92,6 +92,10 @@ function wp_remote_retrieve_body( $response ) {
 	return isset( $response['body'] ) ? $response['body'] : '';
 }
 
+function wp_parse_url( $url, $component = -1 ) {
+	return parse_url( $url, $component );
+}
+
 function wp_json_encode( $data ) {
 	return json_encode( $data );
 }
