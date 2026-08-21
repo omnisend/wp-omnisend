@@ -45,6 +45,10 @@ if (!defined('OMNISEND_CORE_API')) {
     define('OMNISEND_CORE_API', 'https://api.omnisend.com/api');
 }
 
+if (!defined('OMNISEND_CORE_API_V3')) {
+    define('OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3');
+}
+
 function do_action($args) {
     return;
 }

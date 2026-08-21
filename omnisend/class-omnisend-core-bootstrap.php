@@ -34,8 +34,15 @@ const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
 // Change for different environment.
-const OMNISEND_CORE_API         = 'https://api.omnisend.com/api';
-const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
+const OMNISEND_CORE_API = 'https://api.omnisend.com/api';
+// Retained deprecated base, used only by API key connections for the account write. The /api account routes
+// require permissions brand API keys do not have, and brand writes on /api are OAuth only.
+const OMNISEND_CORE_API_V3       = 'https://api.omnisend.com/v3';
+const OMNISEND_CORE_OAUTH_ISSUER = 'https://app.omnisend.com';
+const OMNISEND_CORE_SNIPPET_URL  = 'https://omnisnippet1.com/inshop/launcher-v2.js';
+
+// Application this plugin registers itself as in the Omnisend app market.
+const OMNISEND_CORE_OAUTH_CLIENT_NAME = 'WordPress';
 
 // Omnisend for Woo plugin.
 const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION = 'omnisend_api_key';
@@ -61,6 +68,7 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
+		add_action( 'admin_init', 'Omnisend\Internal\Connection::handle_oauth_request' );
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 		add_action( 'admin_init', 'Omnisend_Core_Bootstrap::add_privacy_policy_content' );
 
