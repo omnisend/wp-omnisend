@@ -7,6 +7,7 @@
 
 namespace Omnisend\SDK\V1;
 
+use Omnisend\Internal\Utils;
 use Omnisend\SDK\V1\Product;
 use WP_Error;
 
@@ -19,6 +20,7 @@ class ProductVariant {
 	private const REQUIRED_PROPERTIES = array(
 		'id',
 		'price',
+		'status',
 		'title',
 		'url',
 	);
@@ -310,26 +312,71 @@ class ProductVariant {
 			$error->add( 'id', 'ID must be under 100 characters' );
 		}
 
-		if ( strlen( $this->title ) > 100 ) {
-			$error->add( 'title', 'Title must be under 100 characters' );
+		if ( ! Utils::is_valid_identifier( (string) $this->id ) ) {
+			$error->add( 'id', 'ID must contain only letters, numbers, underscores and dashes' );
 		}
 
-		if ( $this->description !== null && strlen( $this->description ) > 300 ) {
-			$error->add( 'description', 'Description must be under 300 characters' );
+		if ( strlen( $this->title ) > 255 ) {
+			$error->add( 'title', 'Title must be under 255 characters' );
 		}
 
-		if ( $this->sku !== null && strlen( $this->sku ) > 100 ) {
-			$error->add( 'sku', 'SKU must be under 100 characters' );
+		if ( $this->description !== null && strlen( $this->description ) > 1000 ) {
+			$error->add( 'description', 'Description must be under 1000 characters' );
+		}
+
+		if ( $this->sku !== null && strlen( $this->sku ) > 255 ) {
+			$error->add( 'sku', 'SKU must be under 255 characters' );
+		}
+
+		if ( ! $this->is_valid_price( $this->price ) ) {
+			$error->add( 'price', 'Price must not be negative and must have no more than 2 decimal places' );
+		}
+
+		if ( ! empty( $this->strike_through_price ) && ! $this->is_valid_price( $this->strike_through_price ) ) {
+			$error->add( 'strike_through_price', 'Strike through price must not be negative and must have no more than 2 decimal places' );
 		}
 
 		if ( ! empty( $this->default_image_url ) && ! filter_var( $this->default_image_url, FILTER_VALIDATE_URL ) ) {
 			$error->add( 'default_image_url', 'Default image URL must contain a valid URL' );
 		}
 
+		if ( ! empty( $this->default_image_url ) && strlen( $this->default_image_url ) > 1000 ) {
+			$error->add( 'default_image_url', 'Default image URL must be under 1000 characters' );
+		}
+
 		if ( ! filter_var( $this->url, FILTER_VALIDATE_URL ) ) {
 			$error->add( 'url', 'Url must contain a valid URL' );
 		}
 
+		if ( strlen( $this->url ) > 1000 ) {
+			$error->add( 'url', 'Url must be under 1000 characters' );
+		}
+
+		if ( count( $this->images ) > 300 ) {
+			$error->add( 'images', 'Images must not exceed 300 items' );
+		}
+
+		foreach ( $this->images as $image ) {
+			if ( ! filter_var( $image, FILTER_VALIDATE_URL ) ) {
+				$error->add( 'images', 'Image "' . $image . '" must contain a valid URL' );
+			}
+
+			if ( strlen( $image ) > 1000 ) {
+				$error->add( 'images', 'Image URL must be under 1000 characters' );
+			}
+		}
+
 		return $error;
+	}
+
+	/**
+	 * Checks that price is not negative and fits into 2 decimal places, as Omnisend API requires
+	 *
+	 * @param mixed $price
+	 *
+	 * @return bool
+	 */
+	private function is_valid_price( $price ): bool {
+		return $price >= 0 && (float) $price === round( (float) $price, 2 );
 	}
 }

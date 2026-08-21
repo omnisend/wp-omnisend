@@ -87,7 +87,7 @@ class Category {
 		}
 
 		return array(
-			'categoryId' => $this->category_id,
+			'categoryID' => $this->category_id,
 			'title'      => $this->title,
 		);
 	}
