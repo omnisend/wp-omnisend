@@ -3,6 +3,9 @@ run-name: PHP Standards 🔀 ${{ github.ref_name }}
 
 on: push
 
+permissions:
+  contents: read
+
 jobs:
   Lint:
     name: Lint
@@ -19,3 +22,15 @@ jobs:
 
       - name: Lint PHP files
         run: ./lint.sh check
+
+  Tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit tests/Omnisend/
