@@ -25,7 +25,7 @@ class GetContactResponse {
 		$this->wp_error = $wp_error;
 	}
 
-	public function get_contact(): ?Contact {
+	public function get_contact(): Contact {
 		return $this->contact;
 	}
 
