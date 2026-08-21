@@ -32,6 +32,23 @@ class ApiRequest {
 		);
 	}
 
+	/**
+	 * Builds the headers of the retained deprecated /v3 account calls, which authenticate with X-API-Key
+	 * and are not versioned.
+	 *
+	 * @param string $api_key Omnisend brand API key.
+	 * @param array  $extra_headers Headers only some callers send, for example the integration name and version.
+	 */
+	public static function legacy_api_key_headers( string $api_key, array $extra_headers = array() ): array {
+		return array_merge(
+			array(
+				'Content-Type' => 'application/json',
+				'X-API-Key'    => $api_key,
+			),
+			$extra_headers
+		);
+	}
+
 	public static function api_key_authorization( string $api_key ): string {
 		return 'Omnisend-API-Key ' . $api_key;
 	}

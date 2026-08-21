@@ -160,13 +160,31 @@ final class ConnectionTest extends TestCase
         $this->assertEquals('2026-03-15', $request['args']['headers']['Omnisend-Version']);
     }
 
-    public function test_api_key_connect_of_brand_without_store_is_sent_to_the_oauth_flow(): void
+    public function test_api_key_connect_of_brand_without_store_uses_the_retained_v3_account_write(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"verified":true}'));
 
-        $this->assertStringContainsString('Use the "Connect Omnisend" button', $this->connection_error());
+        $response = Connection::omnisend_post_connection();
+
+        $this->assertTrue($response['success']);
+        $this->assertTrue(Options::is_store_connected());
+        $this->assertEquals(Options::AUTH_MODE_API_KEY, Options::get_auth_mode());
+
+        $request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('https://api.omnisend.com/v3/accounts', $request['url']);
+        $this->assertEquals('brandid-secret', $request['args']['headers']['X-API-Key']);
+        $this->assertArrayNotHasKey('Authorization', $request['args']['headers']);
+        $this->assertEquals('wordpress', json_decode($request['args']['body'], true)['platform']);
+    }
+
+    public function test_api_key_connect_of_brand_without_store_fails_when_omnisend_does_not_verify_it(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"verified":false}'));
+
+        $this->assertStringContainsString('verified in response', $this->connection_error());
         $this->assertFalse(Options::is_store_connected());
-        $this->assertCount(1, WP_Http_Test_Stub::$requests);
     }
 
     public function test_non_boolean_connected_in_brand_response_is_rejected(): void

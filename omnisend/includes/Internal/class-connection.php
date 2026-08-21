@@ -214,6 +214,43 @@ class Connection {
 	}
 
 	/**
+	 * Writes this site into the brand the pasted API key belongs to. This is the retained deprecated /v3 call:
+	 * brand API keys are rejected by the /api account routes and may not write brand settings at all.
+	 *
+	 * @return true|WP_Error True when the store is connected, otherwise an error describing the failure.
+	 */
+	private static function connect_store_with_api_key( string $api_key ) {
+		$data = array(
+			'website'         => site_url(),
+			'platform'        => self::WORDPRESS_PLATFORM,
+			'version'         => OMNISEND_CORE_PLUGIN_VERSION,
+			'phpVersion'      => phpversion(),
+			'platformVersion' => get_bloginfo( 'version' ),
+		);
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API_V3 . '/accounts',
+			array(
+				'body'    => wp_json_encode( $data ),
+				'headers' => ApiRequest::legacy_api_key_headers( $api_key ),
+				'timeout' => 10,
+			)
+		);
+
+		$parsed = ApiResponse::parse( $response );
+
+		if ( is_wp_error( $parsed ) ) {
+			return $parsed;
+		}
+
+		if ( empty( $parsed['verified'] ) ) {
+			return ApiResponse::unexpected_value_error( 'verified', 'is not set, so Omnisend did not verify this store' );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Starts and finishes the OAuth connect flow. New connections and reconnections go through it;
 	 * stores that are already connected with an API key never reach it.
 	 */
@@ -427,9 +464,8 @@ class Connection {
 	}
 
 	/**
-	 * Connects a store with an API key its administrator pasted. New brands are connected through OAuth,
-	 * because only OAuth credentials may write brand settings, so this only accepts brands Omnisend already
-	 * knows as WordPress stores.
+	 * Connects a store with an API key its administrator pasted. Brands Omnisend does not know a platform for
+	 * are written with the retained deprecated /v3 account call, because API keys may not write brand settings on /api.
 	 */
 	public static function omnisend_post_connection() {
 		$connected = Options::is_store_connected();
@@ -515,10 +551,26 @@ class Connection {
 			}
 
 			if ( $response['platform'] === '' ) {
+				$connected_store = self::connect_store_with_api_key( $api_key );
+
+				if ( is_wp_error( $connected_store ) ) {
+					return rest_ensure_response(
+						array(
+							'success' => false,
+							'error'   => self::get_connection_error_message( $connected_store ),
+						)
+					);
+				}
+
+				Options::set_api_key( $api_key );
+				Options::set_brand_id( $brand_id );
+				Options::set_store_connected();
+				self::schedule_contact_sync();
+
 				return rest_ensure_response(
 					array(
-						'success' => false,
-						'error'   => 'This Omnisend account has no store connected yet. Use the "Connect Omnisend" button to connect it.',
+						'success' => true,
+						'error'   => '',
 					)
 				);
 			}

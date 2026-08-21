@@ -135,6 +135,39 @@ final class AuthModeTest extends TestCase
         $this->assertEquals('https://app.omnisend.com/oauth2/token', WP_Http_Test_Stub::last_request()['url']);
     }
 
+    public function test_sdk_connect_store_of_an_api_key_install_uses_the_retained_v3_account_write(): void
+    {
+        $this->connect_with_api_key();
+
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"verified":true}'));
+
+        $response = $this->client()->connect_store('wordpress');
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+
+        $request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('https://api.omnisend.com/v3/accounts/brandid', $request['url']);
+        $this->assertEquals('brandid-secret', $request['args']['headers']['X-API-Key']);
+        $this->assertArrayNotHasKey('Authorization', $request['args']['headers']);
+        $this->assertEquals('test-plugin', $request['args']['headers']['X-INTEGRATION-NAME']);
+    }
+
+    public function test_sdk_connect_store_of_an_oauth_install_writes_the_current_brand(): void
+    {
+        $this->connect_with_oauth(DAY_IN_SECONDS);
+
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{}'));
+
+        $response = $this->client()->connect_store('wordpress');
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+
+        $request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('https://api.omnisend.com/api/brands/current', $request['url']);
+        $this->assertEquals('Bearer access-1', $request['args']['headers']['Authorization']);
+        $this->assertEquals('2026-03-15', $request['args']['headers']['Omnisend-Version']);
+    }
+
     public function test_store_without_any_credential_is_not_connected(): void
     {
         $this->assertEquals('', Options::get_auth_mode());

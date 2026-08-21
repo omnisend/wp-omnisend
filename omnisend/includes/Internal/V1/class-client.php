@@ -256,14 +256,27 @@ class Client implements \Omnisend\SDK\V1\Client {
 			'platformVersion' => get_bloginfo( 'version' ),
 		);
 
-		// Brand settings may only be written with an OAuth token, so API key connections keep using the account endpoint.
-		$url = $this->is_oauth_connection() ? OMNISEND_CORE_API . '/brands/current' : OMNISEND_CORE_API . '/accounts/' . $brand_id;
+		// Brand settings may only be written with an OAuth token, so API key connections stay on the
+		// retained deprecated /v3 account call, which is the only account write they are allowed to make.
+		if ( $this->is_oauth_connection() ) {
+			$url     = OMNISEND_CORE_API . '/brands/current';
+			$headers = $this->get_request_headers();
+		} else {
+			$url     = OMNISEND_CORE_API_V3 . '/accounts/' . $brand_id;
+			$headers = ApiRequest::legacy_api_key_headers(
+				$this->api_key,
+				array(
+					'X-INTEGRATION-NAME'    => $this->plugin_name,
+					'X-INTEGRATION-VERSION' => $this->plugin_version,
+				)
+			);
+		}
 
 		$response = wp_remote_post(
 			$url,
 			array(
 				'body'    => wp_json_encode( $data ),
-				'headers' => $this->get_request_headers(),
+				'headers' => $headers,
 				'timeout' => 10,
 			)
 		);

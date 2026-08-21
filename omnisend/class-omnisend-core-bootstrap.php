@@ -34,7 +34,10 @@ const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
 // Change for different environment.
-const OMNISEND_CORE_API          = 'https://api.omnisend.com/api';
+const OMNISEND_CORE_API = 'https://api.omnisend.com/api';
+// Retained deprecated base, used only by API key connections for the account write. The /api account routes
+// require permissions brand API keys do not have, and brand writes on /api are OAuth only.
+const OMNISEND_CORE_API_V3       = 'https://api.omnisend.com/v3';
 const OMNISEND_CORE_OAUTH_ISSUER = 'https://app.omnisend.com';
 const OMNISEND_CORE_SNIPPET_URL  = 'https://omnisnippet1.com/inshop/launcher-v2.js';
 
