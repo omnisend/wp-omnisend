@@ -146,55 +146,27 @@ final class ConnectionTest extends TestCase
         $this->assertTrue(Options::is_store_connected());
     }
 
-    public function test_store_connect_failure_reports_api_error(): void
+    public function test_already_connected_wordpress_store_keeps_authenticating_with_its_api_key(): void
     {
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"This action requires the \'accounts.write\' permission."}'));
-
-        $this->assertStringContainsString('missing required permissions (accounts.write)', $this->connection_error());
-        $this->assertFalse(Options::is_store_connected());
-    }
-
-    public function test_store_connect_success(): void
-    {
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"connected":true}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"wordpress"}'));
 
         $response = Connection::omnisend_post_connection();
 
         $this->assertTrue($response['success']);
-        $this->assertTrue(Options::is_store_connected());
+        $this->assertEquals(Options::AUTH_MODE_API_KEY, Options::get_auth_mode());
 
         $request = WP_Http_Test_Stub::last_request();
         $this->assertEquals('Omnisend-API-Key brandid-secret', $request['args']['headers']['Authorization']);
         $this->assertEquals('2026-03-15', $request['args']['headers']['Omnisend-Version']);
     }
 
-    public function test_store_connect_without_connected_flag_reports_unexpected_shape(): void
+    public function test_api_key_connect_of_brand_without_store_is_sent_to_the_oauth_flow(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{}'));
 
-        $this->assertStringContainsString('connected not found in response.', $this->connection_error());
+        $this->assertStringContainsString('Use the "Connect Omnisend" button', $this->connection_error());
         $this->assertFalse(Options::is_store_connected());
-    }
-
-    public function test_store_connect_with_connected_false_does_not_connect(): void
-    {
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"connected":false}'));
-
-        $this->assertStringContainsString('connected in response is false, so the store was not connected.', $this->connection_error());
-        $this->assertFalse(Options::is_store_connected());
-    }
-
-    public function test_store_connect_with_non_boolean_connected_does_not_connect(): void
-    {
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
-        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"connected":"false"}'));
-
-        $this->assertStringContainsString('connected not found in response.', $this->connection_error());
-        $this->assertFalse(Options::is_store_connected());
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
     }
 
     public function test_non_boolean_connected_in_brand_response_is_rejected(): void

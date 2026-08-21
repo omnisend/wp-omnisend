@@ -23,6 +23,7 @@ use Omnisend\SDK\V1\GetCategoryResponse;
 use Omnisend\SDK\V1\GetProductResponse;
 use Omnisend\Internal\ApiRequest;
 use Omnisend\Internal\ApiResponse;
+use Omnisend\Internal\Options as PluginOptions;
 use Omnisend\Internal\ContactFactory;
 use Omnisend\Internal\CategoryFactory;
 use Omnisend\Internal\ProductFactory;
@@ -41,6 +42,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 	private string $plugin_name;
 	private string $plugin_version;
 	private ?Options $options;
+	private string $authorization          = '';
+	private ?WP_Error $authorization_error = null;
 
 	/**
 	 * @param string $plugin_name
@@ -57,7 +60,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 	private function get_request_headers(): array {
 		return ApiRequest::headers(
-			$this->api_key,
+			$this->get_authorization(),
 			array(
 				'X-INTEGRATION-NAME'    => $this->plugin_name,
 				'X-INTEGRATION-VERSION' => $this->plugin_version,
@@ -253,8 +256,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 			'platformVersion' => get_bloginfo( 'version' ),
 		);
 
+		// Brand settings may only be written with an OAuth token, so API key connections keep using the account endpoint.
+		$url = $this->is_oauth_connection() ? OMNISEND_CORE_API . '/brands/current' : OMNISEND_CORE_API . '/accounts/' . $brand_id;
+
 		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/accounts/' . $brand_id,
+			$url,
 			array(
 				'body'    => wp_json_encode( $data ),
 				'headers' => $this->get_request_headers(),
@@ -616,14 +622,43 @@ class Client implements \Omnisend\SDK\V1\Client {
 			$error->add( 'initialisation', 'Client is created with empty plugin version.' );
 		}
 
-		if ( ! $this->api_key ) {
-			$error->add( 'api_key', 'Omnisend plugin is not connected.' );
+		if ( $this->get_authorization() === '' && $this->authorization_error !== null ) {
+			$error->merge_from( $this->authorization_error );
 		}
 
 		return $error;
 	}
 
+	/**
+	 * @return string Authorization header value of the credential this store is connected with, empty when it has none.
+	 */
+	private function get_authorization(): string {
+		if ( $this->authorization !== '' ) {
+			return $this->authorization;
+		}
+
+		$authorization = ApiRequest::authorization( $this->api_key );
+
+		if ( is_wp_error( $authorization ) ) {
+			$this->authorization_error = $authorization;
+
+			return '';
+		}
+
+		$this->authorization = $authorization;
+
+		return $this->authorization;
+	}
+
+	private function is_oauth_connection(): bool {
+		return PluginOptions::get_auth_mode() === PluginOptions::AUTH_MODE_OAUTH;
+	}
+
 	private function get_brand_id(): string {
+		if ( $this->is_oauth_connection() ) {
+			return PluginOptions::get_brand_id();
+		}
+
 		$list = explode( '-', $this->api_key );
 		if ( count( $list ) != 2 ) {
 			return '';

@@ -18,12 +18,19 @@ class Connection {
 
 	private static $signup_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
 
+	// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- WordPress is lowercase as it's required by integration.
+	private const WORDPRESS_PLATFORM    = 'wordpress';
+	private const OAUTH_NONCE_ACTION    = 'omnisend_oauth_connect';
+	private const OAUTH_ERROR_TRANSIENT = 'omni_send_core_oauth_error';
+
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'omnisend' ) );
 		}
 
 		Options::set_landing_page_visited();
+
+		self::display_oauth_error();
 
 		if ( self::show_connected_store_view() ) {
 			?>
@@ -94,10 +101,19 @@ class Connection {
 	 * @return array|WP_Error Brand data or an error describing the transport, status or body failure.
 	 */
 	private static function get_account_data( $api_key ) {
+		return self::get_brand_data( ApiRequest::api_key_authorization( $api_key ) );
+	}
+
+	/**
+	 * @param string $authorization Authorization header value of the credential the store is connected with.
+	 *
+	 * @return array|WP_Error Brand data or an error describing the transport, status or body failure.
+	 */
+	private static function get_brand_data( string $authorization ) {
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/brands/current',
 			array(
-				'headers' => ApiRequest::headers( $api_key ),
+				'headers' => ApiRequest::headers( $authorization ),
 				'timeout' => 10,
 			)
 		);
@@ -163,41 +179,183 @@ class Connection {
 	}
 
 	/**
+	 * Writes this site into the brand the administrator consented to. The API gateway only allows brand
+	 * writes with an OAuth token, so connecting a store always happens on the OAuth callback.
+	 *
+	 * @param string $authorization Bearer authorization header value.
+	 *
 	 * @return true|WP_Error True when the store is connected, otherwise an error describing the failure.
 	 */
-	private static function connect_store( $api_key ) {
+	private static function connect_store( string $authorization ) {
 		$data = array(
 			'website'         => site_url(),
-			'platform'        => 'wordpress',
+			'platform'        => self::WORDPRESS_PLATFORM,
 			'version'         => OMNISEND_CORE_PLUGIN_VERSION,
 			'phpVersion'      => phpversion(),
 			'platformVersion' => get_bloginfo( 'version' ),
 		);
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/accounts',
+			OMNISEND_CORE_API . '/brands/current',
 			array(
 				'body'    => wp_json_encode( $data ),
-				'headers' => ApiRequest::headers( $api_key ),
+				'headers' => ApiRequest::headers( $authorization ),
 				'timeout' => 10,
 			)
 		);
 
-		$arr = ApiResponse::parse( $response );
+		$parsed = ApiResponse::parse( $response, false );
 
-		if ( is_wp_error( $arr ) ) {
-			return $arr;
-		}
-
-		if ( ! isset( $arr['connected'] ) || ! is_bool( $arr['connected'] ) ) {
-			return ApiResponse::unexpected_shape_error( 'connected' );
-		}
-
-		if ( $arr['connected'] !== true ) {
-			return ApiResponse::unexpected_value_error( 'connected', 'is false, so the store was not connected' );
+		if ( is_wp_error( $parsed ) ) {
+			return $parsed;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Starts and finishes the OAuth connect flow. New connections and reconnections go through it;
+	 * stores that are already connected with an API key never reach it.
+	 */
+	public static function handle_oauth_request(): void {
+		$action = isset( $_GET['omnisend_oauth'] ) ? sanitize_text_field( wp_unslash( $_GET['omnisend_oauth'] ) ) : '';
+
+		if ( $action !== 'connect' && $action !== 'callback' ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( $action === 'connect' ) {
+			// The callback comes from Omnisend and cannot carry a nonce, so only starting the flow is nonce protected;
+			// the callback is verified with the OAuth state instead.
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), self::OAUTH_NONCE_ACTION ) ) {
+				self::finish_oauth_request( 'Connecting to Omnisend failed because the request could not be verified. Please try again.' );
+
+				return;
+			}
+
+			$authorization_url = OAuthClient::get_authorization_url();
+
+			if ( is_wp_error( $authorization_url ) ) {
+				self::finish_oauth_request( self::get_connection_error_message( $authorization_url ) );
+
+				return;
+			}
+
+			self::redirect( $authorization_url );
+
+			return;
+		}
+
+		self::finish_oauth_request( self::complete_oauth_connection() );
+	}
+
+	public static function get_oauth_connect_url(): string {
+		return wp_nonce_url(
+			admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE . '&omnisend_oauth=connect' ),
+			self::OAUTH_NONCE_ACTION
+		);
+	}
+
+	/**
+	 * @return string Empty string when the store got connected, otherwise the message to show to the administrator.
+	 */
+	private static function complete_oauth_connection(): string {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state below.
+		if ( isset( $_GET['error'] ) ) {
+			return 'Omnisend did not authorize this store: ' . sanitize_text_field( wp_unslash( $_GET['error'] ) ) . '.';
+		}
+
+		$code  = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
+		$state = isset( $_GET['state'] ) ? sanitize_text_field( wp_unslash( $_GET['state'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		$authorized = OAuthClient::complete_authorization( $code, $state );
+
+		if ( is_wp_error( $authorized ) ) {
+			Options::clear_oauth_tokens();
+
+			return self::get_connection_error_message( $authorized );
+		}
+
+		$access_token = OAuthClient::get_valid_access_token();
+
+		if ( is_wp_error( $access_token ) ) {
+			return self::get_connection_error_message( $access_token );
+		}
+
+		$authorization = ApiRequest::bearer_authorization( $access_token );
+		$brand         = self::get_brand_data( $authorization );
+
+		if ( is_wp_error( $brand ) ) {
+			return self::get_connection_error_message( $brand, 'brands.read' );
+		}
+
+		if ( empty( $brand['brandID'] ) || ! is_string( $brand['brandID'] ) ) {
+			return self::get_connection_error_message( ApiResponse::unexpected_shape_error( 'brandID' ) );
+		}
+
+		if ( ! isset( $brand['platform'] ) || ! is_string( $brand['platform'] ) ) {
+			return self::get_connection_error_message( ApiResponse::unexpected_shape_error( 'platform' ) );
+		}
+
+		if ( $brand['platform'] !== '' && $brand['platform'] !== self::WORDPRESS_PLATFORM ) {
+			Options::clear_oauth_tokens();
+
+			return 'The connection did not go through. This Omnisend account is connected to another platform (' . $brand['platform'] . ').';
+		}
+
+		$connected = self::connect_store( $authorization );
+
+		if ( is_wp_error( $connected ) ) {
+			// Only the tokens this flow obtained are dropped, so a store that was connected with an API key before keeps working.
+			Options::clear_oauth_tokens();
+
+			return self::get_connection_error_message( $connected, 'brands.write' );
+		}
+
+		Options::set_brand_id( $brand['brandID'] );
+		Options::set_store_connected();
+		self::schedule_contact_sync();
+
+		return '';
+	}
+
+	private static function finish_oauth_request( string $error_message ): void {
+		if ( $error_message !== '' ) {
+			set_transient( self::OAUTH_ERROR_TRANSIENT, $error_message, 5 * MINUTE_IN_SECONDS );
+		}
+
+		self::redirect( admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE ) );
+	}
+
+	private static function redirect( string $url ): void {
+		wp_safe_redirect( $url );
+
+		exit;
+	}
+
+	private static function display_oauth_error(): void {
+		$error_message = get_transient( self::OAUTH_ERROR_TRANSIENT );
+
+		if ( ! is_string( $error_message ) || $error_message === '' ) {
+			return;
+		}
+
+		delete_transient( self::OAUTH_ERROR_TRANSIENT );
+
+		?>
+		<div class="notice notice-error"><p><?php echo esc_html( $error_message ); ?></p></div>
+		<?php
+	}
+
+	private static function schedule_contact_sync(): void {
+		if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
+			wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
+		}
 	}
 
 	public static function connect_with_omnisend_for_woo_plugin(): void {
@@ -268,11 +426,15 @@ class Connection {
 		return null;
 	}
 
+	/**
+	 * Connects a store with an API key its administrator pasted. New brands are connected through OAuth,
+	 * because only OAuth credentials may write brand settings, so this only accepts brands Omnisend already
+	 * knows as WordPress stores.
+	 */
 	public static function omnisend_post_connection() {
 		$connected = Options::is_store_connected();
 
-		// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText
-		$wordpress_platform = 'wordpress'; // WordPress is lowercase as it's required by integration.
+		$wordpress_platform = self::WORDPRESS_PLATFORM;
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return rest_ensure_response(
@@ -352,33 +514,21 @@ class Connection {
 				);
 			}
 
-			$connected = false;
-			if ( $response['platform'] === $wordpress_platform ) {
-				$connected = true;
-			}
-
 			if ( $response['platform'] === '' ) {
-				$connected = self::connect_store( $api_key );
-
-				if ( is_wp_error( $connected ) ) {
-					Options::disconnect(); // Store was not connected, clean up.
-					return rest_ensure_response(
-						array(
-							'success' => false,
-							'error'   => self::get_connection_error_message( $connected, 'accounts.write' ),
-						)
-					);
-				}
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'error'   => 'This Omnisend account has no store connected yet. Use the "Connect Omnisend" button to connect it.',
+					)
+				);
 			}
 
-			if ( $connected ) {
+			if ( $response['platform'] === $wordpress_platform ) {
 				Options::set_api_key( $api_key );
 				Options::set_brand_id( $brand_id );
 				Options::set_store_connected();
+				self::schedule_contact_sync();
 
-				if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
-					wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
-				}
 				return rest_ensure_response(
 					array(
 						'success' => true,
