@@ -135,12 +135,10 @@ class Client implements \Omnisend\SDK\V1\Client {
 			);
 		}
 
-		$contract_array = $contact->to_array();
-
 		$response = wp_remote_post(
 			OMNISEND_CORE_API . '/contacts',
 			array(
-				'body'    => wp_json_encode( $contract_array ),
+				'body'    => wp_json_encode( $contact->to_array() ),
 				'headers' => array_merge( $this->get_request_headers(), $options ),
 				'timeout' => 10,
 			)
@@ -162,7 +160,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 	public function get_contact_by_email( string $email ): GetContactResponse {
 		$error = new WP_Error();
-		$email = str_replace( '+', '%2b', $email );
+		$email = rawurlencode( $email );
 
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/contacts?email=' . $email,
@@ -175,6 +173,16 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$contact_data = ApiResponse::parse( $response );
 		if ( is_wp_error( $contact_data ) ) {
 			$error->merge_from( $contact_data );
+			return new GetContactResponse( null, $error );
+		}
+
+		if ( ! isset( $contact_data['contacts'] ) || ! is_array( $contact_data['contacts'] ) ) {
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact list' ) );
+			return new GetContactResponse( null, $error );
+		}
+
+		if ( empty( $contact_data['contacts'] ) ) {
+			$error->merge_from( ApiResponse::not_found_error( 'Contact' ) );
 			return new GetContactResponse( null, $error );
 		}
 

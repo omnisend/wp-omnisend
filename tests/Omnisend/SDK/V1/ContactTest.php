@@ -49,12 +49,12 @@ final class ContactTest extends TestCase
                     'channels' => [
                         'email' => [
                             'status' => 'nonSubscribed',
-                            'statusDate' => gmdate('c'),
+                            'statusChangedAt' => gmdate('c'),
                         ],
                     ],
+                    'sendWelcomeMessage' => false,
                 ],
             ],
-            'tags' => [],
             'firstName' => 'John',
             'lastName' => 'Doe',
         ];
@@ -240,20 +240,22 @@ final class ContactTest extends TestCase
                 [
                     'type' => 'email',
                     'id' => 'test@example.com',
+                    'sendWelcomeMessage' => false,
                     'channels' => [
                         'email' => [
                             'status' => 'subscribed',
-                            'statusDate' => gmdate('c'),
+                            'statusChangedAt' => gmdate('c'),
                         ],
                     ],
                 ],
                 [
                     'type' => 'phone',
                     'id' => '1234567890',
+                    'sendWelcomeMessage' => false,
                     'channels' => [
                         'sms' => [
                             'status' => 'subscribed',
-                            'statusDate' => gmdate('c'),
+                            'statusChangedAt' => gmdate('c'),
                         ],
                     ],
                 ],
