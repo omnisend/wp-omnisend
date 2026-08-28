@@ -146,6 +146,14 @@ final class OAuthConnectionTest extends TestCase
         $this->assertFalse(Options::is_store_connected());
     }
 
+    public function test_oauth_issuer_is_allowed_as_a_redirect_host(): void
+    {
+        $this->assertEquals(
+            array('example.com', 'app.omnisend.com'),
+            Connection::allow_oauth_issuer_redirect(array('example.com'))
+        );
+    }
+
     public function test_authorization_response_without_a_pending_attempt_is_reported(): void
     {
         $_GET = array(

@@ -9,6 +9,7 @@ function wp_test_reset_options(): void {
 	$GLOBALS['wp_test_options']    = array( 'blog_charset' => 'UTF-8' );
 	$GLOBALS['wp_test_transients'] = array();
 	$GLOBALS['wp_test_redirects']  = array();
+	$GLOBALS['wp_test_filters']    = array();
 }
 
 wp_test_reset_options();
@@ -80,15 +81,27 @@ function add_query_arg( $args, $url = '' ) {
 class WP_Redirect_Test_Exception extends Exception {}
 
 function wp_safe_redirect( $location, $status = 302 ) {
+	$hosts = array( 'example.com' );
+
+	foreach ( $GLOBALS['wp_test_filters']['allowed_redirect_hosts'] ?? array() as $callback ) {
+		$hosts = call_user_func( $callback, $hosts );
+	}
+
+	$host = wp_parse_url( $location, PHP_URL_HOST );
+
+	if ( $host !== null && ! in_array( $host, $hosts, true ) ) {
+		$location = admin_url();
+	}
+
 	$GLOBALS['wp_test_redirects'][] = $location;
 
 	throw new WP_Redirect_Test_Exception( $location );
 }
 
-function wp_redirect( $location, $status = 302 ) {
-	$GLOBALS['wp_test_redirects'][] = $location;
+function add_filter( $hook_name, $callback, $priority = 10, $accepted_args = 1 ) {
+	$GLOBALS['wp_test_filters'][ $hook_name ][] = $callback;
 
-	throw new WP_Redirect_Test_Exception( $location );
+	return true;
 }
 
 function set_transient( $transient, $value, $expiration = 0 ) {

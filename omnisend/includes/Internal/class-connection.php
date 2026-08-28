@@ -282,7 +282,9 @@ class Connection {
 				return;
 			}
 
-			self::redirect_external( $authorization_url );
+			add_filter( 'allowed_redirect_hosts', array( self::class, 'allow_oauth_issuer_redirect' ) );
+
+			self::redirect( $authorization_url );
 
 			return;
 		}
@@ -391,10 +393,15 @@ class Connection {
 		exit;
 	}
 
-	private static function redirect_external( string $url ): void {
-		wp_redirect( $url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Omnisend OAuth issuer, built by the plugin and not from user input.
+	/**
+	 * @param string[] $hosts Hosts wp_safe_redirect() is allowed to leave this site for.
+	 *
+	 * @return string[]
+	 */
+	public static function allow_oauth_issuer_redirect( $hosts ): array {
+		$hosts[] = wp_parse_url( OMNISEND_CORE_OAUTH_ISSUER, PHP_URL_HOST );
 
-		exit;
+		return $hosts;
 	}
 
 	private static function display_oauth_error(): void {
