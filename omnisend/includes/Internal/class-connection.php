@@ -291,14 +291,14 @@ class Connection {
 	}
 
 	/**
-	 * The redirect URI carries no marker of its own, so the consent redirect is recognised by the response it
-	 * carries together with a connect attempt waiting for it.
+	 * The redirect URI carries no marker of its own, so the consent redirect is recognised by the authorization
+	 * response it carries. A response that no longer matches a pending attempt is reported instead of ignored.
 	 */
 	private static function is_oauth_callback(): bool {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state.
 		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
-		if ( $page !== OMNISEND_CORE_SETTINGS_PAGE || ! OAuthClient::has_pending_state() ) {
+		if ( $page !== OMNISEND_CORE_SETTINGS_PAGE ) {
 			return false;
 		}
 

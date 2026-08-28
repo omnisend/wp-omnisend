@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 env=$1
 
 case $env in
@@ -27,17 +29,23 @@ rm -f omnisend-$env.zip
 cp -r omnisend temp/omnisend
 rm -rf temp/omnisend/node_modules
 
-# The asset version is the enqueued script's cache key, so it has to change with the rewritten bundles.
-version_suffix="s/'version' => '\([^']*\)'/'version' => '\1-$env'/g"
-
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    grep -rl "omnisend.com" temp/omnisend | xargs sed -i '' 's/omnisend\.com/'$domain'/g'
-    grep -rl "omnisnippet1.com" temp/omnisend | xargs sed -i '' 's/omnisnippet1\.com/'$snippet_domain'/g'
-    sed -i '' "$version_suffix" temp/omnisend/build/*.asset.php
+    grep -rl "omnisend.com" temp/omnisend | xargs -r sed -i '' 's/omnisend\.com/'$domain'/g'
+    grep -rl "omnisnippet1.com" temp/omnisend | xargs -r sed -i '' 's/omnisnippet1\.com/'$snippet_domain'/g'
 else
-    grep -rl "omnisend.com" temp/omnisend | xargs sed -i 's/omnisend\.com/'$domain'/g'
-    grep -rl "omnisnippet1.com" temp/omnisend | xargs sed -i 's/omnisnippet1\.com/'$snippet_domain'/g'
-    sed -i "$version_suffix" temp/omnisend/build/*.asset.php
+    grep -rl "omnisend.com" temp/omnisend | xargs -r sed -i 's/omnisend\.com/'$domain'/g'
+    grep -rl "omnisnippet1.com" temp/omnisend | xargs -r sed -i 's/omnisnippet1\.com/'$snippet_domain'/g'
+fi
+
+# The asset version is the enqueued script's cache key, so a rewritten bundle needs its own one.
+if [ "$env" != "prod" ]; then
+    version_suffix="s/'version' => '\([^']*\)'/'version' => '\1-$env'/g"
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "$version_suffix" temp/omnisend/build/*.asset.php
+    else
+        sed -i "$version_suffix" temp/omnisend/build/*.asset.php
+    fi
 fi
 
 ( cd temp ; zip -r ../omnisend-$env.zip omnisend )

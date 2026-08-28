@@ -125,12 +125,6 @@ class OAuthClient {
 		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
 	}
 
-	public static function has_pending_state(): bool {
-		$state = get_transient( self::STATE_TRANSIENT );
-
-		return is_string( $state ) && $state !== '';
-	}
-
 	/**
 	 * @return true|WP_Error
 	 */

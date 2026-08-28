@@ -146,6 +146,19 @@ final class OAuthConnectionTest extends TestCase
         $this->assertFalse(Options::is_store_connected());
     }
 
+    public function test_authorization_response_without_a_pending_attempt_is_reported(): void
+    {
+        $_GET = array(
+            'page' => 'omnisend',
+            'code' => 'auth-code',
+            'state' => 'state-of-an-expired-attempt',
+        );
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('did not match this site', $this->oauth_error());
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+    }
+
     public function test_settings_page_without_an_authorization_response_is_not_treated_as_a_callback(): void
     {
         $_GET = array('page' => 'omnisend');
