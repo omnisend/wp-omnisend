@@ -257,11 +257,7 @@ class Connection {
 	public static function handle_oauth_request(): void {
 		$action = isset( $_GET['omnisend_oauth'] ) ? sanitize_text_field( wp_unslash( $_GET['omnisend_oauth'] ) ) : '';
 
-		if ( $action === '' && self::is_oauth_callback() ) {
-			$action = 'callback';
-		}
-
-		if ( $action !== 'connect' && $action !== 'callback' ) {
+		if ( $action !== 'connect' && ! self::is_oauth_callback() ) {
 			return;
 		}
 

@@ -25,12 +25,6 @@ class OAuthClient {
 	private const STATE_LIFETIME  = 900;
 
 	/**
-	 * Several connect attempts can be in flight at once, so the states of the most recent ones are kept
-	 * and a later attempt does not invalidate an earlier one.
-	 */
-	private const STATE_LIMIT = 5;
-
-	/**
 	 * Access tokens are refreshed slightly before they expire so a request does not fail on a token
 	 * that expires while it is in flight.
 	 */
@@ -43,7 +37,7 @@ class OAuthClient {
 	 * @return string|WP_Error
 	 */
 	public static function get_authorization_url() {
-		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' || Options::get_oauth_client_redirect_uri() !== self::get_redirect_uri() ) {
+		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' ) {
 			$registered = self::register_client();
 
 			if ( is_wp_error( $registered ) ) {
@@ -52,7 +46,7 @@ class OAuthClient {
 		}
 
 		$state = wp_generate_password( 32, false );
-		self::remember_state( $state );
+		set_transient( self::STATE_TRANSIENT, $state, self::STATE_LIFETIME );
 
 		$query = array(
 			'response_type' => 'code',
@@ -72,7 +66,10 @@ class OAuthClient {
 	 * @return true|WP_Error
 	 */
 	public static function complete_authorization( string $code, string $state ) {
-		if ( ! self::consume_state( $state ) ) {
+		$expected_state = get_transient( self::STATE_TRANSIENT );
+		delete_transient( self::STATE_TRANSIENT );
+
+		if ( ! is_string( $expected_state ) || $expected_state === '' || ! hash_equals( $expected_state, $state ) ) {
 			return new WP_Error( self::ERROR_STATE, 'The Omnisend authorization response did not match this site. Please try connecting again.' );
 		}
 
@@ -129,53 +126,9 @@ class OAuthClient {
 	}
 
 	public static function has_pending_state(): bool {
-		return self::get_pending_states() !== array();
-	}
+		$state = get_transient( self::STATE_TRANSIENT );
 
-	private static function remember_state( string $state ): void {
-		$states   = self::get_pending_states();
-		$states[] = $state;
-
-		set_transient( self::STATE_TRANSIENT, array_slice( $states, -self::STATE_LIMIT ), self::STATE_LIFETIME );
-	}
-
-	/**
-	 * @return string[] States of the connect attempts that have not been completed yet.
-	 */
-	private static function get_pending_states(): array {
-		$states = get_transient( self::STATE_TRANSIENT );
-
-		if ( ! is_array( $states ) ) {
-			return array();
-		}
-
-		return array_values( array_filter( $states, 'is_string' ) );
-	}
-
-	private static function consume_state( string $state ): bool {
-		if ( $state === '' ) {
-			return false;
-		}
-
-		$remaining = array();
-		$matched   = false;
-
-		foreach ( self::get_pending_states() as $pending ) {
-			if ( ! $matched && hash_equals( $pending, $state ) ) {
-				$matched = true;
-				continue;
-			}
-
-			$remaining[] = $pending;
-		}
-
-		if ( $remaining === array() ) {
-			delete_transient( self::STATE_TRANSIENT );
-		} else {
-			set_transient( self::STATE_TRANSIENT, $remaining, self::STATE_LIFETIME );
-		}
-
-		return $matched;
+		return is_string( $state ) && $state !== '';
 	}
 
 	/**
@@ -295,7 +248,7 @@ class OAuthClient {
 			return self::registration_error( ApiResponse::unexpected_shape_error( 'client_secret' ) );
 		}
 
-		Options::set_oauth_client( $registration['client_id'], $registration['client_secret'], self::get_redirect_uri() );
+		Options::set_oauth_client( $registration['client_id'], $registration['client_secret'] );
 
 		return true;
 	}

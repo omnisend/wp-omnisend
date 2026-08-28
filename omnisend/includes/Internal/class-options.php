@@ -28,7 +28,6 @@ class Options {
 	private const OPTION_AUTH_MODE                       = 'omni_send_core_auth_mode';
 	private const OPTION_OAUTH_CLIENT_ID                 = 'omni_send_core_oauth_client_id';
 	private const OPTION_OAUTH_CLIENT_SECRET             = 'omni_send_core_oauth_client_secret';
-	private const OPTION_OAUTH_CLIENT_REDIRECT_URI       = 'omni_send_core_oauth_client_redirect_uri';
 	private const OPTION_OAUTH_ACCESS_TOKEN              = 'omni_send_core_oauth_access_token';
 	private const OPTION_OAUTH_REFRESH_TOKEN             = 'omni_send_core_oauth_refresh_token';
 	private const OPTION_OAUTH_TOKEN_EXPIRES_AT          = 'omni_send_core_oauth_token_expires_at';
@@ -107,15 +106,6 @@ class Options {
 		return is_string( $client_secret ) ? $client_secret : '';
 	}
 
-	/**
-	 * @return string Redirect URI this site is registered with, so a changed one leads to a new registration.
-	 */
-	public static function get_oauth_client_redirect_uri(): string {
-		$redirect_uri = get_option( self::OPTION_OAUTH_CLIENT_REDIRECT_URI );
-
-		return is_string( $redirect_uri ) ? $redirect_uri : '';
-	}
-
 	public static function get_oauth_access_token(): string {
 		$access_token = get_option( self::OPTION_OAUTH_ACCESS_TOKEN );
 
@@ -134,10 +124,9 @@ class Options {
 		return is_numeric( $expires_at ) ? intval( $expires_at ) : 0;
 	}
 
-	public static function set_oauth_client( string $client_id, string $client_secret, string $redirect_uri ): void {
+	public static function set_oauth_client( string $client_id, string $client_secret ): void {
 		update_option( self::OPTION_OAUTH_CLIENT_ID, $client_id );
 		update_option( self::OPTION_OAUTH_CLIENT_SECRET, $client_secret );
-		update_option( self::OPTION_OAUTH_CLIENT_REDIRECT_URI, $redirect_uri );
 	}
 
 	public static function set_oauth_tokens( string $access_token, string $refresh_token, int $expires_at ): void {

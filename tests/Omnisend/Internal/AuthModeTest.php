@@ -35,7 +35,7 @@ final class AuthModeTest extends TestCase
     {
         Options::set_brand_id('brand-1');
         Options::set_store_connected();
-        Options::set_oauth_client('client-1', 'secret-1', 'https://example.com/wp-admin/admin.php?page=omnisend');
+        Options::set_oauth_client('client-1', 'secret-1');
         Options::set_oauth_tokens('access-1', 'refresh-1', time() + $expires_in);
     }
 
@@ -65,7 +65,7 @@ final class AuthModeTest extends TestCase
     public function test_registered_oauth_client_alone_does_not_switch_an_api_key_install_to_oauth(): void
     {
         $this->connect_with_api_key();
-        Options::set_oauth_client('client-1', 'secret-1', 'https://example.com/wp-admin/admin.php?page=omnisend');
+        Options::set_oauth_client('client-1', 'secret-1');
 
         $this->assertEquals(Options::AUTH_MODE_API_KEY, Options::get_auth_mode());
         $this->assertEquals('Omnisend-API-Key brandid-secret', $this->request_contact()['args']['headers']['Authorization']);
