@@ -43,7 +43,7 @@ class OAuthClient {
 	 * @return string|WP_Error
 	 */
 	public static function get_authorization_url() {
-		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' ) {
+		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' || Options::get_oauth_client_redirect_uri() !== self::get_redirect_uri() ) {
 			$registered = self::register_client();
 
 			if ( is_wp_error( $registered ) ) {
@@ -118,8 +118,14 @@ class OAuthClient {
 		return Options::get_oauth_access_token();
 	}
 
+	/**
+	 * The consent step rebuilds the authorize request from its parts and does not re-encode redirect_uri, so
+	 * everything after the first parameter of the redirect URI is lost. The authorization code is then bound to
+	 * the truncated URI and the token request has to send the very same value back, so the redirect URI is kept
+	 * to a single parameter and the callback is recognised by the code and state it carries.
+	 */
 	public static function get_redirect_uri(): string {
-		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE . '&omnisend_oauth=callback' );
+		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
 	}
 
 	public static function has_pending_state(): bool {
@@ -289,7 +295,7 @@ class OAuthClient {
 			return self::registration_error( ApiResponse::unexpected_shape_error( 'client_secret' ) );
 		}
 
-		Options::set_oauth_client( $registration['client_id'], $registration['client_secret'] );
+		Options::set_oauth_client( $registration['client_id'], $registration['client_secret'], self::get_redirect_uri() );
 
 		return true;
 	}

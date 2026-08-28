@@ -101,7 +101,7 @@ final class OAuthConnectionTest extends TestCase
         $this->assertEquals('wordpress', $body['client_name']);
         $this->assertEquals(array('authorization_code', 'refresh_token'), $body['grant_types']);
         $this->assertEquals(
-            array('https://example.com/wp-admin/admin.php?page=omnisend&omnisend_oauth=callback'),
+            array('https://example.com/wp-admin/admin.php?page=omnisend'),
             $body['redirect_uris']
         );
 
@@ -123,17 +123,26 @@ final class OAuthConnectionTest extends TestCase
 
         $redirect = $this->last_redirect();
         $this->assertStringContainsString(
-            'redirect_uri=https%3A%2F%2Fexample.com%2Fwp-admin%2Fadmin.php%3Fpage%3Domnisend%26omnisend_oauth%3Dcallback',
+            'redirect_uri=https%3A%2F%2Fexample.com%2Fwp-admin%2Fadmin.php%3Fpage%3Domnisend',
             $redirect
         );
 
         $query = array();
         parse_str(parse_url($redirect, PHP_URL_QUERY), $query);
+        $this->assertArrayNotHasKey('page', $query);
         $this->assertArrayNotHasKey('omnisend_oauth', $query);
-        $this->assertEquals(
-            'https://example.com/wp-admin/admin.php?page=omnisend&omnisend_oauth=callback',
-            $query['redirect_uri']
-        );
+        $this->assertEquals('https://example.com/wp-admin/admin.php?page=omnisend', $query['redirect_uri']);
+    }
+
+    public function test_client_registered_with_another_redirect_uri_is_registered_again(): void
+    {
+        Options::set_oauth_client('old-client', 'old-secret', 'https://example.com/wp-admin/admin.php?page=omnisend&omnisend_oauth=callback');
+        WP_Http_Test_Stub::queue($this->registration_response());
+
+        $this->start_connect();
+
+        $this->assertEquals('https://app.omnisend.com/oauth2/register', WP_Http_Test_Stub::$requests[0]['url']);
+        $this->assertEquals('client-1', Options::get_oauth_client_id());
     }
 
     public function test_callback_without_the_marker_still_exchanges_the_code(): void
@@ -157,6 +166,22 @@ final class OAuthConnectionTest extends TestCase
 
         $token_request = WP_Http_Test_Stub::$requests[1];
         $this->assertEquals('https://app.omnisend.com/oauth2/token', $token_request['url']);
+        $this->assertEquals(
+            'https://example.com/wp-admin/admin.php?page=omnisend',
+            $token_request['args']['body']['redirect_uri']
+        );
+    }
+
+    public function test_denied_authorization_without_the_marker_is_reported(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        $_GET = array('page' => 'omnisend', 'error' => 'access_denied');
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('access_denied', $this->oauth_error());
+        $this->assertFalse(Options::is_store_connected());
     }
 
     public function test_settings_page_without_an_authorization_response_is_not_treated_as_a_callback(): void

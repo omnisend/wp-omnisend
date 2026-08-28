@@ -257,7 +257,7 @@ class Connection {
 	public static function handle_oauth_request(): void {
 		$action = isset( $_GET['omnisend_oauth'] ) ? sanitize_text_field( wp_unslash( $_GET['omnisend_oauth'] ) ) : '';
 
-		if ( $action === '' && self::is_oauth_callback_without_marker() ) {
+		if ( $action === '' && self::is_oauth_callback() ) {
 			$action = 'callback';
 		}
 
@@ -295,17 +295,18 @@ class Connection {
 	}
 
 	/**
-	 * Recognises the consent redirect even when the marker did not survive it, so a normalised redirect URI
-	 * does not turn the callback into a silent page reload.
+	 * The redirect URI carries no marker of its own, so the consent redirect is recognised by the response it
+	 * carries together with a connect attempt waiting for it.
 	 */
-	private static function is_oauth_callback_without_marker(): bool {
+	private static function is_oauth_callback(): bool {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state.
 		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
-		return $page === OMNISEND_CORE_SETTINGS_PAGE
-			&& ! empty( $_GET['code'] )
-			&& ! empty( $_GET['state'] )
-			&& OAuthClient::has_pending_state();
+		if ( $page !== OMNISEND_CORE_SETTINGS_PAGE || ! OAuthClient::has_pending_state() ) {
+			return false;
+		}
+
+		return ( ! empty( $_GET['code'] ) && ! empty( $_GET['state'] ) ) || ! empty( $_GET['error'] );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
