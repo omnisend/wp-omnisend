@@ -291,8 +291,8 @@ class Connection {
 	}
 
 	/**
-	 * The redirect URI carries no marker of its own, so the consent redirect is recognised by the authorization
-	 * response it carries. A response that no longer matches a pending attempt is reported instead of ignored.
+	 * The redirect URI carries no marker of its own, so the return from Omnisend is recognised by the
+	 * authorization response it carries.
 	 */
 	private static function is_oauth_callback(): bool {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state.
@@ -391,9 +391,6 @@ class Connection {
 		exit;
 	}
 
-	/**
-	 * wp_safe_redirect() drops hosts outside this site, so the consent screen has to be redirected to directly.
-	 */
 	private static function redirect_external( string $url ): void {
 		wp_redirect( $url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Omnisend OAuth issuer, built by the plugin and not from user input.
 

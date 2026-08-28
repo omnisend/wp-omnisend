@@ -56,7 +56,6 @@ class OAuthClient {
 			'state'         => $state,
 		);
 
-		// add_query_arg() does not encode values, which would break redirect_uri, as it carries a query string of its own.
 		return OMNISEND_CORE_OAUTH_ISSUER . '/oauth2/authorize?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
 	}
 
@@ -116,10 +115,8 @@ class OAuthClient {
 	}
 
 	/**
-	 * The consent step rebuilds the authorize request from its parts and does not re-encode redirect_uri, so
-	 * everything after the first parameter of the redirect URI is lost. The authorization code is then bound to
-	 * the truncated URI and the token request has to send the very same value back, so the redirect URI is kept
-	 * to a single parameter and the callback is recognised by the code and state it carries.
+	 * Has to stay a single query parameter: Omnisend re-emits it unencoded when the consent is granted, so any
+	 * further parameter is lost and the token request can no longer match the URI the code was issued for.
 	 */
 	public static function get_redirect_uri(): string {
 		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
