@@ -414,7 +414,7 @@ class Connection {
 		delete_transient( self::OAUTH_ERROR_TRANSIENT );
 
 		?>
-		<div class="notice notice-error"><p><?php echo esc_html( $error_message ); ?></p></div>
+		<div class="notice notice-error omnisend-notice"><p><?php echo esc_html( $error_message ); ?></p></div>
 		<?php
 	}
 
