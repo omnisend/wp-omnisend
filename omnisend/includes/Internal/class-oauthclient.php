@@ -25,6 +25,12 @@ class OAuthClient {
 	private const STATE_LIFETIME  = 900;
 
 	/**
+	 * Several connect attempts can be in flight at once, so the states of the most recent ones are kept
+	 * and a later attempt does not invalidate an earlier one.
+	 */
+	private const STATE_LIMIT = 5;
+
+	/**
 	 * Access tokens are refreshed slightly before they expire so a request does not fail on a token
 	 * that expires while it is in flight.
 	 */
@@ -46,7 +52,7 @@ class OAuthClient {
 		}
 
 		$state = wp_generate_password( 32, false );
-		set_transient( self::STATE_TRANSIENT, $state, self::STATE_LIFETIME );
+		self::remember_state( $state );
 
 		$query = array(
 			'response_type' => 'code',
@@ -56,7 +62,8 @@ class OAuthClient {
 			'state'         => $state,
 		);
 
-		return add_query_arg( $query, OMNISEND_CORE_OAUTH_ISSUER . '/oauth2/authorize' );
+		// add_query_arg() does not encode values, which would break redirect_uri, as it carries a query string of its own.
+		return OMNISEND_CORE_OAUTH_ISSUER . '/oauth2/authorize?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
 	}
 
 	/**
@@ -65,10 +72,7 @@ class OAuthClient {
 	 * @return true|WP_Error
 	 */
 	public static function complete_authorization( string $code, string $state ) {
-		$expected_state = get_transient( self::STATE_TRANSIENT );
-		delete_transient( self::STATE_TRANSIENT );
-
-		if ( ! is_string( $expected_state ) || $expected_state === '' || ! hash_equals( $expected_state, $state ) ) {
+		if ( ! self::consume_state( $state ) ) {
 			return new WP_Error( self::ERROR_STATE, 'The Omnisend authorization response did not match this site. Please try connecting again.' );
 		}
 
@@ -116,6 +120,56 @@ class OAuthClient {
 
 	public static function get_redirect_uri(): string {
 		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE . '&omnisend_oauth=callback' );
+	}
+
+	public static function has_pending_state(): bool {
+		return self::get_pending_states() !== array();
+	}
+
+	private static function remember_state( string $state ): void {
+		$states   = self::get_pending_states();
+		$states[] = $state;
+
+		set_transient( self::STATE_TRANSIENT, array_slice( $states, -self::STATE_LIMIT ), self::STATE_LIFETIME );
+	}
+
+	/**
+	 * @return string[] States of the connect attempts that have not been completed yet.
+	 */
+	private static function get_pending_states(): array {
+		$states = get_transient( self::STATE_TRANSIENT );
+
+		if ( ! is_array( $states ) ) {
+			return array();
+		}
+
+		return array_values( array_filter( $states, 'is_string' ) );
+	}
+
+	private static function consume_state( string $state ): bool {
+		if ( $state === '' ) {
+			return false;
+		}
+
+		$remaining = array();
+		$matched   = false;
+
+		foreach ( self::get_pending_states() as $pending ) {
+			if ( ! $matched && hash_equals( $pending, $state ) ) {
+				$matched = true;
+				continue;
+			}
+
+			$remaining[] = $pending;
+		}
+
+		if ( $remaining === array() ) {
+			delete_transient( self::STATE_TRANSIENT );
+		} else {
+			set_transient( self::STATE_TRANSIENT, $remaining, self::STATE_LIFETIME );
+		}
+
+		return $matched;
 	}
 
 	/**

@@ -62,9 +62,16 @@ final class OAuthConnectionTest extends TestCase
         $_GET = array(
             'omnisend_oauth' => 'callback',
             'code' => 'auth-code',
-            'state' => get_transient('omni_send_core_oauth_state'),
+            'state' => $this->pending_state(),
         );
         $this->handle_oauth_request();
+    }
+
+    private function pending_state(): string
+    {
+        $states = get_transient('omni_send_core_oauth_state');
+
+        return is_array($states) && $states ? $states[count($states) - 1] : '';
     }
 
     private function last_redirect(): string
@@ -91,7 +98,7 @@ final class OAuthConnectionTest extends TestCase
         $this->assertEquals('https://app.omnisend.com/oauth2/register', $registration['url']);
 
         $body = json_decode($registration['args']['body'], true);
-        $this->assertEquals('WordPress', $body['client_name']);
+        $this->assertEquals('wordpress', $body['client_name']);
         $this->assertEquals(array('authorization_code', 'refresh_token'), $body['grant_types']);
         $this->assertEquals(
             array('https://example.com/wp-admin/admin.php?page=omnisend&omnisend_oauth=callback'),
@@ -105,7 +112,61 @@ final class OAuthConnectionTest extends TestCase
         $this->assertStringContainsString('client_id=client-1', $redirect);
         $this->assertStringContainsString('response_type=code', $redirect);
         $this->assertStringContainsString('brands.write', urldecode($redirect));
-        $this->assertStringContainsString('state=' . get_transient('omni_send_core_oauth_state'), $redirect);
+        $this->assertStringContainsString('state=' . $this->pending_state(), $redirect);
+    }
+
+    public function test_authorize_url_carries_the_encoded_redirect_uri(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+
+        $this->start_connect();
+
+        $redirect = $this->last_redirect();
+        $this->assertStringContainsString(
+            'redirect_uri=https%3A%2F%2Fexample.com%2Fwp-admin%2Fadmin.php%3Fpage%3Domnisend%26omnisend_oauth%3Dcallback',
+            $redirect
+        );
+
+        $query = array();
+        parse_str(parse_url($redirect, PHP_URL_QUERY), $query);
+        $this->assertArrayNotHasKey('omnisend_oauth', $query);
+        $this->assertEquals(
+            'https://example.com/wp-admin/admin.php?page=omnisend&omnisend_oauth=callback',
+            $query['redirect_uri']
+        );
+    }
+
+    public function test_callback_without_the_marker_still_exchanges_the_code(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1"}'));
+
+        $_GET = array(
+            'page' => 'omnisend',
+            'code' => 'auth-code',
+            'state' => $this->pending_state(),
+        );
+        $this->handle_oauth_request();
+
+        $this->assertEquals('', $this->oauth_error());
+        $this->assertTrue(Options::is_store_connected());
+
+        $token_request = WP_Http_Test_Stub::$requests[1];
+        $this->assertEquals('https://app.omnisend.com/oauth2/token', $token_request['url']);
+    }
+
+    public function test_settings_page_without_an_authorization_response_is_not_treated_as_a_callback(): void
+    {
+        $_GET = array('page' => 'omnisend');
+
+        Connection::handle_oauth_request();
+
+        $this->assertEmpty($GLOBALS['wp_test_redirects']);
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
     }
 
     public function test_registration_failure_is_reported_and_does_not_start_the_flow(): void

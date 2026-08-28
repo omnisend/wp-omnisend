@@ -257,6 +257,10 @@ class Connection {
 	public static function handle_oauth_request(): void {
 		$action = isset( $_GET['omnisend_oauth'] ) ? sanitize_text_field( wp_unslash( $_GET['omnisend_oauth'] ) ) : '';
 
+		if ( $action === '' && self::is_oauth_callback_without_marker() ) {
+			$action = 'callback';
+		}
+
 		if ( $action !== 'connect' && $action !== 'callback' ) {
 			return;
 		}
@@ -282,12 +286,27 @@ class Connection {
 				return;
 			}
 
-			self::redirect( $authorization_url );
+			self::redirect_external( $authorization_url );
 
 			return;
 		}
 
 		self::finish_oauth_request( self::complete_oauth_connection() );
+	}
+
+	/**
+	 * Recognises the consent redirect even when the marker did not survive it, so a normalised redirect URI
+	 * does not turn the callback into a silent page reload.
+	 */
+	private static function is_oauth_callback_without_marker(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state.
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+
+		return $page === OMNISEND_CORE_SETTINGS_PAGE
+			&& ! empty( $_GET['code'] )
+			&& ! empty( $_GET['state'] )
+			&& OAuthClient::has_pending_state();
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	public static function get_oauth_connect_url(): string {
@@ -371,6 +390,15 @@ class Connection {
 
 	private static function redirect( string $url ): void {
 		wp_safe_redirect( $url );
+
+		exit;
+	}
+
+	/**
+	 * wp_safe_redirect() drops hosts outside this site, so the consent screen has to be redirected to directly.
+	 */
+	private static function redirect_external( string $url ): void {
+		wp_redirect( $url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Omnisend OAuth issuer, built by the plugin and not from user input.
 
 		exit;
 	}

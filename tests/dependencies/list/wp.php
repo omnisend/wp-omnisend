@@ -85,6 +85,12 @@ function wp_safe_redirect( $location, $status = 302 ) {
 	throw new WP_Redirect_Test_Exception( $location );
 }
 
+function wp_redirect( $location, $status = 302 ) {
+	$GLOBALS['wp_test_redirects'][] = $location;
+
+	throw new WP_Redirect_Test_Exception( $location );
+}
+
 function set_transient( $transient, $value, $expiration = 0 ) {
 	$GLOBALS['wp_test_transients'][ $transient ] = $value;
 
@@ -130,7 +136,7 @@ if ( ! defined( 'OMNISEND_CORE_OAUTH_ISSUER' ) ) {
 }
 
 if ( ! defined( 'OMNISEND_CORE_OAUTH_CLIENT_NAME' ) ) {
-	define( 'OMNISEND_CORE_OAUTH_CLIENT_NAME', 'WordPress' );
+	define( 'OMNISEND_CORE_OAUTH_CLIENT_NAME', 'wordpress' );
 }
 
 if ( ! defined( 'OMNISEND_CORE_PLUGIN_VERSION' ) ) {
