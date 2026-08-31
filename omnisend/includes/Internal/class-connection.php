@@ -257,7 +257,7 @@ class Connection {
 	public static function handle_oauth_request(): void {
 		$action = isset( $_GET['omnisend_oauth'] ) ? sanitize_text_field( wp_unslash( $_GET['omnisend_oauth'] ) ) : '';
 
-		if ( $action !== 'connect' && $action !== 'callback' ) {
+		if ( $action !== 'connect' && ! self::is_oauth_callback() ) {
 			return;
 		}
 
@@ -282,12 +282,30 @@ class Connection {
 				return;
 			}
 
+			add_filter( 'allowed_redirect_hosts', array( self::class, 'allow_oauth_issuer_redirect' ) );
+
 			self::redirect( $authorization_url );
 
 			return;
 		}
 
 		self::finish_oauth_request( self::complete_oauth_connection() );
+	}
+
+	/**
+	 * The redirect URI carries no marker of its own, so the return from Omnisend is recognised by the
+	 * authorization response it carries.
+	 */
+	private static function is_oauth_callback(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state.
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( $page !== OMNISEND_CORE_SETTINGS_PAGE ) {
+			return false;
+		}
+
+		return ( ! empty( $_GET['code'] ) && ! empty( $_GET['state'] ) ) || ! empty( $_GET['error'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	public static function get_oauth_connect_url(): string {
@@ -373,6 +391,17 @@ class Connection {
 		wp_safe_redirect( $url );
 
 		exit;
+	}
+
+	/**
+	 * @param string[] $hosts Hosts wp_safe_redirect() is allowed to leave this site for.
+	 *
+	 * @return string[]
+	 */
+	public static function allow_oauth_issuer_redirect( $hosts ): array {
+		$hosts[] = wp_parse_url( OMNISEND_CORE_OAUTH_ISSUER, PHP_URL_HOST );
+
+		return $hosts;
 	}
 
 	private static function display_oauth_error(): void {

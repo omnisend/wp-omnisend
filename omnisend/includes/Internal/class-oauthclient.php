@@ -56,7 +56,7 @@ class OAuthClient {
 			'state'         => $state,
 		);
 
-		return add_query_arg( $query, OMNISEND_CORE_OAUTH_ISSUER . '/oauth2/authorize' );
+		return OMNISEND_CORE_OAUTH_ISSUER . '/oauth2/authorize?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
 	}
 
 	/**
@@ -114,8 +114,12 @@ class OAuthClient {
 		return Options::get_oauth_access_token();
 	}
 
+	/**
+	 * Has to stay a single query parameter: Omnisend re-emits it unencoded when the consent is granted, so any
+	 * further parameter is lost and the token request can no longer match the URI the code was issued for.
+	 */
 	public static function get_redirect_uri(): string {
-		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE . '&omnisend_oauth=callback' );
+		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
 	}
 
 	/**
