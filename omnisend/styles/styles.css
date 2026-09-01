@@ -115,30 +115,6 @@
 	line-height: 56px;
 }
 
-.omnisend-h1 {
-	margin: 0;
-	color: #1e2423;
-	font-family: Roboto;
-	font-stretch: normal;
-	font-style: normal;
-	font-weight: 500;
-	letter-spacing: normal;
-	font-size: 32px;
-	line-height: 40px;
-}
-
-.omnisend-paragraph-14 {
-	margin: 0;
-	font-weight: 300;
-	color: #1e2423;
-	font-family: Roboto;
-	font-size: 14px;
-	font-stretch: normal;
-	font-style: normal;
-	letter-spacing: normal;
-	line-height: 24px;
-}
-
 .omnisend-text-body {
 	font-family: Roboto;
 	font-size: 22px;
@@ -323,11 +299,6 @@
 	height: auto;
 }
 
-.omnisend-divider {
-	border: 0;
-	border-bottom: 1px solid #b6b6b6;
-}
-
 .omnisend-landing-text-microcopy {
 	font-family: Roboto;
 	font-size: 13px;
@@ -336,44 +307,10 @@
 	color: #1e2423;
 }
 
-.omnisend-bullet-list li {
-	margin-bottom: 8px;
-	font-weight: 300;
-	color: #1e2423;
-	font-family: Roboto;
-	font-size: 14px;
-	font-stretch: normal;
-	font-style: normal;
-	letter-spacing: normal;
-	line-height: 24px;
-}
-
-.omnisend-bullet-list li:before {
-	content: '';
-	width: 5px;
-	height: 5px;
-	border-radius: 50%;
-	margin-right: 16px;
-	display: inline-block;
-	background-color: #018482;
-	vertical-align: middle;
-}
-
 .omnisend-connect {
 	margin-top: 70px;
 	margin-left: 70px;
 	margin-right: 70px;
-}
-
-.omnisend-icon-wrapper {
-	box-sizing: border-box;
-	display: flex;
-	flex: 0 1 auto;
-	flex-flow: wrap;
-	flex-direction: row;
-	margin: 0 auto;
-	width: 100%;
-	align-items: center;
 }
 
 .omnisend-landing-page-text {
@@ -436,7 +373,6 @@
 }
 
 #omnisend-app-market,
-#omnisend-connection,
 #omnisend-connected {
 	margin: 40px 0;
 	width: 100%;
@@ -469,23 +405,9 @@
 	flex-grow: 1;
 }
 
-.omnisend-connection-input {
-	width: 100%;
-}
-
-.omnisend-connection-input-wrap {
-	flex-grow: 1;
-}
-
 .omnisend-wp-text-body {
 	font-size: 14px;
 	line-height: 24px;
-	color: #1e1e1e;
-}
-
-.omnisend-wp-text-list {
-	font-size: 16px;
-	line-height: 20px;
 	color: #1e1e1e;
 }
 

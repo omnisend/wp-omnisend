@@ -59,7 +59,6 @@ class Omnisend_Core_Bootstrap {
 		self::load_react();
 		// Cron every minute only for short period of time (after connection) to sync WP users to Omnisend. After sync cron is disabled.
 		add_filter( 'cron_schedules', array( 'Omnisend_Core_Bootstrap', 'cron_schedules' ) ); //phpcs:ignore WordPress.WP.CronInterval.CronSchedulesInterval
-		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
 		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
@@ -126,21 +125,6 @@ class Omnisend_Core_Bootstrap {
 		<div id="omnisend-hostinger-discount-notice"></div>
 		<?php
 	}
-
-	public static function omnisend_register_connection_routes() {
-		register_rest_route(
-			'omnisend/v1',
-			'/connect',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => 'Omnisend\Internal\Connection::omnisend_post_connection',
-				'permission_callback' => function () {
-					return is_user_logged_in();
-				},
-			)
-		);
-	}
-
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
@@ -316,37 +300,6 @@ class Omnisend_Core_Bootstrap {
 						foreach ( $assets['dependencies'] as $style ) {
 							wp_enqueue_style( $style );
 						}
-					}
-				}
-			);
-		}
-
-		if ( Connection::show_connection_view() ) {
-			add_action(
-				'admin_enqueue_scripts',
-				function ( $suffix ) {
-					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
-						$assets = require_once $asset_file_page;
-						wp_enqueue_script(
-							'connection-script',
-							plugin_dir_url( __FILE__ ) . 'build/connection.js',
-							$assets['dependencies'],
-							$assets['version'],
-							true
-						);
-						foreach ( $assets['dependencies'] as $style ) {
-							wp_enqueue_style( $style );
-						}
-						wp_localize_script(
-							'connection-script',
-							'omnisend_connection',
-							array(
-								'nonce'        => wp_create_nonce( 'wp_rest' ),
-								'action_nonce' => wp_create_nonce( 'connect' ),
-								'site_url'     => site_url(),
-							)
-						);
 					}
 				}
 			);

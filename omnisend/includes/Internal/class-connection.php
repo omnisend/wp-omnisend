@@ -16,8 +16,6 @@ class Connection {
 
 	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
 
-	private static $signup_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=connect_store';
-
 	// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- WordPress is lowercase as it's required by integration.
 	private const WORDPRESS_PLATFORM    = 'wordpress';
 	private const OAUTH_NONCE_ACTION    = 'omnisend_oauth_connect';
@@ -35,16 +33,6 @@ class Connection {
 		if ( self::show_connected_store_view() ) {
 			?>
 			<div id="omnisend-connected"></div>
-			<?php
-			return;
-		}
-
-		if ( self::show_connection_view() ) {
-			?>
-			<script type="text/javascript">
-				var plugin_omnisend_signup_url = "<?php echo esc_url_raw( self::get_signup_url() ); ?>";
-			</script>
-			<div id="omnisend-connection"></div>
 			<?php
 			return;
 		}
@@ -158,24 +146,11 @@ class Connection {
 	private static function get_missing_permission_message( string $required_permission ): string {
 		$permission = $required_permission === '' ? '' : ' (' . $required_permission . ')';
 
-		return 'This API key is missing required permissions' . $permission . '. In Omnisend create a new API key with store connection permissions and paste it here to reconnect.';
+		return 'Omnisend rejected this request because of missing permissions' . $permission . '. Please connect again and grant access to Omnisend.';
 	}
 
 	public static function show_connected_store_view(): bool {
 		return Options::is_store_connected();
-	}
-
-	public static function show_connection_view(): bool {
-		$connected = Options::is_store_connected();
-
-		if ( ! $connected && ! empty( $_GET['action'] ) && 'show_connection_form' == $_GET['action'] ) {
-			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'show_connection_form' ) ) {
-				die( 'nonce verification failed: ' . __FILE__ . ':' . __LINE__ );
-			}
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -208,43 +183,6 @@ class Connection {
 
 		if ( is_wp_error( $parsed ) ) {
 			return $parsed;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Writes this site into the brand the pasted API key belongs to. This is the retained deprecated /v3 call:
-	 * brand API keys are rejected by the /api account routes and may not write brand settings at all.
-	 *
-	 * @return true|WP_Error True when the store is connected, otherwise an error describing the failure.
-	 */
-	private static function connect_store_with_api_key( string $api_key ) {
-		$data = array(
-			'website'         => site_url(),
-			'platform'        => self::WORDPRESS_PLATFORM,
-			'version'         => OMNISEND_CORE_PLUGIN_VERSION,
-			'phpVersion'      => phpversion(),
-			'platformVersion' => get_bloginfo( 'version' ),
-		);
-
-		$response = wp_remote_post(
-			OMNISEND_CORE_API_V3 . '/accounts',
-			array(
-				'body'    => wp_json_encode( $data ),
-				'headers' => ApiRequest::legacy_api_key_headers( $api_key ),
-				'timeout' => 10,
-			)
-		);
-
-		$parsed = ApiResponse::parse( $response );
-
-		if ( is_wp_error( $parsed ) ) {
-			return $parsed;
-		}
-
-		if ( empty( $parsed['verified'] ) ) {
-			return ApiResponse::unexpected_value_error( 'verified', 'is not set, so Omnisend did not verify this store' );
 		}
 
 		return true;
@@ -449,26 +387,6 @@ class Connection {
 	}
 
 	/**
-	 * Validates the Omnisend signup link after applying filters.
-	 *
-	 * This function applies the 'omnisend_signup_wp_link' filter,
-	 * checks if the resulting URL has the naked domain 'omnisend.com',
-	 * and returns the filtered URL if valid, or a default URL otherwise.
-	 *
-	 * @return string
-	 */
-	private static function get_signup_url(): string {
-		$filtered_url = apply_filters( 'omnisend_signup_wp_link', self::$signup_url );
-		$naked_domain = self::get_naked_domain( $filtered_url );
-
-		if ( $naked_domain === 'omnisend.com' ) {
-			return $filtered_url;
-		}
-
-		return esc_url( self::$signup_url );
-	}
-
-	/**
 	 * Helper function to extract the naked domain from a URL.
 	 *
 	 * @param string $url The URL to extract the naked domain from.
@@ -490,148 +408,5 @@ class Connection {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Connects a store with an API key its administrator pasted. Brands Omnisend does not know a platform for
-	 * are written with the retained deprecated /v3 account call, because API keys may not write brand settings on /api.
-	 */
-	public static function omnisend_post_connection() {
-		$connected = Options::is_store_connected();
-
-		$wordpress_platform = self::WORDPRESS_PLATFORM;
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return rest_ensure_response(
-				array(
-					'success' => false,
-					'error'   => 'You do not have sufficient permissions to perform this action.',
-				)
-			);
-		}
-
-		if ( ! isset( $_POST['action_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['action_nonce'] ) ), 'connect' ) ) {
-			return rest_ensure_response(
-				array(
-					'success' => false,
-					'error'   => 'Nonce verification failed.',
-				)
-			);
-		}
-
-		if ( empty( $_POST['api_key'] ) ) {
-			return rest_ensure_response(
-				array(
-					'success' => false,
-					'error'   => 'API key is required.',
-				)
-			);
-		}
-
-		if ( ! $connected && ! empty( $_POST['api_key'] ) ) {
-			$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ) );
-			$response = self::get_account_data( $api_key );
-
-			if ( is_wp_error( $response ) ) {
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => self::get_connection_error_message( $response, 'brands.read' ),
-					)
-				);
-			}
-
-			$brand_id = ! empty( $response['brandID'] ) ? $response['brandID'] : '';
-
-			if ( ! $brand_id ) {
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => 'Omnisend API did not return a brand for this API key. Check if the API key is correct.',
-					)
-				);
-			}
-
-			if ( ! isset( $response['platform'] ) || ! is_string( $response['platform'] ) ) {
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => self::get_connection_error_message( ApiResponse::unexpected_shape_error( 'platform' ) ),
-					)
-				);
-			}
-
-			if ( isset( $response['connected'] ) && ! is_bool( $response['connected'] ) ) {
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => self::get_connection_error_message( ApiResponse::unexpected_value_error( 'connected', 'is not a boolean' ) ),
-					)
-				);
-			}
-
-			if ( ! empty( $response['connected'] ) && $response['platform'] !== $wordpress_platform ) {
-				return rest_ensure_response(
-					array(
-						'success' => false,
-						'error'   => 'This Omnisend account is already connected to non-WordPress site. Log in to access it.',
-					)
-				);
-			}
-
-			if ( $response['platform'] === '' ) {
-				$connected_store = self::connect_store_with_api_key( $api_key );
-
-				if ( is_wp_error( $connected_store ) ) {
-					return rest_ensure_response(
-						array(
-							'success' => false,
-							'error'   => self::get_connection_error_message( $connected_store ),
-						)
-					);
-				}
-
-				Options::set_api_key( $api_key );
-				Options::set_brand_id( $brand_id );
-				Options::set_store_connected();
-				self::schedule_contact_sync();
-
-				return rest_ensure_response(
-					array(
-						'success' => true,
-						'error'   => '',
-					)
-				);
-			}
-
-			if ( $response['platform'] === $wordpress_platform ) {
-				Options::set_api_key( $api_key );
-				Options::set_brand_id( $brand_id );
-				Options::set_store_connected();
-				self::schedule_contact_sync();
-
-				return rest_ensure_response(
-					array(
-						'success' => true,
-						'error'   => '',
-					)
-				);
-			}
-
-			Options::disconnect(); // Store was not connected, clean up.
-			return rest_ensure_response(
-				array(
-					'success' => false,
-					'error'   => 'The connection did not go through. This Omnisend account is connected to another platform (' . $response['platform'] . ').',
-				)
-			);
-		}
-
-		return rest_ensure_response(
-			array(
-				'success' => false,
-				'error'   => 'Something went wrong. Please try again.',
-			)
-		);
 	}
 }

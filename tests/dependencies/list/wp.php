@@ -10,6 +10,9 @@ function wp_test_reset_options(): void {
 	$GLOBALS['wp_test_transients'] = array();
 	$GLOBALS['wp_test_redirects']  = array();
 	$GLOBALS['wp_test_filters']    = array();
+
+	$GLOBALS['wp_test_woocommerce_plugin_active']    = false;
+	$GLOBALS['wp_test_woocommerce_plugin_connected'] = false;
 }
 
 wp_test_reset_options();
@@ -164,15 +167,19 @@ if ( ! defined( 'OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE' ) ) {
 	define( 'OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE', 'omnisend_core_every_minute' );
 }
 
+if ( ! defined( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION' ) ) {
+	define( 'OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION', 'omnisend_api_key' );
+}
+
 if ( ! class_exists( 'Omnisend_Core_Bootstrap' ) ) {
 	class Omnisend_Core_Bootstrap {
 
 		public static function is_omnisend_woocommerce_plugin_active(): bool {
-			return false;
+			return ! empty( $GLOBALS['wp_test_woocommerce_plugin_active'] );
 		}
 
 		public static function is_omnisend_woocommerce_plugin_connected(): bool {
-			return false;
+			return ! empty( $GLOBALS['wp_test_woocommerce_plugin_connected'] );
 		}
 	}
 }
