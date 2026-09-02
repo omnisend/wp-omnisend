@@ -2,6 +2,7 @@
 namespace Omnisend\Internal;
 
 use PHPUnit\Framework\TestCase;
+use WP_Error;
 use WP_Http_Test_Stub;
 use WP_Redirect_Test_Exception;
 
@@ -86,6 +87,26 @@ final class OAuthConnectionTest extends TestCase
         $error = get_transient('omni_send_core_oauth_error');
 
         return is_string($error) ? $error : '';
+    }
+
+    /**
+     * @param array|\WP_Error $brand_response Response the brand read of the callback gets from Omnisend.
+     *
+     * @return string Message shown to the administrator after the callback.
+     */
+    private function callback_error_for_brand_response($brand_response): string
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue($brand_response);
+
+        $this->complete_callback();
+
+        $this->assertFalse(Options::is_store_connected());
+
+        return $this->oauth_error();
     }
 
     public function test_connect_registers_the_client_and_redirects_to_the_consent_screen(): void
@@ -277,7 +298,7 @@ final class OAuthConnectionTest extends TestCase
 
         $this->complete_callback();
 
-        $this->assertStringContainsString('missing required permissions (brands.write)', $this->oauth_error());
+        $this->assertStringContainsString('missing permissions (brands.write)', $this->oauth_error());
         $this->assertFalse(Options::is_store_connected());
         $this->assertEquals('', Options::get_oauth_access_token());
     }
@@ -293,5 +314,88 @@ final class OAuthConnectionTest extends TestCase
 
         $this->assertStringContainsString('access_token not found in response.', $this->oauth_error());
         $this->assertEquals('', Options::get_oauth_access_token());
+    }
+
+    public function test_rejected_credential_on_the_brand_read_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(401, '{"title":"Unauthorized"}'));
+
+        $this->assertStringContainsString('rejected by Omnisend', $error);
+    }
+
+    public function test_brand_read_without_permission_asks_to_grant_access_again(): void
+    {
+        $error = $this->callback_error_for_brand_response(
+            WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing brands.read scope."}')
+        );
+
+        $this->assertStringContainsString('missing permissions (brands.read)', $error);
+        $this->assertStringContainsString('connect again', $error);
+    }
+
+    public function test_retired_api_version_on_the_brand_read_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(410, '{"title":"Gone"}'));
+
+        $this->assertStringContainsString('retired Omnisend API version', $error);
+    }
+
+    public function test_rate_limited_brand_read_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(
+            WP_Http_Test_Stub::response(429, '{"title":"Too many requests","retryAfter":30}')
+        );
+
+        $this->assertStringContainsString('rate limiting', $error);
+    }
+
+    public function test_network_failure_on_the_brand_read_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(new WP_Error('http_request_failed', 'cURL error 28: timeout'));
+
+        $this->assertStringContainsString('Could not reach Omnisend API', $error);
+        $this->assertStringContainsString('timeout', $error);
+    }
+
+    public function test_server_error_on_the_brand_read_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(503, ''));
+
+        $this->assertStringContainsString('temporarily unavailable', $error);
+    }
+
+    public function test_empty_brand_read_body_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(200, ''));
+
+        $this->assertStringContainsString('unexpected response', $error);
+    }
+
+    public function test_malformed_brand_read_body_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(200, '{"brandID":'));
+
+        $this->assertStringContainsString('unexpected response', $error);
+    }
+
+    public function test_brand_read_of_an_unexpected_shape_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(200, '["brand-1"]'));
+
+        $this->assertStringContainsString('unexpected response', $error);
+    }
+
+    public function test_brand_read_without_a_brand_id_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(200, '{"platform":""}'));
+
+        $this->assertStringContainsString('brandID not found in response.', $error);
+    }
+
+    public function test_brand_read_without_a_platform_is_reported(): void
+    {
+        $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1"}'));
+
+        $this->assertStringContainsString('platform not found in response.', $error);
     }
 }

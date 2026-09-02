@@ -21,6 +21,7 @@ final class ClientTest extends TestCase
     protected function setUp(): void
     {
         WP_Http_Test_Stub::reset();
+        wp_test_reset_options();
     }
 
     private function client(): Client

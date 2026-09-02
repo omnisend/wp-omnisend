@@ -121,6 +121,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 1.9.0 =
+
+* New connections and reconnections now happen through Omnisend OAuth instead of pasting an API key.
+* Stores already connected with an API key keep working unchanged.
+* Removed the `omnisend_signup_wp_link` filter, which was only used by the removed API key connection screen.
+
 = 1.8.1 =
 
 * Tested up to WordPress 7.1
