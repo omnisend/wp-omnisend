@@ -301,7 +301,6 @@ class Connection {
 			return 'The connection did not go through. This Omnisend account is connected to another platform (' . $brand['platform'] . ').';
 		}
 
-		// A brand already connected to WordPress rejects a second brand write.
 		if ( $brand['platform'] === '' ) {
 			$connected = self::connect_store( $authorization );
 
