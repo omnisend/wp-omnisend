@@ -301,13 +301,14 @@ class Connection {
 			return 'The connection did not go through. This Omnisend account is connected to another platform (' . $brand['platform'] . ').';
 		}
 
-		$connected = self::connect_store( $authorization );
+		if ( $brand['platform'] === '' ) {
+			$connected = self::connect_store( $authorization );
 
-		if ( is_wp_error( $connected ) ) {
-			// Only the tokens this flow obtained are dropped, so a store that was connected with an API key before keeps working.
-			Options::clear_oauth_tokens();
+			if ( is_wp_error( $connected ) ) {
+				Options::clear_oauth_tokens();
 
-			return self::get_connection_error_message( $connected, 'brands.write' );
+				return self::get_connection_error_message( $connected, 'brands.write' );
+			}
 		}
 
 		Options::set_brand_id( $brand['brandID'] );
