@@ -152,7 +152,8 @@
 
 .omnisend-button:hover,
 .omnisend-button:focus {
-	color: #2f8481;
+	background-color: #2f8481;
+	color: #fff;
 	outline: none;
 	box-shadow: none;
 }
