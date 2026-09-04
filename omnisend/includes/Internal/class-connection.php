@@ -257,6 +257,20 @@ class Connection {
 	 * @return string Empty string when the store got connected, otherwise the message to show to the administrator.
 	 */
 	private static function complete_oauth_connection(): string {
+		$error_message = self::try_complete_oauth_connection();
+
+		if ( $error_message !== '' ) {
+			// Only the tokens this flow obtained are dropped, so a store that was connected with an API key before keeps working.
+			Options::clear_oauth_tokens();
+		}
+
+		return $error_message;
+	}
+
+	/**
+	 * @return string Empty string when the store got connected, otherwise the message to show to the administrator.
+	 */
+	private static function try_complete_oauth_connection(): string {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Omnisend redirects here, so the request is verified with the OAuth state below.
 		if ( isset( $_GET['error'] ) ) {
 			return 'Omnisend did not authorize this store: ' . sanitize_text_field( wp_unslash( $_GET['error'] ) ) . '.';
@@ -269,8 +283,6 @@ class Connection {
 		$authorized = OAuthClient::complete_authorization( $code, $state );
 
 		if ( is_wp_error( $authorized ) ) {
-			Options::clear_oauth_tokens();
-
 			return self::get_connection_error_message( $authorized );
 		}
 
@@ -296,17 +308,12 @@ class Connection {
 		}
 
 		if ( $brand['platform'] !== '' && $brand['platform'] !== self::WORDPRESS_PLATFORM ) {
-			Options::clear_oauth_tokens();
-
 			return 'The connection did not go through. This Omnisend account is connected to another platform (' . $brand['platform'] . ').';
 		}
 
 		$connected = self::connect_store( $authorization );
 
 		if ( is_wp_error( $connected ) ) {
-			// Only the tokens this flow obtained are dropped, so a store that was connected with an API key before keeps working.
-			Options::clear_oauth_tokens();
-
 			return self::get_connection_error_message( $connected, 'brands.write' );
 		}
 

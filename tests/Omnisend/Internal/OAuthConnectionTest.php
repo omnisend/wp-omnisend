@@ -105,6 +105,9 @@ final class OAuthConnectionTest extends TestCase
         $this->complete_callback();
 
         $this->assertFalse(Options::is_store_connected());
+        $this->assertFalse(Options::has_credentials());
+        $this->assertSame('', Options::get_oauth_access_token());
+        $this->assertSame('', Options::get_oauth_refresh_token());
 
         return $this->oauth_error();
     }
