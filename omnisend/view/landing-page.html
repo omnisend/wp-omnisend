@@ -11,38 +11,45 @@
     );
 ?>
 
-<div class="omnisend-connection-container">
-    <div class="omnisend-connection-info">
-        <div class="omnisend-connection-content-left">
-            <p class="omnisend-connection-title">Welcome to Omnisend</p>
-            <p class="omnisend-connection-subtitle">
-                Send personalized and automated emails, collect subscribers, and turn 1st-time visitors into lifelong customers.
-            </p>
-            <div class="omnisend-connection-btns">
-                <a class="omnisend-create-account-btn omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank">Create new account</a>
-                <a class="omnisend-connect-account-btn omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank">Connect your account</a>
+<div class="omnisend-landing-page-header">
+    <div class="omnisend-landing-header-container">
+        <div class="omnisend-landing-page-content">
+            <div class="omnisend-landing-h1">
+                Convert website visitors into subscribers and send newsletters to them - all with Omnisend
+            </div>
+            <div class="omnisend-spacing-mv-8">
+                <div class="omnisend-text-body omnisend-landing-page-text">
+                    Save on website traffic costs by using Omnisend to convert visitors into subscribers, engaging them with email
+                    newsletters and targeted campaigns.
+                </div>
+            </div>
+            <div class="omnisend-button-container omnisend-spacing-mb-10">
                 <?php if (Omnisend_Core_Bootstrap::is_hostinger_plugin_active()): ?>
-                <a class="omnisend-connect-account-btn" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">Explore Omnisend</a>
+                <a class="omnisend-button-primary" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
+                    Explore Omnisend
+                </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
+                <?php else: ?>
+                <a class="omnisend-button-primary omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 <?php endif; ?>
             </div>
-            <a class="omnisend-kb-link" href="https://support.omnisend.com/en/articles/1640692-connect-wordpress-plugin-to-omnisend" target="_blank">
-                Check out article how to integrate with Omnisend
-                <img src="<?php echo esc_url( plugins_url( '../assets/img/kb-icon.svg', __FILE__ ) ); ?>" alt="">
-            </a>
         </div>
-        <div class="omnisend-connection-content-right">
-            <div class="omnisend-connection-card">
-                <div class="omnisend-connection-card-logos">
-                    <span class="omnisend-connection-card-wp">WordPress</span>
-                    <span class="omnisend-connection-card-plus">+</span>
-                    <img src="<?php echo esc_url( plugins_url( '../assets/img/omnisend-logo.svg', __FILE__ ) ); ?>" alt="Omnisend">
-                </div>
-                <ol class="omnisend-connection-steps">
-                    <li><span class="omnisend-connection-step-number">1</span><span>Connect your Omnisend account to your WordPress site.</span></li>
-                    <li><span class="omnisend-connection-step-number">2</span><span>Start exploring Omnisend!</span></li>
-                </ol>
-            </div>
-        </div>
+    </div>
+</div>
+<div class="omnisend-landing-page-video-block omnisend-spacing-mb-25">
+    <div class="omnisend-landing-page-video-container">
+        <iframe
+            width="580"
+            height="370"
+            class="omnisend-landing-page-video"
+            src="https://www.youtube-nocookie.com/embed/8cpoBHteFCs?si=c1-CKMBb0Yk_5mrM"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+        ></iframe>
     </div>
 </div>
 <div class="omnisend-landing-page">
