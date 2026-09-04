@@ -198,12 +198,18 @@
 	color: #fff;
 }
 .omnisend-button-primary:hover,
-.omnisend-button-primary:focus,
-.omnisend-button-primary:active {
-	background-color: #2f8481;
+.omnisend-button-primary:focus {
+	background-color: #5da9a5;
 	color: #fff;
 	outline: none;
 	box-shadow: none;
+}
+
+.omnisend-button-primary:active {
+	background-color: #2f8481;
+	outline: none;
+	box-shadow: none;
+	color: #fff;
 }
 
 .omnisend-button-green {
