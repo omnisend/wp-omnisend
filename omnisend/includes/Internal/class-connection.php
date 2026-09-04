@@ -20,6 +20,7 @@ class Connection {
 	private const WORDPRESS_PLATFORM    = 'wordpress';
 	private const OAUTH_NONCE_ACTION    = 'omnisend_oauth_connect';
 	private const OAUTH_ERROR_TRANSIENT = 'omni_send_core_oauth_error';
+	public const STATUS_AJAX_ACTION     = 'omnisend_connection_status';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -195,7 +196,9 @@ class Connection {
 	public static function handle_oauth_request(): void {
 		$action = isset( $_GET['omnisend_oauth'] ) ? sanitize_text_field( wp_unslash( $_GET['omnisend_oauth'] ) ) : '';
 
-		if ( $action !== 'connect' && ! self::is_oauth_callback() ) {
+		$starts_flow = $action === 'connect' || $action === 'register';
+
+		if ( ! $starts_flow && ! self::is_oauth_callback() ) {
 			return;
 		}
 
@@ -203,7 +206,7 @@ class Connection {
 			return;
 		}
 
-		if ( $action === 'connect' ) {
+		if ( $starts_flow ) {
 			// The callback comes from Omnisend and cannot carry a nonce, so only starting the flow is nonce protected;
 			// the callback is verified with the OAuth state instead.
 			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), self::OAUTH_NONCE_ACTION ) ) {
@@ -222,12 +225,25 @@ class Connection {
 
 			add_filter( 'allowed_redirect_hosts', array( self::class, 'allow_oauth_issuer_redirect' ) );
 
-			self::redirect( $authorization_url );
+			self::redirect( $action === 'register' ? self::get_registration_url( $authorization_url ) : $authorization_url );
 
 			return;
 		}
 
 		self::finish_oauth_request( self::complete_oauth_connection() );
+	}
+
+	/**
+	 * The OAuth flow finishes in the tab Omnisend opened in, so the landing page polls this to learn the store got connected.
+	 */
+	public static function send_connection_status(): void {
+		check_ajax_referer( self::STATUS_AJAX_ACTION );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( null, 403 );
+		}
+
+		wp_send_json( array( 'connected' => Options::is_store_connected() ) );
 	}
 
 	/**
@@ -247,10 +263,31 @@ class Connection {
 	}
 
 	public static function get_oauth_connect_url(): string {
+		return self::get_oauth_action_url( 'connect' );
+	}
+
+	public static function get_oauth_register_url(): string {
+		return self::get_oauth_action_url( 'register' );
+	}
+
+	private static function get_oauth_action_url( string $action ): string {
 		return wp_nonce_url(
-			admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE . '&omnisend_oauth=connect' ),
+			admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE . '&omnisend_oauth=' . $action ),
 			self::OAUTH_NONCE_ACTION
 		);
+	}
+
+	/**
+	 * Registration returns to a path on the Omnisend app, so the consent screen is passed relative to the issuer.
+	 */
+	private static function get_registration_url( string $authorization_url ): string {
+		$query = array(
+			'registration_redirect_url' => ltrim( substr( $authorization_url, strlen( OMNISEND_CORE_OAUTH_ISSUER ) ), '/' ),
+			'utm_source'                => 'wordpress_plugin',
+			'utm_content'               => 'create_account',
+		);
+
+		return OMNISEND_CORE_OAUTH_ISSUER . '/ecom/registration/start?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
 	}
 
 	/**

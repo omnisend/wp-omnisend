@@ -1,6 +1,14 @@
 <?php
     use Omnisend\Internal\Connection;
-    $connect_url = Connection::get_oauth_connect_url();
+    $connect_url  = Connection::get_oauth_connect_url();
+    $register_url = Connection::get_oauth_register_url();
+    $status_url   = add_query_arg(
+        array(
+            'action'   => Connection::STATUS_AJAX_ACTION,
+            '_wpnonce' => wp_create_nonce( Connection::STATUS_AJAX_ACTION ),
+        ),
+        admin_url( 'admin-ajax.php' )
+    );
 ?>
 
 <div class="omnisend-landing-page-header">
@@ -20,9 +28,11 @@
                 <a class="omnisend-button-primary" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
                     Explore Omnisend
                 </a>
-                <a class="omnisend-button" href="<?php echo esc_url( $connect_url ); ?>"> Connect Omnisend </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 <?php else: ?>
-                <a class="omnisend-button-primary" href="<?php echo esc_url( $connect_url ); ?>"> Connect Omnisend </a>
+                <a class="omnisend-button-primary omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 <?php endif; ?>
             </div>
         </div>
@@ -100,9 +110,38 @@
                     <a class="omnisend-button-green" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
                         Explore Omnisend
                     </a>
-                    <a class="omnisend-button-white" href="<?php echo esc_url( $connect_url ); ?>"> Connect Omnisend </a>
+                    <a class="omnisend-button-white omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                    <a class="omnisend-button-white omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+    (function () {
+        var statusUrl = <?php echo wp_json_encode( $status_url ); ?>;
+        var interval;
+
+        function reloadWhenConnected() {
+            if ( interval ) {
+                return;
+            }
+
+            interval = setInterval( function () {
+                fetch( statusUrl + '&_=' + Date.now(), { credentials: 'same-origin' } )
+                    .then( function ( response ) { return response.json(); } )
+                    .then( function ( status ) {
+                        if ( status && status.connected ) {
+                            clearInterval( interval );
+                            location.reload();
+                        }
+                    } )
+                    .catch( function () {} );
+            }, 2000 );
+        }
+
+        document.querySelectorAll( '.omnisend-connect-action' ).forEach( function ( element ) {
+            element.addEventListener( 'click', reloadWhenConnected );
+        } );
+    })();
+</script>
