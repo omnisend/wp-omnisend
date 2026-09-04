@@ -68,6 +68,7 @@ class Omnisend_Core_Bootstrap {
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::handle_oauth_request' );
+		add_action( 'wp_ajax_omnisend_connection_status', 'Omnisend\Internal\Connection::send_connection_status' );
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 		add_action( 'admin_init', 'Omnisend_Core_Bootstrap::add_privacy_policy_content' );
 
@@ -282,6 +283,29 @@ class Omnisend_Core_Bootstrap {
 				}
 			}
 		);
+
+		if ( ! Connection::show_connected_store_view() ) {
+			add_action(
+				'admin_enqueue_scripts',
+				function ( $suffix ) {
+					if ( 'toplevel_page_omnisend' !== $suffix ) {
+						return;
+					}
+					wp_enqueue_script(
+						'omnisend-connection-status-script',
+						plugin_dir_url( __FILE__ ) . 'assets/js/connection-status.js',
+						array(),
+						OMNISEND_CORE_PLUGIN_VERSION,
+						true
+					);
+					wp_localize_script(
+						'omnisend-connection-status-script',
+						'omnisendConnectionStatus',
+						array( 'url' => Connection::get_status_url() )
+					);
+				}
+			);
+		}
 
 		if ( Connection::show_connected_store_view() ) {
 			add_action(

@@ -22,7 +22,7 @@ class OAuthClient {
 	const SCOPES = 'brands.read brands.write contacts.read contacts.write events.write products.read products.write';
 
 	private const STATE_TRANSIENT = 'omni_send_core_oauth_state';
-	private const STATE_LIFETIME  = 900;
+	private const STATE_LIFETIME  = HOUR_IN_SECONDS;
 
 	/**
 	 * Access tokens are refreshed slightly before they expire so a request does not fail on a token
