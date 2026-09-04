@@ -126,6 +126,12 @@
 	color: #1e2423;
 }
 
+.omnisend-button-container {
+	display: flex;
+	gap: 24px;
+	justify-content: center;
+}
+
 .omnisend-button {
 	text-decoration: none;
 
@@ -147,6 +153,29 @@
 .omnisend-button:hover {
 	background-color: #1e2423;
 	color: #fff;
+}
+
+.omnisend-button-white {
+	text-decoration: none;
+
+	font-family: Roboto;
+
+	display: inline-block;
+	padding: 12px 32px;
+	border: 2px #fff solid;
+	border-radius: 8px;
+	text-align: center;
+	font-weight: 500;
+	font-size: 18px;
+	line-height: 24px;
+	transition: ease all 0.3s;
+	margin-bottom: 24px;
+	color: #fff;
+}
+
+.omnisend-button-white:hover {
+	background-color: #fff;
+	color: #1e2423;
 }
 
 .omnisend-button-primary {
@@ -181,10 +210,32 @@
 	color: #fff;
 }
 
+.omnisend-button-green {
+	text-decoration: none;
+
+	font-family: Roboto;
+
+	display: inline-block;
+	padding: 12px 32px;
+	background: #a6f41c;
+	border: 2px solid #a6f41c;
+	border-radius: 8px;
+	text-align: center;
+	font-weight: 500;
+	font-size: 18px;
+	line-height: 24px;
+	transition: ease all 0.3s;
+	margin-bottom: 24px;
+	color: #1e2423;
+}
+
+.omnisend-button-green:hover {
+	background-color: #1e2423;
+	color: #a6f41c;
+}
+
 .omnisend-landing-page {
-	background: #fff;
-	margin-left: -20px;
-	padding: 0 48px 80px 48px;
+	margin: 80px 70px 80px 50px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -342,24 +393,12 @@
 }
 
 .omnisend-connection-steps {
-	position: relative;
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-.omnisend-connection-steps::before {
-	content: '';
-	position: absolute;
-	left: 15px;
-	top: -16px;
-	bottom: 16px;
-	width: 2px;
-	background: #2f8481;
-}
-
 .omnisend-connection-steps li {
-	position: relative;
 	display: flex;
 	align-items: flex-start;
 	gap: 16px;
@@ -455,89 +494,52 @@
 }
 
 .omnisend-landing-page-banner {
-	margin-top: 16px;
-	width: 100%;
-	background: #35938f;
+	width: inherit;
+	max-width: 1000px;
+	background-color: #1e2423;
 	border-radius: 24px;
 	padding: 48px;
-	box-sizing: border-box;
+	position: relative;
+}
+
+.omnisend-landing-page-banner-sticker {
+	height: 100px;
+	position: absolute;
+	left: 80px;
+	top: 42px;
+	display: block;
+}
+
+@media only screen and (max-width: 1300px) {
+	.omnisend-landing-page-banner-sticker {
+		display: none;
+	}
 }
 
 .omnisend-landing-page-banner-header {
 	font-family: Roboto;
 	font-weight: 800;
-	font-size: 40px;
-	line-height: 48px;
+	font-size: 48px;
+	line-height: 56px;
 	color: #fff;
-	margin-bottom: 24px;
+	margin: auto;
 	max-width: 640px;
 }
 
 .omnisend-landing-page-banner-text {
 	font-family: Roboto;
-	font-weight: 300;
-	font-size: 18px;
-	line-height: 32px;
+	font-weight: 600;
+	font-size: 22px;
+	line-height: 36px;
 	color: #fff;
 	max-width: 780px;
-	margin-bottom: 32px;
+	margin: auto;
 }
 
 .omnisend-landing-page-banner-content {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-}
-
-.omnisend-landing-page-banner-buttons {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 16px;
-	justify-content: center;
-}
-
-.omnisend-banner-primary-btn,
-.omnisend-banner-secondary-btn {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	box-sizing: border-box;
-	width: 300px;
-	height: 52px;
-	border: 2px solid #fff;
-	border-radius: 8px;
-	font-family: Roboto;
-	font-weight: 500;
-	font-size: 16px;
-	line-height: 24px;
-	text-decoration: none;
-	transition: ease all 0.3s;
-}
-
-.omnisend-banner-primary-btn {
-	background-color: #fff;
-	color: #35938f;
-}
-
-.omnisend-banner-primary-btn:hover,
-.omnisend-banner-primary-btn:focus {
-	background-color: #e1f5ee;
-	color: #35938f;
-	outline: none;
-	box-shadow: none;
-}
-
-.omnisend-banner-secondary-btn {
-	background-color: transparent;
-	color: #fff;
-}
-
-.omnisend-banner-secondary-btn:hover,
-.omnisend-banner-secondary-btn:focus {
-	background-color: #fff;
-	color: #35938f;
-	outline: none;
-	box-shadow: none;
 }
 
 /* --------------------- */
