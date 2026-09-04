@@ -4,7 +4,7 @@
  *
  * Plugin Name: Newsletters, Email Marketing, SMS and Popups by Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.8.1
+ * Version: 1.9.0
  * Requires PHP: 7.4
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
@@ -24,7 +24,7 @@ use Omnisend\Internal\Connection;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.8.1';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.9.0';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
@@ -33,10 +33,16 @@ const OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE = 'omni_send_core_every_minute';
 
 const OMNISEND_CORE_CRON_SYNC_CONTACT = 'omni_send_cron_sync_contacts';
 
-// Change for different environment.
-const OMNISEND_CORE_API_V3      = 'https://api.omnisend.com/v3';
-const OMNISEND_CORE_API_V5      = 'https://api.omnisend.com/v5';
+// Hosts can be overridden in wp-config.php to run the plugin against a non production environment.
+defined( 'OMNISEND_CORE_API' ) || define( 'OMNISEND_CORE_API', 'https://api.omnisend.com/api' );
+// Retained deprecated base, used only by API key connections for the account write. The /api account routes
+// require permissions brand API keys do not have, and brand writes on /api are OAuth only.
+defined( 'OMNISEND_CORE_API_V3' ) || define( 'OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3' );
+defined( 'OMNISEND_CORE_OAUTH_ISSUER' ) || define( 'OMNISEND_CORE_OAUTH_ISSUER', 'https://app.omnisend.com' );
 const OMNISEND_CORE_SNIPPET_URL = 'https://omnisnippet1.com/inshop/launcher-v2.js';
+
+// Application this plugin registers itself as in the Omnisend app market. Must match the app market connectionName.
+const OMNISEND_CORE_OAUTH_CLIENT_NAME = 'wordpress';
 
 // Omnisend for Woo plugin.
 const OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION = 'omnisend_api_key';
@@ -53,7 +59,6 @@ class Omnisend_Core_Bootstrap {
 		self::load_react();
 		// Cron every minute only for short period of time (after connection) to sync WP users to Omnisend. After sync cron is disabled.
 		add_filter( 'cron_schedules', array( 'Omnisend_Core_Bootstrap', 'cron_schedules' ) ); //phpcs:ignore WordPress.WP.CronInterval.CronSchedulesInterval
-		add_action( 'rest_api_init', 'Omnisend_Core_Bootstrap::omnisend_register_connection_routes' );
 		add_action( 'in_admin_header', 'Omnisend_Core_Bootstrap::hide_notices' );
 
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
@@ -62,6 +67,7 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
+		add_action( 'admin_init', 'Omnisend\Internal\Connection::handle_oauth_request' );
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 		add_action( 'admin_init', 'Omnisend_Core_Bootstrap::add_privacy_policy_content' );
 
@@ -119,21 +125,6 @@ class Omnisend_Core_Bootstrap {
 		<div id="omnisend-hostinger-discount-notice"></div>
 		<?php
 	}
-
-	public static function omnisend_register_connection_routes() {
-		register_rest_route(
-			'omnisend/v1',
-			'/connect',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => 'Omnisend\Internal\Connection::omnisend_post_connection',
-				'permission_callback' => function () {
-					return is_user_logged_in();
-				},
-			)
-		);
-	}
-
 
 	public static function add_admin_menu() {
 		$page_title    = OMNISEND_CORE_PLUGIN_NAME;
@@ -309,37 +300,6 @@ class Omnisend_Core_Bootstrap {
 						foreach ( $assets['dependencies'] as $style ) {
 							wp_enqueue_style( $style );
 						}
-					}
-				}
-			);
-		}
-
-		if ( Connection::show_connection_view() ) {
-			add_action(
-				'admin_enqueue_scripts',
-				function ( $suffix ) {
-					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connection.asset.php';
-					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
-						$assets = require_once $asset_file_page;
-						wp_enqueue_script(
-							'connection-script',
-							plugin_dir_url( __FILE__ ) . 'build/connection.js',
-							$assets['dependencies'],
-							$assets['version'],
-							true
-						);
-						foreach ( $assets['dependencies'] as $style ) {
-							wp_enqueue_style( $style );
-						}
-						wp_localize_script(
-							'connection-script',
-							'omnisend_connection',
-							array(
-								'nonce'        => wp_create_nonce( 'wp_rest' ),
-								'action_nonce' => wp_create_nonce( 'connect' ),
-								'site_url'     => site_url(),
-							)
-						);
 					}
 				}
 			);

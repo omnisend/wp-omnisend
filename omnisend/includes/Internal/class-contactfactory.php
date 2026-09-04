@@ -20,8 +20,8 @@ class ContactFactory {
 	public static function create_contact( array $contact_data ): Contact {
 		$contact = new Contact();
 
-		if ( isset( $contact_data['contactID'] ) ) {
-			$contact->set_id( $contact_data['contactID'] );
+		if ( isset( $contact_data['id'] ) ) {
+			$contact->set_id( $contact_data['id'] );
 		}
 
 		if ( isset( $contact_data['firstName'] ) ) {

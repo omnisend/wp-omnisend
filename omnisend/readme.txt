@@ -5,7 +5,7 @@ Tags: email marketing, marketing, newsletter, sms, form
 Requires at least: 4.7.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.8.1
+Stable tag: 1.9.0
 License: GPLv3 or later
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -120,6 +120,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.9.0 =
+
+* New connections and reconnections now happen through Omnisend OAuth instead of pasting an API key.
+* Stores already connected with an API key keep working unchanged.
+* Removed the `omnisend_signup_wp_link` filter, which was only used by the removed API key connection screen.
 
 = 1.8.1 =
 
