@@ -284,6 +284,29 @@ class Omnisend_Core_Bootstrap {
 			}
 		);
 
+		if ( ! Connection::show_connected_store_view() ) {
+			add_action(
+				'admin_enqueue_scripts',
+				function ( $suffix ) {
+					if ( 'toplevel_page_omnisend' !== $suffix ) {
+						return;
+					}
+					wp_enqueue_script(
+						'omnisend-connection-status-script',
+						plugin_dir_url( __FILE__ ) . 'assets/js/connection-status.js',
+						array(),
+						OMNISEND_CORE_PLUGIN_VERSION,
+						true
+					);
+					wp_localize_script(
+						'omnisend-connection-status-script',
+						'omnisendConnectionStatus',
+						array( 'url' => Connection::get_status_url() )
+					);
+				}
+			);
+		}
+
 		if ( Connection::show_connected_store_view() ) {
 			add_action(
 				'admin_enqueue_scripts',

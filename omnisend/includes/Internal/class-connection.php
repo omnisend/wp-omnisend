@@ -233,6 +233,16 @@ class Connection {
 		self::finish_oauth_request( self::complete_oauth_connection() );
 	}
 
+	public static function get_status_url(): string {
+		return add_query_arg(
+			array(
+				'action'   => self::STATUS_AJAX_ACTION,
+				'_wpnonce' => wp_create_nonce( self::STATUS_AJAX_ACTION ),
+			),
+			admin_url( 'admin-ajax.php' )
+		);
+	}
+
 	/**
 	 * The OAuth flow finishes in the tab Omnisend opened in, so the landing page polls this to learn the store got connected.
 	 */
