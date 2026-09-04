@@ -287,7 +287,7 @@ final class OAuthConnectionTest extends TestCase
         $this->assertFalse(Options::is_store_connected());
     }
 
-    public function test_brand_already_connected_to_wordpress_is_reconnected_without_a_brand_write(): void
+    public function test_brand_with_wordpress_platform_skips_the_brand_post(): void
     {
         WP_Http_Test_Stub::queue($this->registration_response());
         $this->start_connect();
