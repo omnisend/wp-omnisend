@@ -242,41 +242,217 @@
 	text-align: center;
 }
 
-.omnisend-landing-header-container {
+.omnisend-connection-container {
+	font-family: Roboto, sans-serif;
+	background-color: #fff;
+	padding: 64px 64px 40px 88px;
+	margin-left: -20px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	text-align: center;
 }
 
-.omnisend-landing-page-video-block {
+.omnisend-connection-info {
 	display: flex;
-	margin-top: 55px;
-	margin-left: -20px;
+	justify-content: space-between;
+	gap: 80px;
+	flex-wrap: wrap;
+	width: 100%;
+	max-width: 1080px;
 }
 
-.omnisend-landing-page-video-container {
-	padding: 0 20px;
-	height: 100%;
+.omnisend-connection-content-left {
+	max-width: 416px;
 }
 
-.omnisend-landing-page-header {
-	background-color: #c3ebbf;
-	margin-left: -20px;
-	padding-top: 80px;
-	padding-bottom: 175px;
+.omnisend-connection-title {
+	font-weight: 700;
+	font-size: 40px;
+	line-height: 47px;
+	color: #000;
+	margin: 0;
 }
 
-.omnisend-landing-page-video {
+.omnisend-connection-subtitle {
+	margin: 16px 0 0;
+	font-weight: 300;
+	font-size: 16px;
+	line-height: 24px;
+	color: #1e2423;
+}
+
+.omnisend-connection-btns {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 24px;
+	margin: 32px 0 40px;
+}
+
+.omnisend-create-account-btn,
+.omnisend-connect-account-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	box-sizing: border-box;
+	width: 304px;
+	height: 52px;
+	border-radius: 8px;
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 24px;
+	text-align: center;
+	text-decoration: none;
+	transition: ease all 0.3s;
+}
+
+.omnisend-create-account-btn {
+	background: #2f8481;
+	color: #fff;
+}
+
+.omnisend-create-account-btn:hover,
+.omnisend-create-account-btn:focus {
+	background: #5da9a5;
+	color: #fff;
+	outline: none;
+	box-shadow: none;
+}
+
+.omnisend-connect-account-btn {
+	border: 2px solid #2f8481;
+	color: #2f8481;
+	background-color: transparent;
+}
+
+.omnisend-connect-account-btn:hover,
+.omnisend-connect-account-btn:focus {
+	background-color: #2f8481;
+	color: #fff;
+	outline: none;
+	box-shadow: none;
+}
+
+.omnisend-kb-link {
+	display: inline-flex;
+	align-items: center;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 24px;
+	text-decoration-line: underline;
+	color: #2f8481;
+}
+
+.omnisend-kb-link:hover,
+.omnisend-kb-link:focus,
+.omnisend-kb-link:active {
+	color: #2f8481;
+}
+
+.omnisend-kb-link img {
+	margin-left: 4px;
+}
+
+.omnisend-connection-content-right {
+	display: flex;
+	align-items: flex-start;
+	padding-top: 32px;
+}
+
+.omnisend-connection-card {
+	box-sizing: border-box;
+	width: 376px;
 	max-width: 100%;
-	border-radius: 10px;
-	height: 100%;
-	aspect-ratio: 3 / 2;
+	padding: 24px 32px 32px;
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(30, 36, 35, 0.12);
 }
 
-.omnisend-landing-page-video-container {
-	max-width: 800px;
-	margin: -240px auto 0;
+.omnisend-connection-card-logos {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 24px;
+}
+
+.omnisend-connection-card-logos img {
+	width: 110px;
+}
+
+.omnisend-connection-card-wp {
+	font-weight: 700;
+	font-size: 20px;
+	line-height: 24px;
+	color: #1e2423;
+}
+
+.omnisend-connection-card-plus {
+	font-size: 16px;
+	color: #1e2423;
+}
+
+.omnisend-connection-steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.omnisend-connection-steps li {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	margin: 0;
+	padding: 16px 0;
+	font-size: 16px;
+	line-height: 24px;
+	color: #1e2423;
+	border-bottom: 1px solid #e3e6e5;
+}
+
+.omnisend-connection-steps li:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.omnisend-connection-step-number {
+	display: flex;
+	flex-shrink: 0;
+	justify-content: center;
+	align-items: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 4px;
+	background: #2f8481;
+	color: #c3ebbf;
+	font-weight: 500;
+	font-size: 16px;
+}
+
+@media screen and (max-width: 960px) {
+	.omnisend-connection-info {
+		justify-content: center;
+	}
+
+	.omnisend-connection-content-left {
+		text-align: center;
+	}
+
+	.omnisend-connection-btns {
+		align-items: center;
+	}
+}
+
+@media screen and (max-width: 640px) {
+	.omnisend-connection-container {
+		padding: 24px;
+	}
+
+	.omnisend-create-account-btn,
+	.omnisend-connect-account-btn {
+		width: 100%;
+		max-width: 304px;
+	}
 }
 
 .omnisend-landing-page-content {
