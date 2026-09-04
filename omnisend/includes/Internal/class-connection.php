@@ -311,10 +311,12 @@ class Connection {
 			return 'The connection did not go through. This Omnisend account is connected to another platform (' . $brand['platform'] . ').';
 		}
 
-		$connected = self::connect_store( $authorization );
+		if ( $brand['platform'] === '' ) {
+			$connected = self::connect_store( $authorization );
 
-		if ( is_wp_error( $connected ) ) {
-			return self::get_connection_error_message( $connected, 'brands.write' );
+			if ( is_wp_error( $connected ) ) {
+				return self::get_connection_error_message( $connected, 'brands.write' );
+			}
 		}
 
 		Options::set_brand_id( $brand['brandID'] );

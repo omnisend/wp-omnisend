@@ -290,6 +290,25 @@ final class OAuthConnectionTest extends TestCase
         $this->assertFalse(Options::is_store_connected());
     }
 
+    public function test_brand_with_wordpress_platform_skips_the_brand_post(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"wordpress","connected":true}'));
+
+        $this->complete_callback();
+
+        $this->assertEquals('', $this->oauth_error());
+        $this->assertTrue(Options::is_store_connected());
+        $this->assertEquals('brand-1', Options::get_brand_id());
+
+        $brand_request = WP_Http_Test_Stub::last_request();
+        $this->assertEquals('https://api.omnisend.com/api/brands/current', $brand_request['url']);
+        $this->assertEquals('GET', $brand_request['method']);
+    }
+
     public function test_rejected_brand_write_leaves_the_store_disconnected(): void
     {
         WP_Http_Test_Stub::queue($this->registration_response());
