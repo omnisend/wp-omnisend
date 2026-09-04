@@ -10,7 +10,7 @@ use WP_Http_Test_Stub;
 require_once( __DIR__ . '/../../dependencies/dependencies.php' );
 
 if ( ! defined( 'OMNISEND_CORE_PLUGIN_VERSION' ) ) {
-	define( 'OMNISEND_CORE_PLUGIN_VERSION', '1.8.1' );
+	define( 'OMNISEND_CORE_PLUGIN_VERSION', '1.9.0' );
 }
 
 final class ConnectionLandingPageTest extends TestCase
