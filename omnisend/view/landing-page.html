@@ -87,24 +87,17 @@
         </div>
 
         <div class="omnisend-landing-page-banner">
-            <img
-                class="omnisend-landing-page-banner-sticker"
-                src="<?php echo plugins_url( 'images/ribbon-sticker.svg', __FILE__ ); ?>"
-                alt="omnisend-plugins-list"
-            />
             <div class="omnisend-landing-page-banner-content">
-                <div class="omnisend-spacing-mb-4">
-                    <div class="omnisend-landing-page-banner-header">Join 150,000+ brands using Omnisend</div>
-                </div>
+                <div class="omnisend-landing-page-banner-header">Join the <br />150,000+ ecommerce brands</div>
                 <div class="omnisend-landing-page-banner-text">
                     Quickly connect Omnisend to turn visitors into subscribers and keep them engaged with newsletters and targeted emails.
                 </div>
-                <div class="omnisend-spacing-mv-8 omnisend-button-container">
-                    <a class="omnisend-button-green" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
-                        Explore Omnisend
-                    </a>
-                    <a class="omnisend-button-white omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
-                    <a class="omnisend-button-white omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
+                <div class="omnisend-landing-page-banner-buttons">
+                    <a class="omnisend-banner-primary-btn omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank">Create new account</a>
+                    <a class="omnisend-banner-secondary-btn omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank">Connect your account</a>
+                    <?php if (Omnisend_Core_Bootstrap::is_hostinger_plugin_active()): ?>
+                    <a class="omnisend-banner-secondary-btn" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">Explore Omnisend</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
