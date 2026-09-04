@@ -68,7 +68,7 @@ class Omnisend_Core_Bootstrap {
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::handle_oauth_request' );
-		add_action( 'wp_ajax_' . Omnisend\Internal\Connection::STATUS_AJAX_ACTION, 'Omnisend\Internal\Connection::send_connection_status' );
+		add_action( 'wp_ajax_omnisend_connection_status', 'Omnisend\Internal\Connection::send_connection_status' );
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::connect_with_omnisend_for_woo_plugin' );
 		add_action( 'admin_init', 'Omnisend_Core_Bootstrap::add_privacy_policy_content' );
 
