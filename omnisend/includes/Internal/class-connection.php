@@ -17,10 +17,10 @@ class Connection {
 	public static $landing_page_url = 'https://app.omnisend.com/registrationv2?utm_source=wordpress_plugin&utm_content=landing_page';
 
 	// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- WordPress is lowercase as it's required by integration.
-	private const WORDPRESS_PLATFORM    = 'wordpress';
-	private const OAUTH_NONCE_ACTION    = 'omnisend_oauth_connect';
-	private const OAUTH_ERROR_TRANSIENT = 'omni_send_core_oauth_error';
-	public const STATUS_AJAX_ACTION     = 'omnisend_connection_status';
+	private const WORDPRESS_PLATFORM       = 'wordpress';
+	private const OAUTH_NONCE_ACTION       = 'omnisend_oauth_connect';
+	private const OAUTH_ERROR_TRANSIENT    = 'omni_send_core_oauth_error';
+	private const CONNECTION_STATUS_ACTION = 'omnisend_connection_status';
 
 	public static function display(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -236,8 +236,8 @@ class Connection {
 	public static function get_status_url(): string {
 		return add_query_arg(
 			array(
-				'action'   => self::STATUS_AJAX_ACTION,
-				'_wpnonce' => wp_create_nonce( self::STATUS_AJAX_ACTION ),
+				'action'   => self::CONNECTION_STATUS_ACTION,
+				'_wpnonce' => wp_create_nonce( self::CONNECTION_STATUS_ACTION ),
 			),
 			admin_url( 'admin-ajax.php' )
 		);
@@ -247,7 +247,7 @@ class Connection {
 	 * The OAuth flow finishes in the tab Omnisend opened in, so the landing page polls this to learn the store got connected.
 	 */
 	public static function send_connection_status(): void {
-		check_ajax_referer( self::STATUS_AJAX_ACTION );
+		check_ajax_referer( self::CONNECTION_STATUS_ACTION );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( null, 403 );
