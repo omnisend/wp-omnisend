@@ -34,7 +34,7 @@ const ConnectedPageLayout = () => {
 					<Button
 						variant="primary"
 						onClick={() =>
-							navigateToExternalUrl('https://app.omnisend.com')
+							navigateToExternalUrl(window.omnisendConnected.appUrl)
 						}
 					>
 						Go to Omnisend

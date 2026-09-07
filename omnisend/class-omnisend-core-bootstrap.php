@@ -319,6 +319,11 @@ class Omnisend_Core_Bootstrap {
 							$assets['version'],
 							true
 						);
+						wp_localize_script(
+							'connected-script',
+							'omnisendConnected',
+							array( 'appUrl' => OMNISEND_CORE_OAUTH_ISSUER )
+						);
 						foreach ( $assets['dependencies'] as $style ) {
 							wp_enqueue_style( $style );
 						}
