@@ -158,6 +158,39 @@ final class OAuthConnectionTest extends TestCase
         $this->assertEquals('https://example.com/wp-admin/admin.php?page=omnisend', $query['redirect_uri']);
     }
 
+    public function test_register_sends_to_registration_that_returns_to_the_consent_screen(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+
+        $_GET = array('omnisend_oauth' => 'register', '_wpnonce' => 'nonce');
+        $this->handle_oauth_request();
+
+        $redirect = $this->last_redirect();
+        $this->assertStringStartsWith('https://app.omnisend.com/ecom/registration/start?', $redirect);
+
+        $query = array();
+        parse_str(parse_url($redirect, PHP_URL_QUERY), $query);
+        $this->assertEquals('wordpress_plugin', $query['utm_source']);
+        $this->assertStringStartsWith('oauth2/authorize?', $query['registration_redirect_url']);
+        $this->assertStringContainsString('client_id=client-1', $query['registration_redirect_url']);
+        $this->assertStringContainsString('state=' . $this->pending_state(), $query['registration_redirect_url']);
+        $this->assertStringContainsString(
+            'redirect_uri=https%3A%2F%2Fexample.com%2Fwp-admin%2Fadmin.php%3Fpage%3Domnisend',
+            $query['registration_redirect_url']
+        );
+    }
+
+    public function test_register_with_failed_nonce_verification_does_not_start_the_flow(): void
+    {
+        $GLOBALS['wp_test_nonce_valid'] = false;
+
+        $_GET = array('omnisend_oauth' => 'register', '_wpnonce' => 'nonce');
+        $this->handle_oauth_request();
+
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+        $this->assertStringContainsString('could not be verified', $this->oauth_error());
+    }
+
     public function test_denied_authorization_is_reported(): void
     {
         WP_Http_Test_Stub::queue($this->registration_response());

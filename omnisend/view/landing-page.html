@@ -1,6 +1,7 @@
 <?php
     use Omnisend\Internal\Connection;
-    $connect_url = Connection::get_oauth_connect_url();
+    $connect_url  = Connection::get_oauth_connect_url();
+    $register_url = Connection::get_oauth_register_url();
 ?>
 
 <div class="omnisend-landing-page-header">
@@ -20,9 +21,11 @@
                 <a class="omnisend-button-primary" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
                     Explore Omnisend
                 </a>
-                <a class="omnisend-button" href="<?php echo esc_url( $connect_url ); ?>"> Connect Omnisend </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                <a class="omnisend-button omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 <?php else: ?>
-                <a class="omnisend-button-primary" href="<?php echo esc_url( $connect_url ); ?>"> Connect Omnisend </a>
+                <a class="omnisend-button-primary omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                <a class="omnisend-button-primary omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 <?php endif; ?>
             </div>
         </div>
@@ -100,7 +103,8 @@
                     <a class="omnisend-button-green" href="<?php echo Omnisend\Internal\Connection::$landing_page_url;?>" target="_blank">
                         Explore Omnisend
                     </a>
-                    <a class="omnisend-button-white" href="<?php echo esc_url( $connect_url ); ?>"> Connect Omnisend </a>
+                    <a class="omnisend-button-white omnisend-connect-action" href="<?php echo esc_url( $register_url ); ?>" target="_blank"> Create new account </a>
+                    <a class="omnisend-button-white omnisend-connect-action" href="<?php echo esc_url( $connect_url ); ?>" target="_blank"> Connect your account </a>
                 </div>
             </div>
         </div>

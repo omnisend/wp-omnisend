@@ -139,20 +139,23 @@
 
 	display: inline-block;
 	padding: 12px 32px;
-	border: 1px #1e2423 solid;
+	border: 2px #2f8481 solid;
 	border-radius: 8px;
 	text-align: center;
-	font-weight: 600;
+	font-weight: 500;
 	font-size: 18px;
 	line-height: 24px;
 	transition: ease all 0.3s;
 	margin-bottom: 24px;
-	color: #1e2423;
+	color: #2f8481;
 }
 
-.omnisend-button:hover {
-	background-color: #1e2423;
+.omnisend-button:hover,
+.omnisend-button:focus {
+	background-color: #2f8481;
 	color: #fff;
+	outline: none;
+	box-shadow: none;
 }
 
 .omnisend-button-white {
