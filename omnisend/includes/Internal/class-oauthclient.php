@@ -31,13 +31,14 @@ class OAuthClient {
 	private const EXPIRY_SKEW = 60;
 
 	/**
-	 * Starts the connect flow: registers this site as an OAuth client if it has no credentials yet and
-	 * returns the URL the administrator is sent to for consent.
+	 * Starts the connect flow: registers this site as an OAuth client if it has no credentials yet or the
+	 * registered redirect URI no longer matches this site, and returns the URL the administrator is sent
+	 * to for consent.
 	 *
 	 * @return string|WP_Error
 	 */
 	public static function get_authorization_url() {
-		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' ) {
+		if ( self::needs_registration() ) {
 			$registered = self::register_client();
 
 			if ( is_wp_error( $registered ) ) {
@@ -120,6 +121,25 @@ class OAuthClient {
 	 */
 	public static function get_redirect_uri(): string {
 		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
+	}
+
+	/**
+	 * Clients registered before the redirect URI was stored are assumed to belong to the current site.
+	 */
+	private static function needs_registration(): bool {
+		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' ) {
+			return true;
+		}
+
+		$registered_redirect_uri = Options::get_oauth_client_redirect_uri();
+
+		if ( $registered_redirect_uri === '' ) {
+			Options::set_oauth_client_redirect_uri( self::get_redirect_uri() );
+
+			return false;
+		}
+
+		return $registered_redirect_uri !== self::get_redirect_uri();
 	}
 
 	/**
@@ -239,7 +259,7 @@ class OAuthClient {
 			return self::registration_error( ApiResponse::unexpected_shape_error( 'client_secret' ) );
 		}
 
-		Options::set_oauth_client( $registration['client_id'], $registration['client_secret'] );
+		Options::set_oauth_client( $registration['client_id'], $registration['client_secret'], self::get_redirect_uri() );
 
 		return true;
 	}
