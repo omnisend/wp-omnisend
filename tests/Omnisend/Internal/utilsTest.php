@@ -25,6 +25,8 @@ final class UtilsTest extends TestCase
 		$this->assertTrue( Utils::is_valid_api_date_time( '2021-01-04T08:30:24.000Z' ) );
 		$this->assertFalse( Utils::is_valid_api_date_time( '2021-01-04T08:30:24+02:00' ) );
 		$this->assertFalse( Utils::is_valid_api_date_time( '2021-01-04 08:30:24' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( '2021-02-30T08:30:24Z' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( '2021-01-04T99:99:99Z' ) );
 		$this->assertFalse( Utils::is_valid_api_date_time( 20210104 ) );
 	}
 

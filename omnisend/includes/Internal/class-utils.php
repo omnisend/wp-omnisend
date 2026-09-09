@@ -81,7 +81,14 @@ class Utils {
 			return false;
 		}
 
-		return (bool) preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/', $date_time );
+		if ( ! preg_match( '/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?Z$/', $date_time, $matches ) ) {
+			return false;
+		}
+
+		$without_fraction = $matches[1] . 'Z';
+		$parsed           = \DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $without_fraction );
+
+		return $parsed !== false && $parsed->format( 'Y-m-d\TH:i:s\Z' ) === $without_fraction;
 	}
 
 	/**
