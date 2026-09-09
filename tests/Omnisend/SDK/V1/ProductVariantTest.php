@@ -165,6 +165,13 @@ final class ProductVariantTest extends TestCase
         );
     }
 
+    public function test_image_with_non_ascii_characters_passes_validation(): void {
+        $variant = $this->variant();
+        $variant->add_image('https://shop.lt/nuotraukos/žiedas.png');
+
+        $this->assertFalse($variant->validate()->has_errors());
+    }
+
     public function test_unsupported_status_fails_validation(): void {
         $variant = $this->variant();
         $variant->set_status('in stock');

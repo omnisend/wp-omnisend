@@ -386,6 +386,12 @@ final class ProductTest extends TestCase
         );
     }
 
+    public function test_image_with_non_ascii_characters_passes_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('images' => array('https://shop.lt/nuotraukos/žiedas.png'))));
+
+        $this->assertFalse($product->validate()->has_errors());
+    }
+
     public function test_100_category_ids_pass_validation(): void {
         $product = ProductFactory::create_product($this->product_data(array('categoryIDs' => $this->category_ids(100))));
 
@@ -486,6 +492,12 @@ final class ProductTest extends TestCase
             'updated_at must be in Y-m-d\TH:i:s\Z format',
             $product->validate()->get_error_message('updated_at')
         );
+    }
+
+    public function test_created_at_with_fractional_seconds_passes_validation(): void {
+        $product = ProductFactory::create_product($this->product_data(array('createdAt' => '2021-01-04T08:30:24.000Z')));
+
+        $this->assertFalse($product->validate()->has_errors());
     }
 
     public function test_updated_at_in_api_format_passes_validation(): void {

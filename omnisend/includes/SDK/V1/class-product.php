@@ -640,7 +640,7 @@ class Product {
 		}
 
 		foreach ( $this->images as $image ) {
-			if ( ! filter_var( $image, FILTER_VALIDATE_URL ) ) {
+			if ( ! Utils::is_valid_api_url( $image ) ) {
 				$error->add( 'images', 'Image "' . $image . '" must contain a valid URL' );
 			}
 
