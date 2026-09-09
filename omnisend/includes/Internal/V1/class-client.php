@@ -84,9 +84,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new CreateContactResponse( '', $error );
 		}
 
-		$contact_id = $this->write_contact( $contact );
-		if ( is_wp_error( $contact_id ) ) {
-			$error->merge_from( $contact_id );
+		$contact_id = $this->write_contact( $contact, $error );
+		if ( $contact_id === '' ) {
 			return new CreateContactResponse( '', $error );
 		}
 
@@ -108,9 +107,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SaveContactResponse( '', $error );
 		}
 
-		$contact_id = $this->write_contact( $contact );
-		if ( is_wp_error( $contact_id ) ) {
-			$error->merge_from( $contact_id );
+		$contact_id = $this->write_contact( $contact, $error );
+		if ( $contact_id === '' ) {
 			return new SaveContactResponse( '', $error );
 		}
 
@@ -120,18 +118,21 @@ class Client implements \Omnisend\SDK\V1\Client {
 	/**
 	 * Writes a contact to Omnisend: PATCH by id when the contact carries one, otherwise POST (upsert by identifier).
 	 *
-	 * The API replaces the whole tag list on every write, so tags already present on the contact
-	 * are merged into the payload to keep the v5 "tags are appended" behaviour for callers.
+	 * Tags are not part of the write: sending them would replace whatever the contact already has, while
+	 * callers only want their own tags added, so they are sent separately over /contacts/tags.
 	 *
-	 * @return string|WP_Error Contact id on success.
+	 * @return string Contact id, empty when the write failed. Write and tagging failures are merged into $error.
 	 */
-	private function write_contact( Contact $contact ) {
-		$payload = $this->merge_existing_tags( $contact, $contact->to_array() );
+	private function write_contact( Contact $contact, WP_Error $error ): string {
+		$payload = $contact->to_array();
 		$url     = OMNISEND_CORE_API . '/contacts';
 		$args    = array(
 			'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
 			'timeout' => 10,
 		);
+
+		$tags_to_add = empty( $payload['tags'] ) ? array() : $payload['tags'];
+		unset( $payload['tags'] );
 
 		if ( $contact->get_id() ) {
 			$url           .= '/' . rawurlencode( $contact->get_id() );
@@ -146,65 +147,66 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 		$arr = ApiResponse::parse( $response );
 		if ( is_wp_error( $arr ) ) {
-			return $arr;
+			$error->merge_from( $arr );
+			return '';
 		}
 
 		if ( empty( $arr['id'] ) ) {
-			return ApiResponse::unexpected_shape_error( 'Contact id' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact id' ) );
+			return '';
 		}
 
-		return (string) $arr['id'];
-	}
+		$contact_id = (string) $arr['id'];
 
-	private function merge_existing_tags( Contact $contact, array $payload ): array {
-		if ( empty( $payload['tags'] ) ) {
-			return $payload;
+		if ( $tags_to_add ) {
+			$tagging_error = $this->add_tags( $contact_id, $tags_to_add );
+			if ( $tagging_error !== null ) {
+				$error->merge_from( $tagging_error );
+			}
 		}
 
-		$existing_tags = $this->fetch_existing_tags( $contact );
-		if ( $existing_tags === null ) {
-			return $payload;
-		}
-
-		$payload['tags'] = array_values( array_unique( array_merge( $existing_tags, $payload['tags'] ) ) );
-
-		return $payload;
+		return $contact_id;
 	}
 
 	/**
-	 * @return array|null Tags currently stored on the contact, null when the contact is unknown or could not be fetched.
+	 * Adds tags to a contact, leaving the ones it already has in place. Tagging is applied asynchronously.
+	 *
+	 * Adding the same tags twice has no additional effect, so a request lost on the way is retried once.
 	 */
-	private function fetch_existing_tags( Contact $contact ): ?array {
-		if ( $contact->get_id() ) {
-			$url = OMNISEND_CORE_API . '/contacts/' . rawurlencode( $contact->get_id() );
-		} elseif ( $contact->get_email() ) {
-			$url = OMNISEND_CORE_API . '/contacts?email=' . rawurlencode( $contact->get_email() );
-		} else {
-			return null;
-		}
-
-		$response = wp_remote_get(
-			$url,
-			array(
-				'headers' => $this->get_request_headers(),
-				'timeout' => 10,
-			)
+	private function add_tags( string $contact_id, array $tags ): ?WP_Error {
+		$args = array(
+			'body'    => wp_json_encode(
+				array(
+					'contactIDs' => array( $contact_id ),
+					'tags'       => $tags,
+				)
+			),
+			'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
+			'timeout' => 10,
 		);
 
-		$data = ApiResponse::parse( $response );
-		if ( is_wp_error( $data ) ) {
-			return null;
+		$response = wp_remote_post( OMNISEND_CORE_API . '/contacts/tags', $args );
+
+		if ( $this->is_retryable( $response ) ) {
+			$response = wp_remote_post( OMNISEND_CORE_API . '/contacts/tags', $args );
 		}
 
-		if ( isset( $data['contacts'] ) ) {
-			$data = is_array( $data['contacts'] ) && isset( $data['contacts'][0] ) ? $data['contacts'][0] : array();
+		$parsed = ApiResponse::parse( $response, false );
+
+		return is_wp_error( $parsed ) ? $parsed : null;
+	}
+
+	/**
+	 * @param array|WP_Error $response Result of a wp_remote_* call.
+	 */
+	private function is_retryable( $response ): bool {
+		if ( is_wp_error( $response ) ) {
+			return true;
 		}
 
-		if ( ! isset( $data['tags'] ) || ! is_array( $data['tags'] ) ) {
-			return null;
-		}
+		$status = (int) wp_remote_retrieve_response_code( $response );
 
-		return array_values( array_filter( $data['tags'], 'is_string' ) );
+		return $status === 0 || $status >= 500;
 	}
 
 	private function get_origin_headers(): array {
