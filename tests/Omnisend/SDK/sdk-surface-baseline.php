@@ -115,6 +115,7 @@ return array (
       'get_email_status' => 'public function get_email_status(): string',
       'get_first_name' => 'public function get_first_name(): string',
       'get_gender' => 'public function get_gender(): string',
+      'get_id' => 'public function get_id(): ?string',
       'get_last_name' => 'public function get_last_name(): string',
       'get_phone' => 'public function get_phone(): string',
       'get_phone_status' => 'public function get_phone_status(): string',

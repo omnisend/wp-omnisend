@@ -49,6 +49,11 @@ final class ClientTest extends TestCase
         return $event;
     }
 
+    private function queue_no_existing_contact(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"contacts":[]}'));
+    }
+
     private function assert_common_headers(array $request): void
     {
         $this->assertEquals('Omnisend-API-Key brandid-secret', $request['args']['headers']['Authorization']);
@@ -100,6 +105,7 @@ final class ClientTest extends TestCase
 
     public function test_create_contact_accepts_existing_contact_upsert_response(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1"}'));
 
         $response = $this->client()->create_contact($this->contact());
@@ -110,6 +116,7 @@ final class ClientTest extends TestCase
 
     public function test_create_contact_sends_api_payload(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
 
         $this->client()->create_contact($this->contact());
@@ -144,6 +151,7 @@ final class ClientTest extends TestCase
     public function test_create_contact_reports_api_errors(int $status, string $error_code): void
     {
         $body = $status === 429 ? '{"detail":"problem","retryAfter":10}' : '{"detail":"problem"}';
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response($status, $body));
 
         $response = $this->client()->create_contact($this->contact());
@@ -156,6 +164,7 @@ final class ClientTest extends TestCase
 
     public function test_create_contact_reports_empty_body(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, ''));
 
         $response = $this->client()->create_contact($this->contact());
@@ -165,6 +174,7 @@ final class ClientTest extends TestCase
 
     public function test_create_contact_reports_malformed_json(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":'));
 
         $response = $this->client()->create_contact($this->contact());
@@ -198,6 +208,7 @@ final class ClientTest extends TestCase
 
     public function test_create_contact_reports_server_error(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(503, '{"title":"Unavailable"}'));
 
         $response = $this->client()->create_contact($this->contact());
@@ -207,6 +218,7 @@ final class ClientTest extends TestCase
 
     public function test_save_contact_posts_new_contact_and_returns_id(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
 
         $response = $this->client()->save_contact($this->contact());
@@ -225,6 +237,7 @@ final class ClientTest extends TestCase
     public function test_save_contact_reports_api_errors(int $status, string $error_code): void
     {
         $body = $status === 429 ? '{"detail":"problem","retryAfter":10}' : '{"detail":"problem"}';
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response($status, $body));
 
         $response = $this->client()->save_contact($this->contact());
@@ -237,6 +250,7 @@ final class ClientTest extends TestCase
 
     public function test_save_contact_reports_empty_body(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, ''));
 
         $response = $this->client()->save_contact($this->contact());
@@ -246,6 +260,7 @@ final class ClientTest extends TestCase
 
     public function test_save_contact_reports_malformed_json(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":'));
 
         $response = $this->client()->save_contact($this->contact());
@@ -255,6 +270,7 @@ final class ClientTest extends TestCase
 
     public function test_save_contact_preserves_transport_error(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(new WP_Error('http_request_failed', 'cURL error 28: timeout'));
 
         $response = $this->client()->save_contact($this->contact());
@@ -262,8 +278,90 @@ final class ClientTest extends TestCase
         $this->assertEquals('http_request_failed', $response->get_wp_error()->get_error_code());
     }
 
+    public function test_create_contact_merges_existing_tags_into_payload(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"contacts":[{"id":"contact-1","tags":["existing","test-tag"]}]}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1"}'));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $requests = WP_Http_Test_Stub::$requests;
+        $this->assertCount(2, $requests);
+        $this->assertEquals('GET', $requests[0]['method']);
+        $this->assertEquals('https://api.omnisend.com/api/contacts?email=test%40example.com', $requests[0]['url']);
+        $this->assertEquals('POST', $requests[1]['method']);
+        $payload = json_decode($requests[1]['args']['body'], true);
+        $this->assertEquals(array('existing', 'test-tag'), $payload['tags']);
+    }
+
+    public function test_create_contact_sends_own_tags_when_lookup_fails(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, '{"title":"Unavailable"}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $payload = json_decode(WP_Http_Test_Stub::last_request()['args']['body'], true);
+        $this->assertEquals(array('test-tag'), $payload['tags']);
+    }
+
+    public function test_create_contact_skips_lookup_without_tags(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+
+        $contact = new Contact();
+        $contact->set_email('test@example.com');
+        $this->client()->create_contact($contact);
+
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
+        $this->assertEquals('POST', WP_Http_Test_Stub::last_request()['method']);
+    }
+
+    public function test_save_contact_patches_by_id_and_merges_tags(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1","tags":["existing"]}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1"}'));
+
+        $contact = new Contact();
+        $contact->set_id('contact-1');
+        $contact->set_first_name('Test');
+        $contact->add_tag('test-tag');
+        $response = $this->client()->save_contact($contact);
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $this->assertEquals('contact-1', $response->get_contact_id());
+        $requests = WP_Http_Test_Stub::$requests;
+        $this->assertCount(2, $requests);
+        $this->assertEquals('GET', $requests[0]['method']);
+        $this->assertEquals('https://api.omnisend.com/api/contacts/contact-1', $requests[0]['url']);
+        $this->assertEquals('PATCH', $requests[1]['method']);
+        $this->assertEquals('https://api.omnisend.com/api/contacts/contact-1', $requests[1]['url']);
+        $this->assert_common_headers($requests[1]);
+        $payload = json_decode($requests[1]['args']['body'], true);
+        $this->assertArrayNotHasKey('identifiers', $payload);
+        $this->assertArrayNotHasKey('id', $payload);
+        $this->assertEquals('Test', $payload['firstName']);
+        $this->assertEquals(array('existing', 'test-tag'), $payload['tags']);
+    }
+
+    public function test_save_contact_patch_by_id_reports_not_found(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(404, '{"detail":"not found"}'));
+
+        $contact = new Contact();
+        $contact->set_id('contact-1');
+        $contact->set_first_name('Test');
+        $response = $this->client()->save_contact($contact);
+
+        $this->assertEquals(ApiResponse::ERROR_NOT_FOUND, $response->get_wp_error()->get_error_code());
+        $this->assertEquals('PATCH', WP_Http_Test_Stub::last_request()['method']);
+    }
+
     public function test_save_contact_reports_missing_id(): void
     {
+        $this->queue_no_existing_contact();
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"contactID":"contact-1"}'));
 
         $response = $this->client()->save_contact($this->contact());

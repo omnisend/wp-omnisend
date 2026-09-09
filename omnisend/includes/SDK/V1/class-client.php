@@ -35,7 +35,9 @@ interface Client {
 	public function send_customer_event( $event ): SendCustomerEventResponse;
 
 	/**
-	 * Save a contact in Omnisend.
+	 * Save a contact in Omnisend. A contact with an id is updated in place; otherwise it is created or updated by email/phone.
+	 * Tags are added to the ones the contact already has.
+	 *
 	 * @param Contact $contact
 	 *
 	 * @return SaveContactResponse

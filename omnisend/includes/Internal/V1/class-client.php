@@ -84,35 +84,13 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new CreateContactResponse( '', $error );
 		}
 
-		$options = array();
-
-		if ( $this->options !== null ) {
-			$options = array(
-				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
-			);
-		}
-
-		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/contacts',
-			array(
-				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array_merge( $this->get_request_headers(), $options ),
-				'timeout' => 10,
-			)
-		);
-
-		$arr = ApiResponse::parse( $response );
-		if ( is_wp_error( $arr ) ) {
-			$error->merge_from( $arr );
+		$contact_id = $this->write_contact( $contact );
+		if ( is_wp_error( $contact_id ) ) {
+			$error->merge_from( $contact_id );
 			return new CreateContactResponse( '', $error );
 		}
 
-		if ( empty( $arr['id'] ) ) {
-			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact id' ) );
-			return new CreateContactResponse( '', $error );
-		}
-
-		return new CreateContactResponse( (string) $arr['id'], $error );
+		return new CreateContactResponse( $contact_id, $error );
 	}
 
 	public function save_contact( Contact $contact ): SaveContactResponse {
@@ -130,35 +108,113 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SaveContactResponse( '', $error );
 		}
 
-		$options = array();
-
-		if ( $this->options !== null ) {
-			$options = array(
-				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
-			);
+		$contact_id = $this->write_contact( $contact );
+		if ( is_wp_error( $contact_id ) ) {
+			$error->merge_from( $contact_id );
+			return new SaveContactResponse( '', $error );
 		}
 
-		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/contacts',
+		return new SaveContactResponse( $contact_id, $error );
+	}
+
+	/**
+	 * Writes a contact to Omnisend: PATCH by id when the contact carries one, otherwise POST (upsert by identifier).
+	 *
+	 * The API replaces the whole tag list on every write, so tags already present on the contact
+	 * are merged into the payload to keep the v5 "tags are appended" behaviour for callers.
+	 *
+	 * @return string|WP_Error Contact id on success.
+	 */
+	private function write_contact( Contact $contact ) {
+		$payload = $this->merge_existing_tags( $contact, $contact->to_array() );
+		$url     = OMNISEND_CORE_API . '/contacts';
+		$args    = array(
+			'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
+			'timeout' => 10,
+		);
+
+		if ( $contact->get_id() ) {
+			$url           .= '/' . rawurlencode( $contact->get_id() );
+			$args['method'] = 'PATCH';
+			if ( empty( $payload['identifiers'] ) ) {
+				unset( $payload['identifiers'] );
+			}
+		}
+
+		$args['body'] = wp_json_encode( $payload );
+		$response     = wp_remote_post( $url, $args );
+
+		$arr = ApiResponse::parse( $response );
+		if ( is_wp_error( $arr ) ) {
+			return $arr;
+		}
+
+		if ( empty( $arr['id'] ) ) {
+			return ApiResponse::unexpected_shape_error( 'Contact id' );
+		}
+
+		return (string) $arr['id'];
+	}
+
+	private function merge_existing_tags( Contact $contact, array $payload ): array {
+		if ( empty( $payload['tags'] ) ) {
+			return $payload;
+		}
+
+		$existing_tags = $this->fetch_existing_tags( $contact );
+		if ( $existing_tags === null ) {
+			return $payload;
+		}
+
+		$payload['tags'] = array_values( array_unique( array_merge( $existing_tags, $payload['tags'] ) ) );
+
+		return $payload;
+	}
+
+	/**
+	 * @return array|null Tags currently stored on the contact, null when the contact is unknown or could not be fetched.
+	 */
+	private function fetch_existing_tags( Contact $contact ): ?array {
+		if ( $contact->get_id() ) {
+			$url = OMNISEND_CORE_API . '/contacts/' . rawurlencode( $contact->get_id() );
+		} elseif ( $contact->get_email() ) {
+			$url = OMNISEND_CORE_API . '/contacts?email=' . rawurlencode( $contact->get_email() );
+		} else {
+			return null;
+		}
+
+		$response = wp_remote_get(
+			$url,
 			array(
-				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array_merge( $this->get_request_headers(), $options ),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$arr = ApiResponse::parse( $response );
-		if ( is_wp_error( $arr ) ) {
-			$error->merge_from( $arr );
-			return new SaveContactResponse( '', $error );
+		$data = ApiResponse::parse( $response );
+		if ( is_wp_error( $data ) ) {
+			return null;
 		}
 
-		if ( empty( $arr['id'] ) ) {
-			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact id' ) );
-			return new SaveContactResponse( '', $error );
+		if ( isset( $data['contacts'] ) ) {
+			$data = is_array( $data['contacts'] ) && isset( $data['contacts'][0] ) ? $data['contacts'][0] : array();
 		}
 
-		return new SaveContactResponse( (string) $arr['id'], $error );
+		if ( ! isset( $data['tags'] ) || ! is_array( $data['tags'] ) ) {
+			return null;
+		}
+
+		return array_values( array_filter( $data['tags'], 'is_string' ) );
+	}
+
+	private function get_origin_headers(): array {
+		if ( $this->options === null ) {
+			return array();
+		}
+
+		return array(
+			'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
+		);
 	}
 
 	public function get_contact_by_email( string $email ): GetContactResponse {
