@@ -118,9 +118,9 @@ class Client implements \Omnisend\SDK\V1\Client {
 	/**
 	 * Writes a contact to Omnisend: PATCH by id when the contact carries one, otherwise POST (upsert by identifier).
 	 *
-	 * The API replaces the whole tag list on every write, so the contact's current tags are read first and
-	 * merged into the payload to keep the v5 "tags are appended" behaviour for callers. When they cannot be
-	 * read, tags are left out of the write (which leaves them untouched) and added over /contacts/tags instead.
+	 * A write replaces the whole tag list, while callers only ever want their own tags added, so the tags
+	 * the contact already has are read first and included in the payload. When they cannot be read, tags are
+	 * left out of the write - which keeps them as they are - and the new ones are added over /contacts/tags.
 	 *
 	 * @return string Contact id, empty when the write failed. Write and tagging failures are merged into $error.
 	 */
@@ -179,7 +179,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	/**
-	 * Adds tags without touching the ones the contact already has. Tagging is applied asynchronously.
+	 * Adds tags to a contact, leaving the ones it already has in place. Tagging is applied asynchronously.
 	 */
 	private function add_tags( string $contact_id, array $tags ): ?WP_Error {
 		$response = wp_remote_post(
