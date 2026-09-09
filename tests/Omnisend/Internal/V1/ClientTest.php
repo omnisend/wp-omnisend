@@ -49,6 +49,11 @@ final class ClientTest extends TestCase
         return $event;
     }
 
+    private function queue_tagging_accepted(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(202, ''));
+    }
+
     private function assert_common_headers(array $request): void
     {
         $this->assertEquals('Omnisend-API-Key brandid-secret', $request['args']['headers']['Authorization']);
@@ -101,6 +106,7 @@ final class ClientTest extends TestCase
     public function test_create_contact_accepts_existing_contact_upsert_response(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1"}'));
+        $this->queue_tagging_accepted();
 
         $response = $this->client()->create_contact($this->contact());
 
@@ -111,10 +117,11 @@ final class ClientTest extends TestCase
     public function test_create_contact_sends_api_payload(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+        $this->queue_tagging_accepted();
 
         $this->client()->create_contact($this->contact());
 
-        $request = WP_Http_Test_Stub::last_request();
+        $request = WP_Http_Test_Stub::$requests[0];
         $payload = json_decode($request['args']['body'], true);
         $this->assertArrayNotHasKey('contactID', $payload);
         $this->assertArrayNotHasKey('sendWelcomeEmail', $payload);
@@ -123,7 +130,7 @@ final class ClientTest extends TestCase
         $this->assertTrue($payload['identifiers'][1]['sendWelcomeMessage']);
         $this->assertArrayHasKey('statusChangedAt', $payload['identifiers'][0]['channels']['email']);
         $this->assertArrayNotHasKey('statusDate', $payload['identifiers'][0]['channels']['email']);
-        $this->assertEquals(array('test-tag'), $payload['tags']);
+        $this->assertArrayNotHasKey('tags', $payload);
     }
 
     public function test_create_contact_omits_empty_tags(): void
@@ -144,6 +151,7 @@ final class ClientTest extends TestCase
     public function test_create_contact_reports_api_errors(int $status, string $error_code): void
     {
         $body = $status === 429 ? '{"detail":"problem","retryAfter":10}' : '{"detail":"problem"}';
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response($status, $body));
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response($status, $body));
 
         $response = $this->client()->create_contact($this->contact());
@@ -208,12 +216,13 @@ final class ClientTest extends TestCase
     public function test_save_contact_posts_new_contact_and_returns_id(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+        $this->queue_tagging_accepted();
 
         $response = $this->client()->save_contact($this->contact());
 
         $this->assertFalse($response->get_wp_error()->has_errors());
         $this->assertEquals('contact-1', $response->get_contact_id());
-        $request = WP_Http_Test_Stub::last_request();
+        $request = WP_Http_Test_Stub::$requests[0];
         $this->assertEquals('POST', $request['method']);
         $this->assertEquals('https://api.omnisend.com/api/contacts', $request['url']);
         $this->assert_common_headers($request);
@@ -225,6 +234,7 @@ final class ClientTest extends TestCase
     public function test_save_contact_reports_api_errors(int $status, string $error_code): void
     {
         $body = $status === 429 ? '{"detail":"problem","retryAfter":10}' : '{"detail":"problem"}';
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response($status, $body));
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response($status, $body));
 
         $response = $this->client()->save_contact($this->contact());
@@ -260,6 +270,100 @@ final class ClientTest extends TestCase
         $response = $this->client()->save_contact($this->contact());
 
         $this->assertEquals('http_request_failed', $response->get_wp_error()->get_error_code());
+    }
+
+    public function test_create_contact_adds_tags_in_a_separate_request(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+        $this->queue_tagging_accepted();
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $this->assertEquals('contact-1', $response->get_contact_id());
+
+        $requests = WP_Http_Test_Stub::$requests;
+        $this->assertCount(2, $requests);
+        $this->assertArrayNotHasKey('tags', json_decode($requests[0]['args']['body'], true));
+        $this->assertEquals('POST', $requests[1]['method']);
+        $this->assertEquals('https://api.omnisend.com/api/contacts/tags', $requests[1]['url']);
+        $this->assert_common_headers($requests[1]);
+        $this->assertEquals(
+            array(
+                'contactIDs' => array('contact-1'),
+                'tags'       => array('test-tag'),
+            ),
+            json_decode($requests[1]['args']['body'], true)
+        );
+    }
+
+    public function test_create_contact_does_not_tag_when_the_contact_write_fails(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, '{"title":"Unavailable"}'));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertEquals(ApiResponse::ERROR_SERVER, $response->get_wp_error()->get_error_code());
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_retries_tagging_once_when_it_is_retryable(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+        WP_Http_Test_Stub::queue(new WP_Error('http_request_failed', 'cURL error 28: timeout'));
+        $this->queue_tagging_accepted();
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $this->assertEquals('contact-1', $response->get_contact_id());
+        $this->assertCount(3, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_reports_failed_tagging_with_the_contact_id(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(429, '{"detail":"too many requests"}'));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertEquals('contact-1', $response->get_contact_id());
+        $this->assertEquals(ApiResponse::ERROR_RATE_LIMITED, $response->get_wp_error()->get_error_code());
+        $this->assertCount(2, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_skips_tagging_without_tags(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+
+        $contact = new Contact();
+        $contact->set_email('test@example.com');
+        $this->client()->create_contact($contact);
+
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
+        $this->assertEquals('https://api.omnisend.com/api/contacts', WP_Http_Test_Stub::last_request()['url']);
+    }
+
+    public function test_save_contact_adds_tags_in_a_separate_request(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1"}'));
+        $this->queue_tagging_accepted();
+
+        $response = $this->client()->save_contact($this->contact());
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $this->assertEquals('contact-1', $response->get_contact_id());
+        $requests = WP_Http_Test_Stub::$requests;
+        $this->assertCount(2, $requests);
+        $this->assertArrayNotHasKey('tags', json_decode($requests[0]['args']['body'], true));
+        $this->assertEquals('https://api.omnisend.com/api/contacts/tags', $requests[1]['url']);
+        $this->assertEquals(
+            array(
+                'contactIDs' => array('contact-1'),
+                'tags'       => array('test-tag'),
+            ),
+            json_decode($requests[1]['args']['body'], true)
+        );
     }
 
     public function test_save_contact_reports_missing_id(): void
