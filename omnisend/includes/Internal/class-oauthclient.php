@@ -31,13 +31,13 @@ class OAuthClient {
 	private const EXPIRY_SKEW = 60;
 
 	/**
-	 * Starts the connect flow: registers this site as an OAuth client if it has no credentials yet and
-	 * returns the URL the administrator is sent to for consent.
+	 * Starts the connect flow: registers this site as an OAuth client unless it already holds tokens for one,
+	 * and returns the URL the administrator is sent to for consent.
 	 *
 	 * @return string|WP_Error
 	 */
 	public static function get_authorization_url() {
-		if ( Options::get_oauth_client_id() === '' || Options::get_oauth_client_secret() === '' ) {
+		if ( Options::get_oauth_access_token() === '' ) {
 			$registered = self::register_client();
 
 			if ( is_wp_error( $registered ) ) {
