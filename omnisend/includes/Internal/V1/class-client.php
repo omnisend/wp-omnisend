@@ -38,6 +38,8 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class Client implements \Omnisend\SDK\V1\Client {
 
+	private const IDENTIFIER_INVALID_FORMAT = 'invalid_format';
+
 	private string $api_key;
 	private string $plugin_name;
 	private string $plugin_version;
@@ -84,24 +86,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new CreateContactResponse( '', $error );
 		}
 
-		$options = array();
-
-		if ( $this->options !== null ) {
-			$options = array(
-				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
-			);
-		}
-
-		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/contacts',
-			array(
-				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array_merge( $this->get_request_headers(), $options ),
-				'timeout' => 10,
-			)
-		);
-
-		$arr = ApiResponse::parse( $response );
+		$arr = $this->post_contact( $contact->to_array() );
 		if ( is_wp_error( $arr ) ) {
 			$error->merge_from( $arr );
 			return new CreateContactResponse( '', $error );
@@ -130,24 +115,7 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SaveContactResponse( '', $error );
 		}
 
-		$options = array();
-
-		if ( $this->options !== null ) {
-			$options = array(
-				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
-			);
-		}
-
-		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/contacts',
-			array(
-				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array_merge( $this->get_request_headers(), $options ),
-				'timeout' => 10,
-			)
-		);
-
-		$arr = ApiResponse::parse( $response );
+		$arr = $this->post_contact( $contact->to_array() );
 		if ( is_wp_error( $arr ) ) {
 			$error->merge_from( $arr );
 			return new SaveContactResponse( '', $error );
@@ -619,6 +587,91 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		return new DeleteProductResponse( $error, true );
+	}
+
+	/**
+	 * Sends the contact payload. When the API rejects the whole payload only because an identifier value
+	 * is unusable, the contact is sent again without that identifier, so the rest of it is still stored.
+	 *
+	 * @param array $payload Contact payload.
+	 *
+	 * @return array|WP_Error Decoded response body, or the error of the last attempt.
+	 */
+	private function post_contact( array $payload ) {
+		$arr = $this->post_contact_once( $payload );
+
+		if ( ! is_wp_error( $arr ) ) {
+			return $arr;
+		}
+
+		$payload_without_rejected = self::without_rejected_identifiers( $payload, $arr );
+
+		if ( $payload_without_rejected === null ) {
+			return $arr;
+		}
+
+		return $this->post_contact_once( $payload_without_rejected );
+	}
+
+	/**
+	 * @param array $payload Contact payload.
+	 *
+	 * @return array|WP_Error
+	 */
+	private function post_contact_once( array $payload ) {
+		$options = array();
+
+		if ( $this->options !== null ) {
+			$options = array(
+				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
+			);
+		}
+
+		$response = wp_remote_post(
+			OMNISEND_CORE_API . '/contacts',
+			array(
+				'body'    => wp_json_encode( $payload ),
+				'headers' => array_merge( $this->get_request_headers(), $options ),
+				'timeout' => 10,
+			)
+		);
+
+		return ApiResponse::parse( $response );
+	}
+
+	/**
+	 * @param array    $payload Contact payload the API rejected.
+	 * @param WP_Error $error Error the API responded with.
+	 *
+	 * @return array|null Payload without the rejected identifiers, or null when the rejection was not caused
+	 *                    by identifier values alone or nothing identifiable would be left to send.
+	 */
+	private static function without_rejected_identifiers( array $payload, WP_Error $error ): ?array {
+		if ( empty( $payload['identifiers'] ) ) {
+			return null;
+		}
+
+		$rejected_indexes = array();
+
+		foreach ( ApiResponse::field_errors( $error ) as $field => $code ) {
+			if ( self::IDENTIFIER_INVALID_FORMAT !== $code || ! preg_match( '/^identifiers\[(\d+)]\.id$/', $field, $matches ) ) {
+				return null;
+			}
+
+			$rejected_indexes[] = (int) $matches[1];
+		}
+
+		if ( ! $rejected_indexes ) {
+			return null;
+		}
+
+		$payload['identifiers'] = array_values( array_diff_key( $payload['identifiers'], array_flip( $rejected_indexes ) ) );
+
+		if ( ! $payload['identifiers'] ) {
+			return null;
+		}
+
+		return $payload;
 	}
 
 	/**

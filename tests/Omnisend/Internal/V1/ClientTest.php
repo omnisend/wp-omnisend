@@ -205,6 +205,112 @@ final class ClientTest extends TestCase
         $this->assertEquals(ApiResponse::ERROR_SERVER, $response->get_wp_error()->get_error_code());
     }
 
+    private static function invalid_phone_response(): array
+    {
+        return WP_Http_Test_Stub::response(400, json_encode(array(
+            'type' => 'https://problems.omnisend.com/validation-failed',
+            'title' => 'Validation failed',
+            'status' => 400,
+            'errors' => array(
+                array(
+                    'field' => 'identifiers[1].id',
+                    'code' => 'invalid_format',
+                    'message' => 'Phone number format is invalid.',
+                ),
+            ),
+        )));
+    }
+
+    public function test_create_contact_retries_without_the_identifier_the_api_rejected(): void
+    {
+        WP_Http_Test_Stub::queue(self::invalid_phone_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
+
+        $contact = $this->contact();
+        $contact->set_phone('notaphone123');
+        $contact->set_first_name('Test');
+        $response = $this->client()->create_contact($contact);
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $this->assertEquals('contact-1', $response->get_contact_id());
+        $this->assertCount(2, WP_Http_Test_Stub::$requests);
+
+        $payload = json_decode(WP_Http_Test_Stub::last_request()['args']['body'], true);
+        $this->assertCount(1, $payload['identifiers']);
+        $this->assertEquals('email', $payload['identifiers'][0]['type']);
+        $this->assertEquals('test@example.com', $payload['identifiers'][0]['id']);
+        $this->assertEquals('Test', $payload['firstName']);
+        $this->assertEquals(array('test-tag'), $payload['tags']);
+    }
+
+    public function test_save_contact_retries_without_the_identifier_the_api_rejected(): void
+    {
+        WP_Http_Test_Stub::queue(self::invalid_phone_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"id":"contact-1"}'));
+
+        $contact = $this->contact();
+        $contact->set_phone('notaphone123');
+        $response = $this->client()->save_contact($contact);
+
+        $this->assertFalse($response->get_wp_error()->has_errors());
+        $this->assertEquals('contact-1', $response->get_contact_id());
+        $this->assertCount(2, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_reports_error_when_the_retry_also_fails(): void
+    {
+        WP_Http_Test_Stub::queue(self::invalid_phone_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, '{"title":"Unavailable"}'));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertEquals(ApiResponse::ERROR_SERVER, $response->get_wp_error()->get_error_code());
+        $this->assertCount(2, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_does_not_retry_when_the_only_identifier_is_rejected(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(400, json_encode(array(
+            'title' => 'Validation failed',
+            'errors' => array(
+                array('field' => 'identifiers[0].id', 'code' => 'invalid_format', 'message' => 'Invalid.'),
+            ),
+        ))));
+
+        $contact = new Contact();
+        $contact->set_phone('notaphone123');
+        $response = $this->client()->create_contact($contact);
+
+        $this->assertEquals(ApiResponse::ERROR_HTTP, $response->get_wp_error()->get_error_code());
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_does_not_retry_other_validation_errors(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(400, json_encode(array(
+            'title' => 'Validation failed',
+            'errors' => array(
+                array('field' => 'identifiers[1].id', 'code' => 'invalid_format', 'message' => 'Invalid.'),
+                array('field' => 'firstName', 'code' => 'too_long', 'message' => 'Too long.'),
+            ),
+        ))));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertEquals(ApiResponse::ERROR_HTTP, $response->get_wp_error()->get_error_code());
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_create_contact_does_not_retry_errors_without_field_details(): void
+    {
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(429, '{"detail":"problem","retryAfter":10}'));
+
+        $response = $this->client()->create_contact($this->contact());
+
+        $this->assertEquals(ApiResponse::ERROR_RATE_LIMITED, $response->get_wp_error()->get_error_code());
+        $this->assertCount(1, WP_Http_Test_Stub::$requests);
+    }
+
     public function test_save_contact_posts_new_contact_and_returns_id(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));

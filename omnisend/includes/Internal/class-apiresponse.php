@@ -121,17 +121,36 @@ class ApiResponse {
 	}
 
 	/**
+	 * Field errors of a validation failure, as `field => code` pairs, taken from the problem details
+	 * the error was built with.
+	 *
+	 * @param WP_Error $error Error returned by parse().
+	 */
+	public static function field_errors( WP_Error $error ): array {
+		foreach ( $error->get_error_codes() as $code ) {
+			$problem = $error->get_error_data( $code );
+
+			if ( is_array( $problem ) && ! empty( $problem['fieldErrors'] ) ) {
+				return $problem['fieldErrors'];
+			}
+		}
+
+		return array();
+	}
+
+	/**
 	 * Extracts RFC 9457 problem details. Missing fields are normalised, so callers can rely on the shape.
 	 */
 	private static function problem_details( $data ): array {
 		$problem = array(
-			'status'     => 0,
-			'type'       => '',
-			'title'      => '',
-			'detail'     => '',
-			'instance'   => '',
-			'errors'     => array(),
-			'retryAfter' => null,
+			'status'      => 0,
+			'type'        => '',
+			'title'       => '',
+			'detail'      => '',
+			'instance'    => '',
+			'errors'      => array(),
+			'fieldErrors' => array(),
+			'retryAfter'  => null,
 		);
 
 		if ( ! is_array( $data ) ) {
@@ -164,6 +183,10 @@ class ApiResponse {
 				$details = array_filter( array( $code, $text ) );
 
 				$problem['errors'][] = $field !== '' ? $field . ': ' . implode( ' ', $details ) : implode( ' ', $details );
+
+				if ( $field !== '' && $code !== '' ) {
+					$problem['fieldErrors'][ $field ] = $code;
+				}
 			}
 		}
 

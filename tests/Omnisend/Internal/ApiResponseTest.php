@@ -95,6 +95,15 @@ final class ApiResponseTest extends TestCase
         $this->assertEquals(403, $data['status']);
         $this->assertEquals('urn:omnisend:request:550e8400', $data['instance']);
         $this->assertEquals(array('email: invalid Email is invalid'), $data['errors']);
+        $this->assertEquals(array('email' => 'invalid'), $data['fieldErrors']);
+        $this->assertEquals(array('email' => 'invalid'), ApiResponse::field_errors($result));
+    }
+
+    public function test_field_errors_are_empty_without_problem_details(): void
+    {
+        $result = ApiResponse::parse(WP_Http_Test_Stub::response(500, '{"title":"Server error"}'));
+
+        $this->assertEquals(array(), ApiResponse::field_errors($result));
     }
 
     public function test_rate_limit_retry_after_is_preserved(): void
