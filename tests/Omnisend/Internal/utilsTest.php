@@ -18,4 +18,24 @@ final class UtilsTest extends TestCase
 	{
 		$this->assertTrue( Utils::is_valid_tag( Utils::clean_up_tag( 'ABC-_!@#!ĄČ ' ) ) );
 	}
+
+	public function test_api_date_time_validation()
+	{
+		$this->assertTrue( Utils::is_valid_api_date_time( '2021-01-04T08:30:24Z' ) );
+		$this->assertTrue( Utils::is_valid_api_date_time( '2021-01-04T08:30:24.000Z' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( '2021-01-04T08:30:24+02:00' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( '2021-01-04 08:30:24' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( '2021-02-30T08:30:24Z' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( '2021-01-04T99:99:99Z' ) );
+		$this->assertFalse( Utils::is_valid_api_date_time( 20210104 ) );
+	}
+
+	public function test_api_url_validation()
+	{
+		$this->assertTrue( Utils::is_valid_api_url( 'https://shop.lt/nuotraukos/žiedas.png' ) );
+		$this->assertTrue( Utils::is_valid_api_url( 'http://omnisend.com/media/product.png' ) );
+		$this->assertFalse( Utils::is_valid_api_url( 'media/product.png' ) );
+		$this->assertFalse( Utils::is_valid_api_url( 'ftp://omnisend.com/product.png' ) );
+		$this->assertFalse( Utils::is_valid_api_url( 'https:///product.png' ) );
+	}
 }

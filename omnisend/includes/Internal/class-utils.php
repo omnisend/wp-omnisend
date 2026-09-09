@@ -81,8 +81,35 @@ class Utils {
 			return false;
 		}
 
-		$parsed = \DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $date_time );
+		if ( ! preg_match( '/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?Z$/', $date_time, $matches ) ) {
+			return false;
+		}
 
-		return $parsed !== false && $parsed->format( 'Y-m-d\TH:i:s\Z' ) === $date_time;
+		$without_fraction = $matches[1] . 'Z';
+		$parsed           = \DateTime::createFromFormat( 'Y-m-d\TH:i:s\Z', $without_fraction );
+
+		return $parsed !== false && $parsed->format( 'Y-m-d\TH:i:s\Z' ) === $without_fraction;
+	}
+
+	/**
+	 * Validate URL accepted by Omnisend API. Unlike FILTER_VALIDATE_URL it accepts non-ASCII characters,
+	 * which the API allows.
+	 *
+	 * @param $url
+	 *
+	 * @return bool
+	 */
+	public static function is_valid_api_url( $url ): bool {
+		if ( ! is_string( $url ) ) {
+			return false;
+		}
+
+		$parsed = wp_parse_url( $url );
+
+		if ( ! is_array( $parsed ) || empty( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
+			return false;
+		}
+
+		return in_array( strtolower( $parsed['scheme'] ), array( 'http', 'https' ), true );
 	}
 }
