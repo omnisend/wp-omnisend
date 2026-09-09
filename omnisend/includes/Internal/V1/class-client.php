@@ -118,9 +118,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 	/**
 	 * Writes a contact to Omnisend: PATCH by id when the contact carries one, otherwise POST (upsert by identifier).
 	 *
-	 * A write replaces the whole tag list, while callers only ever want their own tags added, so the tags
-	 * the contact already has are read first and included in the payload. When they cannot be read, tags are
-	 * left out of the write - which keeps them as they are - and the new ones are added over /contacts/tags.
+	 * Tags are not part of the write: sending them would replace whatever the contact already has, while
+	 * callers only want their own tags added, so they are sent separately over /contacts/tags.
 	 *
 	 * @return string Contact id, empty when the write failed. Write and tagging failures are merged into $error.
 	 */
@@ -132,17 +131,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 			'timeout' => 10,
 		);
 
-		$tags_to_add = array();
-		if ( ! empty( $payload['tags'] ) ) {
-			$existing_tags = $this->fetch_existing_tags( $contact );
-
-			if ( $existing_tags === null ) {
-				$tags_to_add = $payload['tags'];
-				unset( $payload['tags'] );
-			} else {
-				$payload['tags'] = array_values( array_unique( array_merge( $existing_tags, $payload['tags'] ) ) );
-			}
-		}
+		$tags_to_add = empty( $payload['tags'] ) ? array() : $payload['tags'];
+		unset( $payload['tags'] );
 
 		if ( $contact->get_id() ) {
 			$url           .= '/' . rawurlencode( $contact->get_id() );
@@ -180,21 +170,26 @@ class Client implements \Omnisend\SDK\V1\Client {
 
 	/**
 	 * Adds tags to a contact, leaving the ones it already has in place. Tagging is applied asynchronously.
+	 *
+	 * Adding the same tags twice has no additional effect, so a request lost on the way is retried once.
 	 */
 	private function add_tags( string $contact_id, array $tags ): ?WP_Error {
-		$response = wp_remote_post(
-			OMNISEND_CORE_API . '/contacts/tags',
-			array(
-				'body'    => wp_json_encode(
-					array(
-						'contactIDs' => array( $contact_id ),
-						'tags'       => $tags,
-					)
-				),
-				'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
-				'timeout' => 10,
-			)
+		$args = array(
+			'body'    => wp_json_encode(
+				array(
+					'contactIDs' => array( $contact_id ),
+					'tags'       => $tags,
+				)
+			),
+			'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
+			'timeout' => 10,
 		);
+
+		$response = wp_remote_post( OMNISEND_CORE_API . '/contacts/tags', $args );
+
+		if ( $this->is_retryable( $response ) ) {
+			$response = wp_remote_post( OMNISEND_CORE_API . '/contacts/tags', $args );
+		}
 
 		$parsed = ApiResponse::parse( $response, false );
 
@@ -202,42 +197,16 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	/**
-	 * @return array|null Tags currently stored on the contact, empty when it has none or does not exist yet,
-	 *                    null when they could not be read.
+	 * @param array|WP_Error $response Result of a wp_remote_* call.
 	 */
-	private function fetch_existing_tags( Contact $contact ): ?array {
-		if ( $contact->get_id() ) {
-			$url = OMNISEND_CORE_API . '/contacts/' . rawurlencode( $contact->get_id() );
-		} elseif ( $contact->get_email() ) {
-			$url = OMNISEND_CORE_API . '/contacts?email=' . rawurlencode( $contact->get_email() );
-		} elseif ( $contact->get_phone() ) {
-			$url = OMNISEND_CORE_API . '/contacts?phone=' . rawurlencode( $contact->get_phone() );
-		} else {
-			return null;
+	private function is_retryable( $response ): bool {
+		if ( is_wp_error( $response ) ) {
+			return true;
 		}
 
-		$response = wp_remote_get(
-			$url,
-			array(
-				'headers' => $this->get_request_headers(),
-				'timeout' => 10,
-			)
-		);
+		$status = (int) wp_remote_retrieve_response_code( $response );
 
-		$data = ApiResponse::parse( $response );
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_code() === ApiResponse::ERROR_NOT_FOUND ? array() : null;
-		}
-
-		if ( isset( $data['contacts'] ) ) {
-			$data = is_array( $data['contacts'] ) && isset( $data['contacts'][0] ) ? $data['contacts'][0] : array();
-		}
-
-		if ( ! isset( $data['tags'] ) || ! is_array( $data['tags'] ) ) {
-			return array();
-		}
-
-		return array_values( array_filter( $data['tags'], 'is_string' ) );
+		return $status === 0 || $status >= 500;
 	}
 
 	private function get_origin_headers(): array {
