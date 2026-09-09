@@ -37,7 +37,7 @@ class OAuthClient {
 	 * @return string|WP_Error
 	 */
 	public static function get_authorization_url() {
-		if ( self::needs_registration() ) {
+		if ( Options::get_oauth_access_token() === '' ) {
 			$registered = self::register_client();
 
 			if ( is_wp_error( $registered ) ) {
@@ -120,12 +120,6 @@ class OAuthClient {
 	 */
 	public static function get_redirect_uri(): string {
 		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
-	}
-
-	private static function needs_registration(): bool {
-		return Options::get_oauth_client_id() === ''
-			|| Options::get_oauth_client_secret() === ''
-			|| Options::get_oauth_access_token() === '';
 	}
 
 	/**
