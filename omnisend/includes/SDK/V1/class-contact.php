@@ -362,7 +362,7 @@ class Contact {
 	 * @return string
 	 */
 	public function get_email(): string {
-		return $this->email;
+		return is_string( $this->email ) ? $this->email : '';
 	}
 
 	/**
