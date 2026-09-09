@@ -122,10 +122,6 @@ class OAuthClient {
 		return admin_url( 'admin.php?page=' . OMNISEND_CORE_SETTINGS_PAGE );
 	}
 
-	/**
-	 * A client left behind by an attempt that never finished is bound to the redirect URI of that time, so
-	 * it is not reused: the site URL may have changed since, in which case Omnisend would reject the redirect.
-	 */
 	private static function needs_registration(): bool {
 		return Options::get_oauth_client_id() === ''
 			|| Options::get_oauth_client_secret() === ''
