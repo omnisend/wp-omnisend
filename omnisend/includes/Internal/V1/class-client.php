@@ -118,6 +118,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 	/**
 	 * Writes a contact to Omnisend, creating it or updating the one matching its identifiers.
 	 *
+	 * Contacts are matched by email or phone only, so a contact carrying just an id cannot be written.
+	 *
 	 * Tags are not part of the write: sending them would replace whatever the contact already has, while
 	 * callers only want their own tags added, so they are sent separately over /contacts/tags.
 	 *
@@ -125,6 +127,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 	 */
 	private function write_contact( Contact $contact, WP_Error $error ): string {
 		$payload = $contact->to_array();
+
+		if ( empty( $payload['identifiers'] ) ) {
+			$error->add( 'identifier', 'Email or phone must be set to create or update a contact.' );
+			return '';
+		}
 
 		$tags_to_add = empty( $payload['tags'] ) ? array() : $payload['tags'];
 		unset( $payload['tags'] );
