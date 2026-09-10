@@ -14,6 +14,7 @@ final class ProductVariantTest extends TestCase
         $expected_result = array(
             'id' => array('id is a required property'),
             'price' => array('price is a required property'),
+            'status' => array('status is a required property'),
             'title' => array('title is a required property'),
             'url' => array('url is a required property')
         );
@@ -169,17 +170,6 @@ final class ProductVariantTest extends TestCase
         $variant->add_image('https://shop.lt/nuotraukos/žiedas.png');
 
         $this->assertFalse($variant->validate()->has_errors());
-    }
-
-    public function test_status_is_optional(): void {
-        $variant = new ProductVariant();
-        $variant->set_id('product-1-variant-1');
-        $variant->set_price(9.99);
-        $variant->set_title('My variant');
-        $variant->set_url('https://omnisend.com/products/my-product');
-
-        $this->assertFalse($variant->validate()->has_errors());
-        $this->assertArrayNotHasKey('status', $variant->to_array());
     }
 
     public function test_unsupported_status_fails_validation(): void {
