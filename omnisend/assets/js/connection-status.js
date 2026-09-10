@@ -1,6 +1,6 @@
 (function () {
 	var POLL_INTERVAL_MS = 2000;
-	var MAX_POLL_ATTEMPTS = 150;
+	var MAX_POLL_ATTEMPTS = 300;
 
 	var statusUrl = window.omnisendConnectionStatus && window.omnisendConnectionStatus.url;
 	var interval;
