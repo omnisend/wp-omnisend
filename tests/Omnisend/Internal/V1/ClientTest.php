@@ -213,6 +213,31 @@ final class ClientTest extends TestCase
         $this->assertEquals(ApiResponse::ERROR_SERVER, $response->get_wp_error()->get_error_code());
     }
 
+    public function test_create_contact_rejects_contact_without_email_or_phone(): void
+    {
+        $contact = new Contact();
+        $contact->set_id('contact-1');
+
+        $response = $this->client()->create_contact($contact);
+
+        $this->assertEquals('identifier', $response->get_wp_error()->get_error_code());
+        $this->assertEquals('Email or phone must be set to create or update a contact.', $response->get_wp_error()->get_error_message());
+        $this->assertEquals('', $response->get_contact_id());
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+    }
+
+    public function test_save_contact_rejects_contact_without_email_or_phone(): void
+    {
+        $contact = new Contact();
+        $contact->set_id('contact-1');
+
+        $response = $this->client()->save_contact($contact);
+
+        $this->assertEquals('identifier', $response->get_wp_error()->get_error_code());
+        $this->assertEquals('', $response->get_contact_id());
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+    }
+
     public function test_save_contact_posts_new_contact_and_returns_id(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(201, '{"id":"contact-1"}'));
