@@ -157,7 +157,6 @@ final class ContactTest extends TestCase
             'phoneStatus' => 'subscribed',
             'emailConsent' => 'GDPR',
             'phoneConsent' => 'GDPR',
-            'sendWelcomeEmail' => true,
             'tags' => ['test-tag'],
             'customProperties' => ['custom_key' => 'custom_value']
         ];
@@ -223,7 +222,6 @@ final class ContactTest extends TestCase
             'phoneStatus' => 'subscribed',
             'emailConsent' => 'GDPR',
             'phoneConsent' => 'GDPR',
-            'sendWelcomeEmail' => true,
             'tags' => ['test-tag'],
             'customProperties' => ['custom_key' => 'custom_value'],
             'identifiers' => [
@@ -248,7 +246,7 @@ final class ContactTest extends TestCase
                 [
                     'type' => 'email',
                     'id' => 'test@example.com',
-                    'sendWelcomeMessage' => true,
+                    'sendWelcomeMessage' => false,
                     'channels' => [
                         'email' => [
                             'status' => 'subscribed',
@@ -259,7 +257,7 @@ final class ContactTest extends TestCase
                 [
                     'type' => 'phone',
                     'id' => '1234567890',
-                    'sendWelcomeMessage' => true,
+                    'sendWelcomeMessage' => false,
                     'channels' => [
                         'sms' => [
                             'status' => 'subscribed',
