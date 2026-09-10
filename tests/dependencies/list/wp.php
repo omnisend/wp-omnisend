@@ -58,10 +58,7 @@ function wp_nonce_url( $actionurl, $action = -1, $name = '_wpnonce' ) {
 }
 
 function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {
-	static $calls = 0;
-	++$calls;
-
-	return str_pad( (string) $calls, $length, 'a', STR_PAD_LEFT );
+	return str_repeat( 'a', $length );
 }
 
 function admin_url( $path = '' ) {
