@@ -70,9 +70,25 @@ final class OAuthConnectionTest extends TestCase
 
     private function pending_state(): string
     {
-        $state = get_transient('omni_send_core_oauth_state');
+        $states = $this->pending_states();
 
-        return is_string($state) ? $state : '';
+        return $states === array() ? '' : end($states);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function pending_states(): array
+    {
+        $states = array();
+
+        foreach ($GLOBALS['wp_test_transients'] as $name => $value) {
+            if (strpos($name, 'omni_send_core_oauth_state_') === 0 && is_string($value)) {
+                $states[] = $value;
+            }
+        }
+
+        return $states;
     }
 
     private function last_redirect(): string
@@ -296,6 +312,51 @@ final class OAuthConnectionTest extends TestCase
         $this->assertStringContainsString('did not match this site', $this->oauth_error());
         $this->assertCount($requests_before, WP_Http_Test_Stub::$requests);
         $this->assertFalse(Options::is_store_connected());
+    }
+
+    public function test_callback_with_mismatched_state_keeps_the_pending_attempt(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+        $pending_state = $this->pending_state();
+
+        $_GET = array(
+            'page' => 'omnisend',
+            'code' => 'auth-code',
+            'state' => 'not-the-state-we-sent',
+        );
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('did not match this site', $this->oauth_error());
+        $this->assertEquals(array($pending_state), $this->pending_states());
+    }
+
+    public function test_second_connect_attempt_does_not_invalidate_the_first(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+        $first_state = $this->pending_state();
+
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        $this->assertCount(2, $this->pending_states());
+        $this->assertContains($first_state, $this->pending_states());
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":""}'));
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1"}'));
+
+        $_GET = array(
+            'page' => 'omnisend',
+            'code' => 'auth-code',
+            'state' => $first_state,
+        );
+        $this->handle_oauth_request();
+
+        $this->assertEquals('', $this->oauth_error());
+        $this->assertTrue(Options::is_store_connected());
+        $this->assertNotContains($first_state, $this->pending_states());
     }
 
     public function test_connect_with_failed_nonce_verification_does_not_start_the_flow(): void

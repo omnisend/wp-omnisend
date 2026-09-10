@@ -21,8 +21,8 @@ class OAuthClient {
 
 	const SCOPES = 'brands.read brands.write contacts.read contacts.write events.write products.read products.write';
 
-	private const STATE_TRANSIENT = 'omni_send_core_oauth_state';
-	private const STATE_LIFETIME  = HOUR_IN_SECONDS;
+	private const STATE_TRANSIENT_PREFIX = 'omni_send_core_oauth_state_';
+	private const STATE_LIFETIME         = HOUR_IN_SECONDS;
 
 	/**
 	 * Access tokens are refreshed slightly before they expire so a request does not fail on a token
@@ -46,7 +46,7 @@ class OAuthClient {
 		}
 
 		$state = wp_generate_password( 32, false );
-		set_transient( self::STATE_TRANSIENT, $state, self::STATE_LIFETIME );
+		set_transient( self::get_state_transient_name( $state ), $state, self::STATE_LIFETIME );
 
 		$query = array(
 			'response_type' => 'code',
@@ -65,12 +65,14 @@ class OAuthClient {
 	 * @return true|WP_Error
 	 */
 	public static function complete_authorization( string $code, string $state ) {
-		$expected_state = get_transient( self::STATE_TRANSIENT );
-		delete_transient( self::STATE_TRANSIENT );
+		$transient_name = self::get_state_transient_name( $state );
+		$expected_state = $state === '' ? false : get_transient( $transient_name );
 
 		if ( ! is_string( $expected_state ) || $expected_state === '' || ! hash_equals( $expected_state, $state ) ) {
 			return new WP_Error( self::ERROR_STATE, 'The Omnisend authorization response did not match this site. Please try connecting again.' );
 		}
+
+		delete_transient( $transient_name );
 
 		if ( $code === '' ) {
 			return new WP_Error( self::ERROR_TOKEN, 'Omnisend did not return an authorization code. Please try connecting again.' );
@@ -112,6 +114,14 @@ class OAuthClient {
 		}
 
 		return Options::get_oauth_access_token();
+	}
+
+	/**
+	 * Each pending authorization keeps its own transient so a connect started in a second tab does not
+	 * invalidate the first one.
+	 */
+	private static function get_state_transient_name( string $state ): string {
+		return self::STATE_TRANSIENT_PREFIX . hash( 'sha256', $state );
 	}
 
 	/**
