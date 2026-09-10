@@ -20,7 +20,6 @@ class ProductVariant {
 	private const REQUIRED_PROPERTIES = array(
 		'id',
 		'price',
-		'status',
 		'title',
 		'url',
 	);

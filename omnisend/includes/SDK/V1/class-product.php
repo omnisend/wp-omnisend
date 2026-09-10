@@ -619,7 +619,7 @@ class Product {
 			$error->add( 'vendor', 'Vendor must be under 100 characters' );
 		}
 
-		if ( ! empty( $this->default_image_url ) && ! filter_var( $this->default_image_url, FILTER_VALIDATE_URL ) ) {
+		if ( ! empty( $this->default_image_url ) && ! Utils::is_valid_api_url( $this->default_image_url ) ) {
 			$error->add( 'default_image_url', 'Default image must contain a valid URL' );
 		}
 
@@ -627,7 +627,7 @@ class Product {
 			$error->add( 'default_image_url', 'Default image URL must be under 1000 characters' );
 		}
 
-		if ( ! filter_var( $this->url, FILTER_VALIDATE_URL ) ) {
+		if ( ! Utils::is_valid_api_url( $this->url ) ) {
 			$error->add( 'url', 'Url must contain a valid URL' );
 		}
 

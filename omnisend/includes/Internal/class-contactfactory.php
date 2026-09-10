@@ -68,6 +68,10 @@ class ContactFactory {
 			$contact->set_gender( $contact_data['gender'] );
 		}
 
+		if ( isset( $contact_data['sendWelcomeEmail'] ) ) {
+			$contact->set_welcome_email( $contact_data['sendWelcomeEmail'] );
+		}
+
 		if ( isset( $contact_data['tags'] ) ) {
 			foreach ( $contact_data['tags'] as $tag ) {
 				$contact->add_tag( $tag );

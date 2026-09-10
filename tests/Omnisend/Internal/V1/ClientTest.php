@@ -388,6 +388,22 @@ final class ClientTest extends TestCase
         $this->assert_common_headers($request);
     }
 
+    public function test_read_requests_are_not_sent_without_a_credential(): void
+    {
+        $client = new Client('', 'test-plugin', '1.0.0', null);
+
+        $contact_response = $client->get_contact_by_email('test@example.com');
+        $category_response = $client->get_category_by_id('category-1');
+        $product_response = $client->get_product_by_id('product-1');
+
+        $this->assertEquals('api_key', $contact_response->get_wp_error()->get_error_code());
+        $this->assertEquals('api_key', $category_response->get_wp_error()->get_error_code());
+        $this->assertEquals('api_key', $product_response->get_wp_error()->get_error_code());
+        $this->assertNull($category_response->get_category());
+        $this->assertNull($product_response->get_product());
+        $this->assertEmpty(WP_Http_Test_Stub::$requests);
+    }
+
     public function test_get_contact_by_email_encodes_email_query(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"contacts":[]}'));
