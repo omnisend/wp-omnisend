@@ -118,7 +118,7 @@ class Connection {
 	private static function get_connection_error_message( WP_Error $error, string $required_permission = '' ): string {
 		switch ( $error->get_error_code() ) {
 			case ApiResponse::ERROR_UNAUTHORIZED:
-				return 'The API key was rejected by Omnisend. Check if the API key is correct.';
+				return 'Omnisend rejected the authorization of this site. Please try connecting the store again.';
 			case ApiResponse::ERROR_FORBIDDEN:
 				return self::get_missing_permission_message( $required_permission );
 			case ApiResponse::ERROR_VERSION_RETIRED:

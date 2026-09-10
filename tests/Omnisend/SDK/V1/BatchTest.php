@@ -57,6 +57,36 @@ final class BatchTest extends TestCase
         );
     }
 
+    /**
+     * @dataProvider non_object_item_provider
+     */
+    public function test_non_object_first_item_fails_validation($item): void {
+        $batch = $this->batch(array($item));
+
+        $this->assertEquals('Unknown item type', $batch->validate()->get_error_message('Items'));
+    }
+
+    public function test_non_object_item_after_valid_items_fails_validation(): void {
+        $items = $this->categories(1);
+        $items[] = 'not-a-category';
+
+        $batch = $this->batch($items);
+
+        $this->assertEquals(
+            'Mixed items found, make sure items are of one type: categories,products,contacts,events',
+            $batch->validate()->get_error_message('Items')
+        );
+    }
+
+    public static function non_object_item_provider(): array {
+        return array(
+            array(null),
+            array('category'),
+            array(1),
+            array(array('categoryID' => 'category-1')),
+        );
+    }
+
     public function test_to_array_uses_categories_endpoint(): void {
         $batch = $this->batch($this->categories(1));
 

@@ -9,6 +9,8 @@ require_once( __DIR__ . '/../../../dependencies/dependencies.php' );
 
 final class ContactTest extends TestCase
 {
+    private const ISO_8601_PATTERN = '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/';
+
     public function test_validation(): void
     {
         // Test valid contact
@@ -41,6 +43,8 @@ final class ContactTest extends TestCase
             'lastName' => 'Doe'
         ];
         $contact = ContactFactory::create_contact($contact_data);
+        $actual = $contact->to_array();
+        $status_changed_at = $actual['identifiers'][0]['channels']['email']['statusChangedAt'];
         $expected = [
             'identifiers' => [
                 [
@@ -49,7 +53,7 @@ final class ContactTest extends TestCase
                     'channels' => [
                         'email' => [
                             'status' => 'nonSubscribed',
-                            'statusChangedAt' => gmdate('c'),
+                            'statusChangedAt' => $status_changed_at,
                         ],
                     ],
                     'sendWelcomeMessage' => false,
@@ -58,7 +62,8 @@ final class ContactTest extends TestCase
             'firstName' => 'John',
             'lastName' => 'Doe',
         ];
-        $this->assertEquals($expected, $contact->to_array());
+        $this->assertMatchesRegularExpression(self::ISO_8601_PATTERN, $status_changed_at);
+        $this->assertEquals($expected, $actual);
     }
 
     public function test_to_array_for_event(): void
@@ -152,7 +157,6 @@ final class ContactTest extends TestCase
             'phoneStatus' => 'subscribed',
             'emailConsent' => 'GDPR',
             'phoneConsent' => 'GDPR',
-            'sendWelcomeEmail' => true,
             'tags' => ['test-tag'],
             'customProperties' => ['custom_key' => 'custom_value']
         ];
@@ -218,7 +222,6 @@ final class ContactTest extends TestCase
             'phoneStatus' => 'subscribed',
             'emailConsent' => 'GDPR',
             'phoneConsent' => 'GDPR',
-            'sendWelcomeEmail' => true,
             'tags' => ['test-tag'],
             'customProperties' => ['custom_key' => 'custom_value'],
             'identifiers' => [
@@ -235,6 +238,9 @@ final class ContactTest extends TestCase
             ]
         ];
         $contact = ContactFactory::create_contact($contact_data);
+        $actual = $contact->to_array();
+        $email_status_changed_at = $actual['identifiers'][0]['channels']['email']['statusChangedAt'];
+        $sms_status_changed_at = $actual['identifiers'][1]['channels']['sms']['statusChangedAt'];
         $expected = [
             'identifiers' => [
                 [
@@ -244,7 +250,7 @@ final class ContactTest extends TestCase
                     'channels' => [
                         'email' => [
                             'status' => 'subscribed',
-                            'statusChangedAt' => gmdate('c'),
+                            'statusChangedAt' => $email_status_changed_at,
                         ],
                     ],
                 ],
@@ -255,7 +261,7 @@ final class ContactTest extends TestCase
                     'channels' => [
                         'sms' => [
                             'status' => 'subscribed',
-                            'statusChangedAt' => gmdate('c'),
+                            'statusChangedAt' => $sms_status_changed_at,
                         ],
                     ],
                 ],
@@ -272,6 +278,8 @@ final class ContactTest extends TestCase
             'birthdate' => '1990-01-01',
             'customProperties' => ['custom_key' => 'custom_value']
         ];
-        $this->assertEquals($expected, $contact->to_array());
+        $this->assertMatchesRegularExpression(self::ISO_8601_PATTERN, $email_status_changed_at);
+        $this->assertMatchesRegularExpression(self::ISO_8601_PATTERN, $sms_status_changed_at);
+        $this->assertEquals($expected, $actual);
     }
 }

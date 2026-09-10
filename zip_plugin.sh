@@ -30,8 +30,8 @@ cp -r omnisend temp/omnisend
 rm -rf temp/omnisend/node_modules
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    grep -rl "omnisend.com" temp/omnisend | xargs -r sed -i '' 's/omnisend\.com/'$domain'/g'
-    grep -rl "omnisnippet1.com" temp/omnisend | xargs -r sed -i '' 's/omnisnippet1\.com/'$snippet_domain'/g'
+    grep -rl "omnisend.com" temp/omnisend | xargs sed -i '' 's/omnisend\.com/'$domain'/g'
+    grep -rl "omnisnippet1.com" temp/omnisend | xargs sed -i '' 's/omnisnippet1\.com/'$snippet_domain'/g'
 else
     grep -rl "omnisend.com" temp/omnisend | xargs -r sed -i 's/omnisend\.com/'$domain'/g'
     grep -rl "omnisnippet1.com" temp/omnisend | xargs -r sed -i 's/omnisnippet1\.com/'$snippet_domain'/g'

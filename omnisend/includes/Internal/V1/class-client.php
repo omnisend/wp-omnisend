@@ -213,7 +213,12 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	public function get_contact_by_email( string $email ): GetContactResponse {
-		$error = new WP_Error();
+		$error = $this->check_setup();
+
+		if ( $error->has_errors() ) {
+			return new GetContactResponse( null, $error );
+		}
+
 		$email = rawurlencode( $email );
 
 		$response = wp_remote_get(
@@ -381,7 +386,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	public function get_category_by_id( string $category_id ): GetCategoryResponse {
-		$error = new WP_Error();
+		$error = $this->check_setup();
+
+		if ( $error->has_errors() ) {
+			return new GetCategoryResponse( $error );
+		}
 
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/product-categories/' . $category_id,
@@ -411,7 +420,11 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	public function get_product_by_id( string $product_id ): GetProductResponse {
-		$error = new WP_Error();
+		$error = $this->check_setup();
+
+		if ( $error->has_errors() ) {
+			return new GetProductResponse( $error );
+		}
 
 		$response = wp_remote_get(
 			OMNISEND_CORE_API . '/products/' . $product_id,

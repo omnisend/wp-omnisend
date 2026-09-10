@@ -54,7 +54,7 @@ function wp_create_nonce( $action = -1 ) {
 }
 
 function wp_nonce_url( $actionurl, $action = -1, $name = '_wpnonce' ) {
-	return add_query_arg( $name, wp_create_nonce( $action ), $actionurl );
+	return add_query_arg( array( $name => wp_create_nonce( $action ) ), $actionurl );
 }
 
 function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {

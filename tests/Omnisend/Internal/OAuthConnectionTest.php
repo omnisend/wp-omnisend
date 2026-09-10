@@ -375,7 +375,8 @@ final class OAuthConnectionTest extends TestCase
     {
         $error = $this->callback_error_for_brand_response(WP_Http_Test_Stub::response(401, '{"title":"Unauthorized"}'));
 
-        $this->assertStringContainsString('rejected by Omnisend', $error);
+        $this->assertStringContainsString('try connecting the store again', $error);
+        $this->assertStringNotContainsString('API key', $error);
     }
 
     public function test_brand_read_without_permission_asks_to_grant_access_again(): void

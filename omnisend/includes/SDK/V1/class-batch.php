@@ -198,16 +198,18 @@ class Batch {
 			return $error;
 		}
 
-		$type = get_class( reset( $this->items ) );
+		$first_item = reset( $this->items );
 
-		if ( ! array_key_exists( $type, self::ENDPOINT_MAPPINGS ) ) {
+		if ( ! is_object( $first_item ) || ! array_key_exists( get_class( $first_item ), self::ENDPOINT_MAPPINGS ) ) {
 			$error->add( 'Items', 'Unknown item type' );
 
 			return $error;
 		}
 
+		$type = get_class( $first_item );
+
 		foreach ( $this->items as $item ) {
-			if ( get_class( $item ) !== $type ) {
+			if ( ! is_object( $item ) || get_class( $item ) !== $type ) {
 				$error->add( 'Items', 'Mixed items found, make sure items are of one type: ' . implode( ',', self::ENDPOINT_MAPPINGS ) );
 
 				return $error;
