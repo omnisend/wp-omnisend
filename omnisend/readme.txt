@@ -16,74 +16,64 @@ Newsletters, Email Marketing, Email Automation, Forms, Pop Up, SMS by Omnisend
 = POWERFUL, YET INTUITIVE EMAIL MARKETING, NEWSLETTER, SMS MARKETING & AUTOMATION PLUGIN FOR YOUR WORDPRESS WEBSITE. =
 = IF YOU USE WOOCOMMERCE TO SELL STUFF ONLINE, CLICK <a href="https://wordpress.org/plugins/omnisend-connect/">HERE</a> TO DOWNLOAD OUR PLUGIN BUILT SPECIFICALLY FOR WOOCOMMERCE. =
 
-Email Marketing by Omnisend lets you use the power of email marketing and newsletters to connect with your audience like never before.
+Email Marketing by Omnisend turns your WordPress website visitors into subscribers, then keeps them reading. More than 150,000 brands worldwide use it to run signup forms and landing pages, send newsletters, manage their audience, and text when email isn't the right channel.
 
-More than 150,000 brands worldwide trust Omnisend to turn visitors into subscribers with signup forms and landing pages, send beautifully designed emails, manage customer relationships, and more.
-
-With its powerful integration capabilities, Email Marketing by Omnisend works seamlessly with popular WordPress form plugins, letting you make your messages even more relevant and engaging.
-
-Whether you’re a blogger, an event organizer, or a small business owner, Omnisend offers everything you need to capture your audience’s attention and keep them coming back for more — all directly from your WordPress dashboard.
-
-Best of all, it’s completely free to get started!
+Whether you're a blogger, an event organizer, or a small business owner, it all runs from your WordPress dashboard. Free to start, no credit card needed.
 
 Some of the features of Omnisend include:
 
 **Email campaigns & newsletters**
 
-* Build beautiful emails and newsletters using our intuitive drag-and-drop editor
-* Send or schedule emails at a future date and time, and track your results in real time
-* Use customer data to segment and target your campaigns to the right audience at the right time by creating segments based on behavior, demographics, purchase history, and more
+* Build emails and newsletters in a drag-and-drop editor, with 250+ templates to start from
+* Send or schedule emails for a future date and time, and track your results in real time
+* Segment and target your campaigns on behavior, demographics, signup source, and more
 * Test different subject lines, content, and designs to see what works best for your audience
-* Get insights into your campaigns with detailed reporting and analytics to see how many people opened, clicked, and converted from your emails
-* Set up automated campaigns that trigger based on customer behavior: Welcome new subscribers, congratulate your subscribers on their birthdays, send browse abandonment emails, and more
+* Get detailed reporting on how many people opened, clicked, and converted
+* Set up automated campaigns that trigger on subscriber behavior: welcome new subscribers, send birthday messages, follow up on form submissions, and more
+
+**Omnisend AI — on every plan, free included**
+
+* Generate email copy, subject lines, and preheaders in your brand's voice
+* Get suggestions for grammar, tone, and style while you edit
+* Translate or adjust the tone of a draft without rewriting it
+* Describe an audience in plain words, and AI builds the segment
+* Connect ChatGPT or Claude with Omnisend MCP, then check performance and draft campaigns in one conversation
 
 **Integrated opt-in forms**
 
-* Create and use opt-in forms right from Omnisend, and for more advanced forms, use our integrations with popular form builders, such as Contact Form 7, Formidable Forms, Gravity Forms, and Ninja Forms
-* Segment your users based on different form submissions or submitted data
+* Create popups, signup boxes, and landing pages right from Omnisend
+* Use our integrations with popular form builders, such as Contact Form 7, Formidable Forms, Gravity Forms, and Ninja Forms
+* Describe the form you want and Forms AI Assistant builds the layout, copy, and design (paid plans)
+* Segment your subscribers based on different form submissions or submitted data
 
 **SMS marketing**
 
-* Collect phone numbers and consent to send SMS messages with our customizable opt-in forms
-* Set up and send SMS campaigns to engage customers with mobile messaging
-* Get insights into your SMS campaigns — see how many people read, clicked, and converted from your texts
+* Collect phone numbers and consent with customizable opt-in forms
+* Set up and send SMS campaigns from $0.007 per message
+* See how many people read, clicked, and converted from your texts
 
 **Built-in analytics & dashboards**
 
 * See how your signup forms perform right from the Omnisend dashboard with graphs, charts, and data widgets
-* Track every marketing email and signup for to get in-detail metrics
+* Track every marketing email and signup to get detailed metrics
 
 **Even more features**
 
-* Turn your website visitors into subscribers with our website signup forms
-* Double opt-in feature for getting quality leads
-* Find out which contacts are becoming unengaged and optimize your email campaigns accordingly
+* Turn your website visitors into subscribers with website signup forms
+* Double opt-in for better list quality
+* Spot contacts going quiet and adjust your emails before they're gone
 
 **Fully GDPR ready**
 
-Omnisend is a self-hosted WordPress plugin. You own your data, and it is protected with the latest security standards. Our platform is fully GDPR compliant, so you can be confident that your customers’ data is being collected and used in a responsible way.
+Omnisend is a self-hosted WordPress plugin. You own your data, and it is protected with the latest security standards. Our plugin is fully GDPR compliant, so you can be confident that your customers’ data is being collected and used in a responsible way.
+
+**Support, 24/7**
+
+Live chat and email support on every plan, including free, in six languages, answering in about four minutes. There's a [Help Center](https://support.omnisend.com/) too, if you'd rather sort it out yourself.
 
 **Drive engagement with Omnisend**
 
-Omnisend is an email marketing platform designed to help you drive engagement. Built by a team of experienced developers with a passion for email, Omnisend has been a top choice for marketers across the globe for over 10 years. Omnisend started in 2014 as an email marketing platform called Soundest. From day one, we made it our priority to put marketers at the center of every decision we’d make — and that hasn’t changed at all.
-Join thousands of happy customers and start driving engagement with Omnisend today.
-
-
-**Form integration**
-
-Add Omnisend’s signup forms to your WordPress website in a few clicks and automatically add new subscribers to your Omnisend account. You can also integrate Omnisend with apps like Contact Form 7, Formidable Forms, Gravity Forms, and Ninja Forms to power up your signup forms even more.
-
-**Easy to use**
-
-Omnisend’s plugin is intuitive, with a user-friendly interface that allows you to create and manage email campaigns in minutes. With Omnisend’s plugin, you can take your email marketing to the next level.
-
-Discover apps that’ll help you turn more visitors into loyal subscribers.
-* Ninja forms
-* Gravity forms
-* Formidable forms
-* Contact form 7
-* WS Form
-* WP Fusion
+Omnisend is an email marketing plugin designed to help you drive engagement. Founded in 2014 as Soundest, it's been a top choice for marketers across the globe for over 10 years. From day one, we made it our priority to put marketers at the center of every decision we'd make — and that hasn't changed at all.
 
 == REQUIREMENTS ==
 
@@ -93,7 +83,17 @@ None.
 
 = Installation instructions =
 
-Will be updated support article here.
+Three steps to get going:
+
+1. Create your Omnisend account [here](https://app.omnisend.com/registrationv2/?utm_source=woocommerce_plugin&utm_medium=referral&utm_campaign=app_listing)
+2. Download the Omnisend plugin
+3. Install it and follow the setup prompts
+
+= Can I use Omnisend with ChatGPT or Claude? =
+Yes. [Omnisend is in the ChatGPT plugins list and an official connector in Claude's directory](https://www.omnisend.com/ai/mcp/), so there's no custom setup. Once connected, you can ask how campaigns performed, get segment suggestions, and create campaigns from the conversation. Any AI tool that supports MCP can connect using the Omnisend MCP server.
+
+= I'm switching from Mailchimp or Klaviyo. Do I have to move everything myself? =
+No. Give us access and [our team rebuilds your lists, flows, and templates](https://www.omnisend.com/migration/) within five days, free. That includes your custom automations, not just the standard ones. Self-serve migration tools are there if you'd rather do it yourself.
 
 = What are the technical requirements for the plugin installation? =
 * PHP 7.4+
@@ -106,7 +106,7 @@ Every Omnisend customer gets our award-winning support, 24/7—even on the free 
 = Where can I find Omnisend Terms? =
 Read Omnisend [Terms of Use](https://www.omnisend.com/terms)
 
-= How can I report security bugs?
+= How can I report security bugs? =
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/omnisend)
 
 == Screenshots ==
@@ -120,6 +120,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 7. Convert more visitors with highly-targeted landing pages
 
 == Changelog ==
+
+= 1.9.0 =
+
+* Update plugin description and FAQ.
 
 = 1.8.1 =
 
