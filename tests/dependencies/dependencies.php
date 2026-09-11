@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    define('ABSPATH', 'tests');
+}
+
 /* START | Autoloader */
 require_classes(__DIR__ . '/../../omnisend/includes');
 
@@ -35,6 +39,15 @@ function require_classes($directory) {
 require_once(__DIR__ . '/list/class-wp-error.php');
 require_once(__DIR__ . '/list/formatting.php');
 require_once(__DIR__ . '/list/http.php');
+require_once(__DIR__ . '/list/wp.php');
+
+if (!defined('OMNISEND_CORE_API')) {
+    define('OMNISEND_CORE_API', 'https://api.omnisend.com/api');
+}
+
+if (!defined('OMNISEND_CORE_API_V3')) {
+    define('OMNISEND_CORE_API_V3', 'https://api.omnisend.com/v3');
+}
 
 function do_action($args) {
     return;
@@ -58,11 +71,5 @@ function _is_utf8_charset( $charset_slug ) {
         0 === strcasecmp( 'UTF8', $charset_slug )
     );
 }
-
-function get_option($param = '') {
-    return 'test';
-}
-
-define('ABSPATH', 'tests');
 
 /* END | Fix WordPress requirements */

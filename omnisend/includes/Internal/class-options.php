@@ -15,6 +15,9 @@ define( 'NOTIFICATION_DISABLED', 'disabled' );
 
 class Options {
 
+	const AUTH_MODE_API_KEY = 'api_key';
+	const AUTH_MODE_OAUTH   = 'oauth';
+
 	// omni_send instead of omnisend used to distinct and not interfere with Omnisend for Woo plugin.
 	private const OPTION_API_KEY                         = 'omni_send_core_api_key';
 	private const OPTION_BRAND_ID                        = 'omni_send_core_brand_id';
@@ -22,6 +25,12 @@ class Options {
 	private const OPTION_LANDING_PAGE_VISITED            = 'omni_send_core_landing_page_visited';
 	private const OPTION_LANDING_PAGE_VISIT_LAST_TIME    = 'omni_send_core_landing_page_last_visit_time';
 	private const OPTION_LANDING_PAGE_NOTIFICATION_STATE = 'omni_send_core_landing_page_notification_state';
+	private const OPTION_AUTH_MODE                       = 'omni_send_core_auth_mode';
+	private const OPTION_OAUTH_CLIENT_ID                 = 'omni_send_core_oauth_client_id';
+	private const OPTION_OAUTH_CLIENT_SECRET             = 'omni_send_core_oauth_client_secret';
+	private const OPTION_OAUTH_ACCESS_TOKEN              = 'omni_send_core_oauth_access_token';
+	private const OPTION_OAUTH_REFRESH_TOKEN             = 'omni_send_core_oauth_refresh_token';
+	private const OPTION_OAUTH_TOKEN_EXPIRES_AT          = 'omni_send_core_oauth_token_expires_at';
 
 	public static function get_api_key(): string {
 		$api_key = get_option( self::OPTION_API_KEY );
@@ -60,7 +69,82 @@ class Options {
 	}
 
 	public static function is_connected(): bool {
-		return self::is_store_connected() && self::get_api_key();
+		return self::is_store_connected() && self::has_credentials();
+	}
+
+	public static function has_credentials(): bool {
+		if ( self::get_auth_mode() === self::AUTH_MODE_OAUTH ) {
+			return self::get_oauth_access_token() !== '';
+		}
+
+		return self::get_api_key() !== '';
+	}
+
+	/**
+	 * Stores that were connected before OAuth existed have no stored mode, so an API key alone means API-key mode.
+	 * Only an explicit connect or reconnect writes the OAuth mode.
+	 */
+	public static function get_auth_mode(): string {
+		$mode = get_option( self::OPTION_AUTH_MODE );
+
+		if ( $mode === self::AUTH_MODE_OAUTH || $mode === self::AUTH_MODE_API_KEY ) {
+			return $mode;
+		}
+
+		return self::get_api_key() === '' ? '' : self::AUTH_MODE_API_KEY;
+	}
+
+	public static function get_oauth_client_id(): string {
+		$client_id = get_option( self::OPTION_OAUTH_CLIENT_ID );
+
+		return is_string( $client_id ) ? $client_id : '';
+	}
+
+	public static function get_oauth_client_secret(): string {
+		$client_secret = get_option( self::OPTION_OAUTH_CLIENT_SECRET );
+
+		return is_string( $client_secret ) ? $client_secret : '';
+	}
+
+	public static function get_oauth_access_token(): string {
+		$access_token = get_option( self::OPTION_OAUTH_ACCESS_TOKEN );
+
+		return is_string( $access_token ) ? $access_token : '';
+	}
+
+	public static function get_oauth_refresh_token(): string {
+		$refresh_token = get_option( self::OPTION_OAUTH_REFRESH_TOKEN );
+
+		return is_string( $refresh_token ) ? $refresh_token : '';
+	}
+
+	public static function get_oauth_token_expires_at(): int {
+		$expires_at = get_option( self::OPTION_OAUTH_TOKEN_EXPIRES_AT );
+
+		return is_numeric( $expires_at ) ? intval( $expires_at ) : 0;
+	}
+
+	public static function set_oauth_client( string $client_id, string $client_secret ): void {
+		update_option( self::OPTION_OAUTH_CLIENT_ID, $client_id );
+		update_option( self::OPTION_OAUTH_CLIENT_SECRET, $client_secret );
+	}
+
+	public static function set_oauth_tokens( string $access_token, string $refresh_token, int $expires_at ): void {
+		update_option( self::OPTION_OAUTH_ACCESS_TOKEN, $access_token );
+		update_option( self::OPTION_OAUTH_REFRESH_TOKEN, $refresh_token );
+		update_option( self::OPTION_OAUTH_TOKEN_EXPIRES_AT, $expires_at );
+		update_option( self::OPTION_AUTH_MODE, self::AUTH_MODE_OAUTH );
+	}
+
+	/**
+	 * Drops the tokens of a connect attempt that did not finish. The API key is left alone so a store that
+	 * was connected with one before keeps working.
+	 */
+	public static function clear_oauth_tokens(): void {
+		delete_option( self::OPTION_OAUTH_ACCESS_TOKEN );
+		delete_option( self::OPTION_OAUTH_REFRESH_TOKEN );
+		delete_option( self::OPTION_OAUTH_TOKEN_EXPIRES_AT );
+		delete_option( self::OPTION_AUTH_MODE );
 	}
 
 	public static function get_landing_page_last_visit_time(): int {
@@ -100,6 +184,10 @@ class Options {
 
 	public static function disconnect(): void {
 		delete_option( self::OPTION_API_KEY );
+		delete_option( self::OPTION_AUTH_MODE );
+		delete_option( self::OPTION_OAUTH_ACCESS_TOKEN );
+		delete_option( self::OPTION_OAUTH_REFRESH_TOKEN );
+		delete_option( self::OPTION_OAUTH_TOKEN_EXPIRES_AT );
 		delete_option( self::OPTION_BRAND_ID );
 		delete_option( self::OPTION_STORE_CONNECTED );
 		delete_option( self::OPTION_LANDING_PAGE_VISITED );
@@ -110,5 +198,7 @@ class Options {
 
 	public static function delete_all(): void {
 		self::disconnect();
+		delete_option( self::OPTION_OAUTH_CLIENT_ID );
+		delete_option( self::OPTION_OAUTH_CLIENT_SECRET );
 	}
 }

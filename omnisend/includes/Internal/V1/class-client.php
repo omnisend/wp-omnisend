@@ -21,6 +21,9 @@ use Omnisend\SDK\V1\CreateProductResponse;
 use Omnisend\SDK\V1\GetContactResponse;
 use Omnisend\SDK\V1\GetCategoryResponse;
 use Omnisend\SDK\V1\GetProductResponse;
+use Omnisend\Internal\ApiRequest;
+use Omnisend\Internal\ApiResponse;
+use Omnisend\Internal\Options as PluginOptions;
 use Omnisend\Internal\ContactFactory;
 use Omnisend\Internal\CategoryFactory;
 use Omnisend\Internal\ProductFactory;
@@ -39,6 +42,8 @@ class Client implements \Omnisend\SDK\V1\Client {
 	private string $plugin_name;
 	private string $plugin_version;
 	private ?Options $options;
+	private string $authorization          = '';
+	private ?WP_Error $authorization_error = null;
 
 	/**
 	 * @param string $plugin_name
@@ -51,6 +56,16 @@ class Client implements \Omnisend\SDK\V1\Client {
 		$this->plugin_name    = substr( $plugin_name, 0, 50 );
 		$this->plugin_version = substr( $plugin_version, 0, 50 );
 		$this->options        = $options;
+	}
+
+	private function get_request_headers(): array {
+		return ApiRequest::headers(
+			$this->get_authorization(),
+			array(
+				'X-INTEGRATION-NAME'    => $this->plugin_name,
+				'X-INTEGRATION-VERSION' => $this->plugin_version,
+			)
+		);
 	}
 
 
@@ -69,57 +84,12 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new CreateContactResponse( '', $error );
 		}
 
-		$options = array();
-
-		if ( $this->options !== null ) {
-			$options = array(
-				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
-			);
-		}
-
-		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/contacts',
-			array(
-				'body'    => wp_json_encode( $contact->to_array() ),
-				'headers' => array_merge(
-					array(
-						'Content-Type'          => 'application/json',
-						'X-API-Key'             => $this->api_key,
-						'X-INTEGRATION-NAME'    => $this->plugin_name,
-						'X-INTEGRATION-VERSION' => $this->plugin_version,
-					),
-					$options
-				),
-				'timeout' => 10,
-			)
-		);
-
-		if ( is_wp_error( $response ) ) {
-			return new CreateContactResponse( '', $response );
-		}
-
-		$http_code = wp_remote_retrieve_response_code( $response );
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		$contact_id = $this->write_contact( $contact, $error );
+		if ( $contact_id === '' ) {
 			return new CreateContactResponse( '', $error );
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-			return new CreateContactResponse( '', $error );
-		}
-
-		$arr = json_decode( $body, true );
-
-		if ( empty( $arr['contactID'] ) ) {
-			$error->add( 'omnisend_api', 'contactID not found in response.' );
-			return new CreateContactResponse( '', $error );
-		}
-
-		return new CreateContactResponse( (string) $arr['contactID'], $error );
+		return new CreateContactResponse( $contact_id, $error );
 	}
 
 	public function save_contact( Contact $contact ): SaveContactResponse {
@@ -137,100 +107,153 @@ class Client implements \Omnisend\SDK\V1\Client {
 			return new SaveContactResponse( '', $error );
 		}
 
-		$options = array();
-
-		if ( $this->options !== null ) {
-			$options = array(
-				'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
-			);
+		$contact_id = $this->write_contact( $contact, $error );
+		if ( $contact_id === '' ) {
+			return new SaveContactResponse( '', $error );
 		}
 
-		$contract_array = $contact->to_array();
+		return new SaveContactResponse( $contact_id, $error );
+	}
+
+	/**
+	 * Writes a contact to Omnisend, creating it or updating the one matching its identifiers.
+	 *
+	 * Contacts are matched by email or phone only, so a contact carrying just an id cannot be written.
+	 *
+	 * Tags are not part of the write: sending them would replace whatever the contact already has, while
+	 * callers only want their own tags added, so they are sent separately over /contacts/tags.
+	 *
+	 * @return string Contact id, empty when the write failed. Write and tagging failures are merged into $error.
+	 */
+	private function write_contact( Contact $contact, WP_Error $error ): string {
+		$payload = $contact->to_array();
+
+		if ( empty( $payload['identifiers'] ) ) {
+			$error->add( 'identifier', 'Email or phone must be set to create or update a contact.' );
+			return '';
+		}
+
+		$tags_to_add = empty( $payload['tags'] ) ? array() : $payload['tags'];
+		unset( $payload['tags'] );
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/contacts',
+			OMNISEND_CORE_API . '/contacts',
 			array(
-				'body'    => wp_json_encode( $contract_array ),
-				'headers' => array_merge(
-					array(
-						'Content-Type'          => 'application/json',
-						'X-API-Key'             => $this->api_key,
-						'X-INTEGRATION-NAME'    => $this->plugin_name,
-						'X-INTEGRATION-VERSION' => $this->plugin_version,
-					),
-					$options
-				),
+				'body'    => wp_json_encode( $payload ),
+				'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
 				'timeout' => 10,
 			)
 		);
 
+		$arr = ApiResponse::parse( $response );
+		if ( is_wp_error( $arr ) ) {
+			$error->merge_from( $arr );
+			return '';
+		}
+
+		if ( empty( $arr['id'] ) ) {
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact id' ) );
+			return '';
+		}
+
+		$contact_id = (string) $arr['id'];
+
+		if ( $tags_to_add ) {
+			$tagging_error = $this->add_tags( $contact_id, $tags_to_add );
+			if ( $tagging_error !== null ) {
+				$error->merge_from( $tagging_error );
+			}
+		}
+
+		return $contact_id;
+	}
+
+	/**
+	 * Adds tags to a contact, leaving the ones it already has in place. Tagging is applied asynchronously.
+	 *
+	 * Adding the same tags twice has no additional effect, so a request lost on the way is retried once.
+	 */
+	private function add_tags( string $contact_id, array $tags ): ?WP_Error {
+		$args = array(
+			'body'    => wp_json_encode(
+				array(
+					'contactIDs' => array( $contact_id ),
+					'tags'       => $tags,
+				)
+			),
+			'headers' => array_merge( $this->get_request_headers(), $this->get_origin_headers() ),
+			'timeout' => 10,
+		);
+
+		$response = wp_remote_post( OMNISEND_CORE_API . '/contacts/tags', $args );
+
+		if ( $this->is_retryable( $response ) ) {
+			$response = wp_remote_post( OMNISEND_CORE_API . '/contacts/tags', $args );
+		}
+
+		$parsed = ApiResponse::parse( $response, false );
+
+		return is_wp_error( $parsed ) ? $parsed : null;
+	}
+
+	/**
+	 * @param array|WP_Error $response Result of a wp_remote_* call.
+	 */
+	private function is_retryable( $response ): bool {
 		if ( is_wp_error( $response ) ) {
-			return new SaveContactResponse( '', $response );
+			return true;
 		}
 
-		$http_code = wp_remote_retrieve_response_code( $response );
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
-			return new SaveContactResponse( '', $error );
+		$status = (int) wp_remote_retrieve_response_code( $response );
+
+		return $status === 0 || $status >= 500;
+	}
+
+	private function get_origin_headers(): array {
+		if ( $this->options === null ) {
+			return array();
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-			return new SaveContactResponse( '', $error );
-		}
-
-		$arr = json_decode( $body, true );
-
-		if ( empty( $arr['contactID'] ) ) {
-			$error->add( 'omnisend_api', 'contactID not found in response.' );
-			return new SaveContactResponse( '', $error );
-		}
-
-		return new SaveContactResponse( (string) $arr['contactID'], $error );
+		return array(
+			'X-OMNISEND-ORIGIN' => $this->options->get_origin(),
+		);
 	}
 
 	public function get_contact_by_email( string $email ): GetContactResponse {
-		$error = new WP_Error();
-		$email = str_replace( '+', '%2b', $email );
+		$error = $this->check_setup();
+
+		if ( $error->has_errors() ) {
+			return new GetContactResponse( null, $error );
+		}
+
+		$email = rawurlencode( $email );
 
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V5 . '/contacts?email=' . $email,
+			OMNISEND_CORE_API . '/contacts?email=' . $email,
 			array(
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
+		$contact_data = ApiResponse::parse( $response );
+		if ( is_wp_error( $contact_data ) ) {
+			$error->merge_from( $contact_data );
 			return new GetContactResponse( null, $error );
 		}
 
-		$http_code = wp_remote_retrieve_response_code( $response );
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( ! isset( $contact_data['contacts'] ) || ! is_array( $contact_data['contacts'] ) ) {
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact list' ) );
 			return new GetContactResponse( null, $error );
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
+		if ( empty( $contact_data['contacts'] ) ) {
+			$error->merge_from( ApiResponse::not_found_error( 'Contact' ) );
 			return new GetContactResponse( null, $error );
 		}
 
-		$contact_data = json_decode( $body, true );
-
-		if ( empty( $contact_data['contacts'][0]['contactID'] ) ) {
-			$error->add( 'omnisend_api', 'contactID not found in response.' );
+		if ( empty( $contact_data['contacts'][0]['id'] ) ) {
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Contact id' ) );
 			return new GetContactResponse( null, $error );
 		}
 
@@ -255,28 +278,17 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/events',
+			OMNISEND_CORE_API . '/events',
 			array(
 				'body'    => wp_json_encode( $event->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			return new SendCustomerEventResponse( $response );
-		}
-
-		$http_code = wp_remote_retrieve_response_code( $response );
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		$parsed = ApiResponse::parse( $response, false );
+		if ( is_wp_error( $parsed ) ) {
+			$error->merge_from( $parsed );
 		}
 
 		return new SendCustomerEventResponse( $error );
@@ -307,29 +319,34 @@ class Client implements \Omnisend\SDK\V1\Client {
 			'platformVersion' => get_bloginfo( 'version' ),
 		);
 
-		$response = wp_remote_post(
-			OMNISEND_CORE_API_V3 . '/accounts/' . $brand_id,
-			array(
-				'body'    => wp_json_encode( $data ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
+		// Brand settings may only be written with an OAuth token, so API key connections stay on the
+		// retained deprecated /v3 account call, which is the only account write they are allowed to make.
+		if ( $this->is_oauth_connection() ) {
+			$url     = OMNISEND_CORE_API . '/brands/current';
+			$headers = $this->get_request_headers();
+		} else {
+			$url     = OMNISEND_CORE_API_V3 . '/accounts/' . $brand_id;
+			$headers = ApiRequest::legacy_api_key_headers(
+				$this->api_key,
+				array(
 					'X-INTEGRATION-NAME'    => $this->plugin_name,
 					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				)
+			);
+		}
+
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => wp_json_encode( $data ),
+				'headers' => $headers,
 				'timeout' => 10,
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			return new ConnectStoreResponse( $response );
-		}
-
-		$http_code = wp_remote_retrieve_response_code( $response );
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		$parsed = ApiResponse::parse( $response, false );
+		if ( is_wp_error( $parsed ) ) {
+			$error->merge_from( $parsed );
 		}
 
 		return new ConnectStoreResponse( $error );
@@ -350,41 +367,24 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/batches',
+			OMNISEND_CORE_API . '/batches',
 			array(
 				'body'    => wp_json_encode( $batch->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$arr = ApiResponse::parse( $response );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $arr ) ) {
+			$error->merge_from( $arr );
 
 			return new SendBatchResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new SendBatchResponse( $error );
-		}
-
-		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['batchID'] ) ) {
-			$error->add( 'omnisend_api', 'batchID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'batchID' ) );
 
 			return new SendBatchResponse( $error );
 		}
@@ -393,47 +393,30 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	public function get_category_by_id( string $category_id ): GetCategoryResponse {
-		$error = new WP_Error();
+		$error = $this->check_setup();
+
+		if ( $error->has_errors() ) {
+			return new GetCategoryResponse( $error );
+		}
 
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V5 . '/product-categories/' . $category_id,
+			OMNISEND_CORE_API . '/product-categories/' . $category_id,
 			array(
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			return new GetCategoryResponse( $error );
-		}
+		$category_data = ApiResponse::parse( $response );
 
-		$http_code = wp_remote_retrieve_response_code( $response );
-
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $category_data ) ) {
+			$error->merge_from( $category_data );
 
 			return new GetCategoryResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new GetCategoryResponse( $error );
-		}
-
-		$category_data = json_decode( $body, true );
 
 		if ( empty( $category_data['categoryID'] ) ) {
-			$error->add( 'omnisend_api', 'categoryID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'categoryID' ) );
 
 			return new GetCategoryResponse( $error );
 		}
@@ -444,47 +427,30 @@ class Client implements \Omnisend\SDK\V1\Client {
 	}
 
 	public function get_product_by_id( string $product_id ): GetProductResponse {
-		$error = new WP_Error();
+		$error = $this->check_setup();
+
+		if ( $error->has_errors() ) {
+			return new GetProductResponse( $error );
+		}
 
 		$response = wp_remote_get(
-			OMNISEND_CORE_API_V5 . '/products/' . $product_id,
+			OMNISEND_CORE_API . '/products/' . $product_id,
 			array(
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		if ( is_wp_error( $response ) ) {
-			return new GetProductResponse( $error );
-		}
+		$product_data = ApiResponse::parse( $response );
 
-		$http_code = wp_remote_retrieve_response_code( $response );
-
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $product_data ) ) {
+			$error->merge_from( $product_data );
 
 			return new GetProductResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new GetProductResponse( $error );
-		}
-
-		$product_data = json_decode( $body, true );
 
 		if ( empty( $product_data['id'] ) ) {
-			$error->add( 'omnisend_api', 'productID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Product id' ) );
 
 			return new GetProductResponse( $error );
 		}
@@ -510,41 +476,24 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/product-categories',
+			OMNISEND_CORE_API . '/product-categories',
 			array(
 				'body'    => wp_json_encode( $category->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$arr = ApiResponse::parse( $response );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $arr ) ) {
+			$error->merge_from( $arr );
 
 			return new CreateCategoryResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new CreateCategoryResponse( $error );
-		}
-
-		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['categoryID'] ) ) {
-			$error->add( 'omnisend_api', 'categoryID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'categoryID' ) );
 
 			return new CreateCategoryResponse( $error );
 		}
@@ -568,42 +517,25 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/product-categories/' . $category->get_category_id(),
+			OMNISEND_CORE_API . '/product-categories/' . $category->get_category_id(),
 			array(
 				'method'  => 'PATCH',
 				'body'    => wp_json_encode( $category->to_array_for_update() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$arr = ApiResponse::parse( $response );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $arr ) ) {
+			$error->merge_from( $arr );
 
 			return new UpdateCategoryResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new UpdateCategoryResponse( $error );
-		}
-
-		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['categoryID'] ) ) {
-			$error->add( 'omnisend_api', 'categoryID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'categoryID' ) );
 
 			return new UpdateCategoryResponse( $error );
 		}
@@ -625,25 +557,18 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/product-categories/' . $category_id,
+			OMNISEND_CORE_API . '/product-categories/' . $category_id,
 			array(
 				'method'  => 'DELETE',
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$parsed = ApiResponse::parse( $response, false );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $parsed ) ) {
+			$error->merge_from( $parsed );
 
 			return new DeleteCategoryResponse( $error );
 		}
@@ -667,41 +592,24 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/products',
+			OMNISEND_CORE_API . '/products',
 			array(
 				'body'    => wp_json_encode( $product->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$arr = ApiResponse::parse( $response );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $arr ) ) {
+			$error->merge_from( $arr );
 
 			return new CreateProductResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new CreateProductResponse( $error );
-		}
-
-		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['id'] ) ) {
-			$error->add( 'omnisend_api', 'productID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Product id' ) );
 
 			return new CreateProductResponse( $error );
 		}
@@ -725,42 +633,25 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/products/' . $product->get_id(),
+			OMNISEND_CORE_API . '/products/' . $product->get_id(),
 			array(
 				'method'  => 'PUT',
 				'body'    => wp_json_encode( $product->to_array() ),
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$arr = ApiResponse::parse( $response );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $arr ) ) {
+			$error->merge_from( $arr );
 
 			return new CreateProductResponse( $error );
 		}
-
-		$body = wp_remote_retrieve_body( $response );
-
-		if ( ! $body ) {
-			$error->add( 'omnisend_api', 'empty response' );
-
-			return new CreateProductResponse( $error );
-		}
-
-		$arr = json_decode( $body, true );
 
 		if ( empty( $arr['id'] ) ) {
-			$error->add( 'omnisend_api', 'productID not found in response.' );
+			$error->merge_from( ApiResponse::unexpected_shape_error( 'Product id' ) );
 
 			return new CreateProductResponse( $error );
 		}
@@ -782,25 +673,18 @@ class Client implements \Omnisend\SDK\V1\Client {
 		}
 
 		$response = wp_remote_post(
-			OMNISEND_CORE_API_V5 . '/products/' . $product_id,
+			OMNISEND_CORE_API . '/products/' . $product_id,
 			array(
 				'method'  => 'DELETE',
-				'headers' => array(
-					'Content-Type'          => 'application/json',
-					'X-API-Key'             => $this->api_key,
-					'X-INTEGRATION-NAME'    => $this->plugin_name,
-					'X-INTEGRATION-VERSION' => $this->plugin_version,
-				),
+				'headers' => $this->get_request_headers(),
 				'timeout' => 10,
 			)
 		);
 
-		$http_code = wp_remote_retrieve_response_code( $response );
+		$parsed = ApiResponse::parse( $response, false );
 
-		if ( $http_code >= 400 ) {
-			$body    = wp_remote_retrieve_body( $response );
-			$err_msg = "HTTP error: {$http_code} - " . wp_remote_retrieve_response_message( $response ) . " - {$body}";
-			$error->add( 'omnisend_api', $err_msg );
+		if ( is_wp_error( $parsed ) ) {
+			$error->merge_from( $parsed );
 
 			return new DeleteProductResponse( $error );
 		}
@@ -822,14 +706,43 @@ class Client implements \Omnisend\SDK\V1\Client {
 			$error->add( 'initialisation', 'Client is created with empty plugin version.' );
 		}
 
-		if ( ! $this->api_key ) {
-			$error->add( 'api_key', 'Omnisend plugin is not connected.' );
+		if ( $this->get_authorization() === '' && $this->authorization_error !== null ) {
+			$error->merge_from( $this->authorization_error );
 		}
 
 		return $error;
 	}
 
+	/**
+	 * @return string Authorization header value of the credential this store is connected with, empty when it has none.
+	 */
+	private function get_authorization(): string {
+		if ( $this->authorization !== '' ) {
+			return $this->authorization;
+		}
+
+		$authorization = ApiRequest::authorization( $this->api_key );
+
+		if ( is_wp_error( $authorization ) ) {
+			$this->authorization_error = $authorization;
+
+			return '';
+		}
+
+		$this->authorization = $authorization;
+
+		return $this->authorization;
+	}
+
+	private function is_oauth_connection(): bool {
+		return PluginOptions::get_auth_mode() === PluginOptions::AUTH_MODE_OAUTH;
+	}
+
 	private function get_brand_id(): string {
+		if ( $this->is_oauth_connection() ) {
+			return PluginOptions::get_brand_id();
+		}
+
 		$list = explode( '-', $this->api_key );
 		if ( count( $list ) != 2 ) {
 			return '';

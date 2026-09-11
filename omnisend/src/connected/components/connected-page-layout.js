@@ -1,6 +1,9 @@
 import { Flex, Button } from '@wordpress/components';
 
+const DEFAULT_APP_URL = 'https://app.omnisend.com';
+
 const ConnectedPageLayout = () => {
+	const appUrl = window.omnisendConnected?.appUrl ?? DEFAULT_APP_URL;
 	const navigateToExternalUrl = (url) => {
 		window.open(url, '_blank').focus();
 	};
@@ -34,7 +37,7 @@ const ConnectedPageLayout = () => {
 					<Button
 						variant="primary"
 						onClick={() =>
-							navigateToExternalUrl('https://app.omnisend.com')
+							navigateToExternalUrl(appUrl)
 						}
 					>
 						Go to Omnisend
