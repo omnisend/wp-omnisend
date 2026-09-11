@@ -111,19 +111,21 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Screenshots ==
 
-1. Build beautiful campaigns using our email templates
-2. Drive revenue round the clock and recover sales with pre-built automated workflows
-3. Send emails, newsletters & SMS campaigns
-4. Access all features on the generous free-forever plan
-5. Grow your audience with popups incl exit-intent, signup forms & spin-to-win
-6. Fast support, available 24/77. Actionable insights to help create more personalized messages
-7. Convert more visitors with highly-targeted landing pages
+1. Email & SMS marketing so good, it's boring — trusted by 150,000+ brands
+2. Omnisend, right where you already work — connect ChatGPT or Claude through MCP
+3. Omnisend AI does the boring work, on every plan
+4. Popups, forms, and landing pages that grow your list
+5. Sell while you sleep with pre-built workflows
+6. See what's selling, and what every dollar earned
+7. Award-winning support from real humans, 24/7, and free migration in 5 days
+8. Build automations in the visual workflow editor
+9. Build emails and newsletters in the drag-and-drop editor with 250+ templates
 
 == Changelog ==
 
 = 1.9.0 =
 
-* Update plugin description and FAQ.
+* Update plugin description, FAQ, screenshots and icon.
 
 = 1.8.1 =
 
