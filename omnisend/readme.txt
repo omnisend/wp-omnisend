@@ -111,15 +111,15 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Screenshots ==
 
-1. Email & SMS marketing so good, it's boring — trusted by 150,000+ brands
-2. Omnisend, right where you already work — connect ChatGPT or Claude through MCP
-3. Omnisend AI does the boring work, on every plan
-4. Popups, forms, and landing pages that grow your list
-5. Sell while you sleep with pre-built workflows
-6. See what's selling, and what every dollar earned
-7. Award-winning support from real humans, 24/7, and free migration in 5 days
-8. Build automations in the visual workflow editor
-9. Build emails and newsletters in the drag-and-drop editor with 250+ templates
+1. Build automations in the visual workflow editor
+2. Build emails and newsletters in the drag-and-drop editor with 250+ templates
+3. Email & SMS marketing so good, it's boring — trusted by 150,000+ brands
+4. Omnisend, right where you already work — connect ChatGPT or Claude through MCP
+5. Omnisend AI does the boring work, on every plan
+6. Popups, forms, and landing pages that grow your list
+7. Sell while you sleep with pre-built workflows
+8. See what's selling, and what every dollar earned
+9. Award-winning support from real humans, 24/7, and free migration in 5 days
 
 == Changelog ==
 
