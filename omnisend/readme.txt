@@ -85,7 +85,7 @@ None.
 
 Three steps to get going:
 
-1. Create your Omnisend account [here](https://app.omnisend.com/registrationv2/?utm_source=woocommerce_plugin&utm_medium=referral&utm_campaign=app_listing)
+1. Create your Omnisend account [here](https://app.omnisend.com/registrationv2/?utm_source=wordpress_plugin&utm_medium=referral&utm_campaign=app_listing)
 2. Download the Omnisend plugin
 3. Install it and follow the setup prompts
 
