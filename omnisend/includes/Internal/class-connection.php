@@ -306,8 +306,8 @@ class Connection {
 	private static function complete_oauth_connection(): string {
 		$error_message = self::try_complete_oauth_connection();
 
-		if ( $error_message !== '' ) {
-			// Only the tokens this flow obtained are dropped, so a store that was connected with an API key before keeps working.
+		// A connected store has no UI to start the flow again, so a failed callback there is stale or forged and must not drop working credentials.
+		if ( $error_message !== '' && ! Options::is_store_connected() ) {
 			Options::clear_oauth_tokens();
 		}
 
