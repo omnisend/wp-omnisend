@@ -7,7 +7,7 @@ on:
 jobs:
   gcs:
     environment: testing
-    runs-on: [development]
+    runs-on: ubuntu-latest
 
     permissions:
       contents: 'read'
