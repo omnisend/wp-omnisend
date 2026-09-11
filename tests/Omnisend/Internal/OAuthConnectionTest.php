@@ -298,6 +298,43 @@ final class OAuthConnectionTest extends TestCase
         $this->assertFalse(Options::is_store_connected());
     }
 
+    public function test_failed_callback_on_a_connected_store_keeps_its_tokens(): void
+    {
+        $this->connect_store();
+
+        $_GET = array('page' => 'omnisend', 'error' => 'access_denied');
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('access_denied', $this->oauth_error());
+        $this->assert_store_still_connected();
+
+        $_GET = array('page' => 'omnisend', 'code' => 'auth-code', 'state' => 'stale-state');
+        $this->handle_oauth_request();
+
+        $this->assertStringContainsString('did not match this site', $this->oauth_error());
+        $this->assert_store_still_connected();
+    }
+
+    private function connect_store(): void
+    {
+        WP_Http_Test_Stub::queue($this->registration_response());
+        $this->start_connect();
+
+        WP_Http_Test_Stub::queue($this->token_response());
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, '{"brandID":"brand-1","platform":"wordpress"}'));
+        $this->complete_callback();
+
+        $this->assertTrue(Options::is_store_connected());
+    }
+
+    private function assert_store_still_connected(): void
+    {
+        $this->assertTrue(Options::is_store_connected());
+        $this->assertEquals('access-1', Options::get_oauth_access_token());
+        $this->assertEquals('refresh-1', Options::get_oauth_refresh_token());
+        $this->assertEquals(Options::AUTH_MODE_OAUTH, Options::get_auth_mode());
+    }
+
     public function test_connect_with_failed_nonce_verification_does_not_start_the_flow(): void
     {
         $GLOBALS['wp_test_nonce_valid'] = false;
