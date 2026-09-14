@@ -15,15 +15,16 @@ TC-01–29, grouped under their `WP-BC-*` parents (so numbering is not sequentia
 in this file). WP-TC-030+ were appended after.
 
 Environment for manual cases: local Docker WordPress (`localhost:8080`) +
-`./zip_plugin.sh test` build pointed at testing (`api.omnisend.work` /
-`app.omnisend.work`), or the shared Woo test store. OAuth needs an
-`app.omnisend.work` login on a `platform=wordpress` brand — never Playground.
+`./zip_plugin.sh test` build pointed at the testing environment, or the shared
+Woo test store. Internal hostnames, test brands, and credentials live in the
+agent knowledge base ("wp-omnisend testing" note) — not in this public repo.
+OAuth needs an app login on a `platform=wordpress` brand — never Playground.
 
 ## WP-BC-001 — OAuth connect (new install)
 
 | ID        | Case                                                              | Oracle / expected                                                                                                   | Setup / notes                                                                                          |
 | --------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| WP-TC-001 | Full OAuth connect: landing → DCR → consent → callback            | `POST /oauth2/register` → `authorize` → consent → callback; brand id + 64-char tokens stored, `auth_mode=oauth`, Connected page, sync cron scheduled | Fresh WP install; logged-in `app.omnisend.work` session on a `platform=wordpress` (or `""`) brand       |
+| WP-TC-001 | Full OAuth connect: landing → DCR → consent → callback            | `POST /oauth2/register` → `authorize` → consent → callback; brand id + 64-char tokens stored, `auth_mode=oauth`, Connected page, sync cron scheduled | Fresh WP install; logged-in session on the testing app on a `platform=wordpress` (or `""`) brand       |
 
 ## WP-BC-002 — Reconnect rules by brand platform
 
@@ -36,7 +37,7 @@ Environment for manual cases: local Docker WordPress (`localhost:8080`) +
 
 | ID        | Case                                                        | Oracle / expected                                                                                              | Setup / notes                                                                                     |
 | --------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| WP-TC-004 | "Create new account" → registration → consent              | New tab → `app.omnisend.work/ecom/registration/start?registration_redirect_url=…&utm_source=wordpress_plugin`; after signup, connect completes | Test-email inbox + phone-verification bypass: see the shared "Registering a new Omnisend test account/brand" note in the agent knowledge base — not committed to this public repo. Known app-side gap: `registration_redirect_url` is not honoured after onboarding — finish via "Connect your account" |
+| WP-TC-004 | "Create new account" → registration → consent              | New tab → the app's `/ecom/registration/start?registration_redirect_url=…&utm_source=wordpress_plugin`; after signup, connect completes | Test-email inbox + phone-verification bypass: see the shared "Registering a new Omnisend test account/brand" note in the agent knowledge base — not committed to this public repo. Known app-side gap: `registration_redirect_url` is not honoured after onboarding — finish via "Connect your account" |
 | WP-TC-005 | `?omnisend_oauth=register`/`=connect` without/invalid nonce | Rejected (no redirect, no state transient); subscriber gets 403 on admin page                                   | PHPUnit covers; curl as logged-in admin for the manual variant                                     |
 
 ## WP-BC-004 — Landing page status polling
@@ -70,7 +71,7 @@ Environment for manual cases: local Docker WordPress (`localhost:8080`) +
 
 | ID        | Case                                       | Oracle / expected                                                                                                            | Setup / notes                                              |
 | --------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| WP-TC-013 | Register WP user, run contact-sync cron   | Contact created on the brand with tag `wordpress` + `wordpress_roles`; `omni_send_core_last_sync` set; response `id` mapped     | `wp cron event run omni_send_cron_sync_contacts`; verify via `GET api.omnisend.work/v3/contacts?email=…`. Users marked `ERROR` are never retried (pre-existing) — delete the meta to retry |
+| WP-TC-013 | Register WP user, run contact-sync cron   | Contact created on the brand with tag `wordpress` + `wordpress_roles`; `omni_send_core_last_sync` set; response `id` mapped     | `wp cron event run omni_send_cron_sync_contacts`; verify via `GET /v3/contacts?email=…` on the testing API. Users marked `ERROR` are never retried (pre-existing) — delete the meta to retry |
 
 ## WP-BC-010 / WP-BC-011 / WP-BC-012 — SDK surface
 
