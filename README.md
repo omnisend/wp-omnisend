@@ -224,6 +224,10 @@ The script copies the `omnisend` plugin directory (excluding `node_modules`), re
 
 Build frontend assets first when needed (`npm run build` in the `omnisend` directory) before creating the zip.
 
+### Test zip in Google Cloud Storage
+
+The `Upload plugin to GCS` action builds `omnisend-test.zip` and uploads it to `gs://omnisend_testing_woocommerce/omnisend-test.zip`, where the polar-bear E2E tests install it from. It runs automatically on every push to `main`; to test a branch build instead, run the action manually on that branch (Actions → Upload plugin to GCS → Run workflow). The bucket always holds the most recently uploaded build.
+
 ## UI Changes
 
 Plugin uses React. If you want to make changes run following commands in "omnisend" directory:
