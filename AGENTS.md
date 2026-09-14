@@ -19,5 +19,5 @@ Omnisend **core WordPress plugin** (wordpress.org slug `omnisend`). Connects a W
 ## Conventions that bite agents
 
 - The plugin is only active when installed AND connected — SDK consumers must check `is_plugin_active`, `class_exists`, `Omnisend::is_connected()` before sending.
-- `readme.txt` headers (`Requires PHP`, `Tested up to`) control wordpress.org compatibility surfacing — keep them honest.
+- `omnisend/readme.txt` headers (`Requires PHP`, `Tested up to`) control wordpress.org compatibility surfacing — keep them honest.
 - Never commit credentials; test stores/keys live in secrets, referenced by name only.

@@ -1,6 +1,6 @@
 ---
 owner: ecom-platforms
-last-verified: 2026-09-14
+last-verified: 2026-09-09
 ---
 
 # Test cases — wp-omnisend
@@ -10,8 +10,9 @@ manual steps for each business case. `WP-TC-xxx` IDs are stable, never reused;
 each links to its `WP-BC-xxx` parent. Run results (PASS/FAIL/flaky) live in the
 QA report — never commit per-run status here.
 
-Seeded from the Project-53 QA run (session of 2026-09): WP-TC-001–029 below are
-that run's TC-01–29 verbatim intent, re-keyed.
+Seeded from the Project-53 QA run (2026-09): WP-TC-001–029 re-key that run's
+TC-01–29, grouped under their `WP-BC-*` parents (so numbering is not sequential
+in this file). WP-TC-030+ were appended after.
 
 Environment for manual cases: local Docker WordPress (`localhost:8080`) +
 `./zip_plugin.sh test` build pointed at testing (`api.omnisend.work` /
@@ -35,7 +36,7 @@ Environment for manual cases: local Docker WordPress (`localhost:8080`) +
 
 | ID        | Case                                                        | Oracle / expected                                                                                              | Setup / notes                                                                                     |
 | --------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| WP-TC-004 | "Create new account" → registration → consent              | New tab → `app.omnisend.work/ecom/registration/start?registration_redirect_url=…&utm_source=wordpress_plugin`; after signup, connect completes | Mailinator `@lokalus.lt` address; phone bypass: Afghanistan +93 / `701234567`. Known app-side gap: `registration_redirect_url` is not honoured after onboarding — finish via "Connect your account" |
+| WP-TC-004 | "Create new account" → registration → consent              | New tab → `app.omnisend.work/ecom/registration/start?registration_redirect_url=…&utm_source=wordpress_plugin`; after signup, connect completes | Test-email inbox + phone-verification bypass: see the shared "Registering a new Omnisend test account/brand" note in the agent knowledge base — not committed to this public repo. Known app-side gap: `registration_redirect_url` is not honoured after onboarding — finish via "Connect your account" |
 | WP-TC-005 | `?omnisend_oauth=register`/`=connect` without/invalid nonce | Rejected (no redirect, no state transient); subscriber gets 403 on admin page                                   | PHPUnit covers; curl as logged-in admin for the manual variant                                     |
 
 ## WP-BC-004 — Landing page status polling
@@ -115,7 +116,7 @@ Environment for manual cases: local Docker WordPress (`localhost:8080`) +
 
 | ID        | Case                                                                                | Oracle / expected                                                          | Setup / notes                  |
 | --------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------- |
-| WP-TC-023 | Register user / password change / email change with opt-in enabled and disabled    | Events sent to `/events` only when `omni_send_core_email_service_opt_in` enabled; option deleted on disconnect | Blocked until #164 is rebased  |
+| WP-TC-023 | Register user / password change / email change with opt-in enabled and disabled    | Events sent to `/events` only when `omni_send_core_email_service_opt_in` enabled; option deleted on disconnect | Requires the email-service feature (PR #164) to be merged; toggle the option via `wp option` |
 
 ## WP-BC-020 — OAuth client re-registration
 
@@ -149,3 +150,9 @@ Environment for manual cases: local Docker WordPress (`localhost:8080`) +
 | --------- | --------------------------------- | --------------------------------------------------- | ------------------------------ |
 | WP-TC-031 | Snippet renders when connected   | `launcher-v2.js` tag in page footer on public pages | View source / DOM check       |
 | WP-TC-032 | No snippet when disconnected     | No snippet markup after disconnect                  | Contrast with WP-TC-031       |
+
+## WP-BC-025 — Compatibility headers
+
+| ID        | Case                                                       | Oracle / expected                                                                    | Setup / notes                |
+| --------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------- |
+| WP-TC-033 | `omnisend/readme.txt` headers vs verified support matrix  | `Requires PHP` / `Tested up to` match the WP × PHP versions the plugin was actually tested against | Manual check on version bumps |

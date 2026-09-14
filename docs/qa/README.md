@@ -1,3 +1,8 @@
+---
+owner: ecom-platforms
+last-verified: 2026-09-09
+---
+
 # QA context
 
 Canonical store for this plugin's testing context — the business cases it owes
