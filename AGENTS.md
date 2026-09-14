@@ -2,6 +2,8 @@
 
 Context index for AI coding agents working in this repo. Index only — follow the links, don't duplicate content here.
 
+**Before planning or writing tests, read `docs/qa/`** — `business-cases/` (`WP-BC-*`) and `test-cases/` (`WP-TC-*`) are the canonical testing context: intent, oracles, and setup. Reference the IDs in test titles; update the files in the same PR as behavior changes. Conventions: `docs/qa/README.md`.
+
 ## What this repo is
 
 Omnisend **core WordPress plugin** (wordpress.org slug `omnisend`). Connects a WP site to an Omnisend account (OAuth) and provides the `Omnisend\SDK\V1` client that other plugins (e.g. `omnisend-connect` for WooCommerce) use to send contacts, products, categories, and events. Plugin source lives in `omnisend/` (`includes/SDK`, `includes/Internal`); JS assets build inside `omnisend/` too.
@@ -13,10 +15,6 @@ Omnisend **core WordPress plugin** (wordpress.org slug `omnisend`). Connects a W
 - `./vendor/bin/phpunit tests` — unit tests (no phpunit.xml; do NOT pass `--bootstrap`, each test includes `tests/dependencies/dependencies.php` itself)
 - `cd omnisend && npm run build` / `npm run lint:js` — JS build/lint
 - `./zip_plugin.sh` — build the distributable plugin ZIP
-
-## QA context
-
-`docs/qa/` is the canonical store for this plugin's testing context — business cases carry stable `WP-BC-xxx` IDs referenced by test titles here and in polar-bear. Conventions: `docs/qa/README.md`.
 
 ## Conventions that bite agents
 

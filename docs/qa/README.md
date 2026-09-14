@@ -24,6 +24,19 @@ Code via `CLAUDE.md` → `@AGENTS.md`).
 - **Secrets:** reference the secret _name_ (env var, GSM secret id), never a value.
 - **Freshness:** every file carries `owner:` and `last-verified:` headers. QA gap
   reports flag stale files; fixes land as PRs, not session artifacts.
+- **Durable only:** files hold case + oracle + setup. Per-run results
+  (PASS/FAIL/flaky) stay in QA reports — never commit run history.
+
+## QA Orchestrator contract
+
+`docs/qa/` is the input and output of QA runs:
+
+- **Before planning** — the orchestrator reads `business-cases/` +
+  `test-cases/` first and reuses `WP-BC-*` / `WP-TC-*` IDs in its impact matrix
+  and test plan instead of regenerating cases. Consistent IDs across runs make
+  coverage tracking work.
+- **After reporting** — newly discovered cases land as a PR appending rows to
+  these files; stale cases get flagged. Nothing about a run result is committed.
 
 ## Neighboring context (does NOT live here)
 
