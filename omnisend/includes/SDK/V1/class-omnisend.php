@@ -37,6 +37,6 @@ class Omnisend {
 	 * @return bool
 	 */
 	public static function is_connected(): bool {
-		return Options::get_api_key() != '';
+		return Options::has_credentials();
 	}
 }

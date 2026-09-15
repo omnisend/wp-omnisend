@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || die( 'no direct access' );
 
 class GetContactResponse {
 
-	private Contact $contact;
+	private ?Contact $contact;
 	private WP_Error $wp_error;
 
 	/**

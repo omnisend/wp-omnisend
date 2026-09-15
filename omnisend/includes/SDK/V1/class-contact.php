@@ -126,17 +126,17 @@ class Contact {
 
 		$arr = array(
 			'identifiers' => array(),
-			'tags'        => array_values( array_unique( $this->tags ) ),
 		);
 
 		if ( $this->email ) {
 			$email_identifier = array(
-				'type'     => 'email',
-				'id'       => $this->email,
-				'channels' => array(
+				'type'               => 'email',
+				'id'                 => $this->email,
+				'sendWelcomeMessage' => (bool) $this->send_welcome_email,
+				'channels'           => array(
 					'email' => array(
-						'status'     => $this->email_status,
-						'statusDate' => $time_now,
+						'status'          => $this->email_status,
+						'statusChangedAt' => $time_now,
 					),
 				),
 			);
@@ -158,12 +158,13 @@ class Contact {
 
 		if ( $this->phone ) {
 			$phone_identifier = array(
-				'type'     => 'phone',
-				'id'       => $this->phone,
-				'channels' => array(
+				'type'               => 'phone',
+				'id'                 => $this->phone,
+				'sendWelcomeMessage' => (bool) $this->send_welcome_email,
+				'channels'           => array(
 					'sms' => array(
-						'status'     => $this->phone_status,
-						'statusDate' => $time_now,
+						'status'          => $this->phone_status,
+						'statusChangedAt' => $time_now,
 					),
 				),
 			);
@@ -178,8 +179,8 @@ class Contact {
 			$arr['identifiers'][] = $phone_identifier;
 		}
 
-		if ( $this->id ) {
-			$arr['contactID'] = $this->id;
+		if ( $this->tags ) {
+			$arr['tags'] = array_values( array_unique( $this->tags ) );
 		}
 
 		if ( $this->first_name ) {
@@ -216,10 +217,6 @@ class Contact {
 
 		if ( $this->gender ) {
 			$arr['gender'] = $this->gender;
-		}
-
-		if ( $this->send_welcome_email ) {
-			$arr['sendWelcomeEmail'] = $this->send_welcome_email;
 		}
 
 		return $arr;
