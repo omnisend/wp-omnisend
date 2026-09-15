@@ -204,6 +204,8 @@ To release a new version of the plugin, you need to:
 1. Run action `Update Plugin Version` - this will create PR with version upgrade in all necessary places.
 2. Get PR approved and merge it. Actions `Create GH Release` and `Release plugin` will be triggered automatically on merge.
 
+**WordPress.org asset size limits:** assets in `.wordpress-org/` are silently ignored by WordPress.org if oversized — icons (`icon-256x256.*`, `icon-128x128.*`, `icon.svg`) must be **under 1 MB**, banners under 4 MB, screenshots under 10 MB. An oversized icon results in the auto-generated "geopattern" placeholder being shown instead. Accepted icon formats: png, jpg, gif or svg.
+
 ## Creating a plugin zip per environment
 
 Use `zip_plugin.sh` to build an installable zip for a specific environment. From the repo root:
@@ -223,6 +225,10 @@ Where `<env>` is one of:
 The script copies the `omnisend` plugin directory (excluding `node_modules`), rewrites production domains to the selected environment, and packages the result. For `dev` and `test`, asset versions in `build/*.asset.php` are also suffixed with `-<env>` so browsers pick up the rewritten bundles.
 
 Build frontend assets first when needed (`npm run build` in the `omnisend` directory) before creating the zip.
+
+### Test zip in Google Cloud Storage
+
+The `Upload plugin to GCS` action builds `omnisend-test.zip` and uploads it to `gs://omnisend_testing_woocommerce/omnisend-test.zip`, where the polar-bear E2E tests install it from. It runs automatically on every push to `main`; to test a branch build instead, run the action manually on that branch (Actions → Upload plugin to GCS → Run workflow). The bucket always holds the most recently uploaded build.
 
 ## UI Changes
 

@@ -3,6 +3,9 @@ run-name: Upload plugin to GCS - ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   gcs:
