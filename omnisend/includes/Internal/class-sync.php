@@ -7,6 +7,7 @@
 
 namespace Omnisend\Internal;
 
+use Omnisend\SDK\V1\Client;
 use Omnisend\SDK\V1\Contact;
 use Omnisend\SDK\V1\Omnisend;
 
@@ -99,13 +100,43 @@ class Sync {
 			}
 		}
 
-		$response = Omnisend::get_client( OMNISEND_CORE_PLUGIN_NAME, OMNISEND_CORE_PLUGIN_VERSION )->create_contact( $contact );
+		$client = Omnisend::get_client( OMNISEND_CORE_PLUGIN_NAME, OMNISEND_CORE_PLUGIN_VERSION );
+		if ( ! self::user_owns_contact_with_email( $client, $user ) ) {
+			UserMetaData::mark_sync_error( $user->ID );
+			return '';
+		}
+
+		$response = $client->create_contact( $contact );
 		if ( $response->get_contact_id() ) {
-			UserMetaData::mark_synced( $user->ID );
+			UserMetaData::mark_synced( $user->ID, $response->get_contact_id() );
 		} else {
 			UserMetaData::mark_sync_error( $user->ID );
 		}
 
 		return $response->get_contact_id();
+	}
+
+	/**
+	 * Whether the user may write to the Omnisend contact registered under their email address.
+	 *
+	 * The write below upserts by email, so an address the user does not own would let them overwrite
+	 * someone else's contact. The contact this plugin synced for the user is bound in user meta; users
+	 * synced before the binding existed may adopt the contact found under their current email once,
+	 * everyone else's write to an already existing contact is refused.
+	 */
+	private static function user_owns_contact_with_email( Client $client, \WP_User $user ): bool {
+		$lookup       = $client->get_contact_by_email( $user->user_email );
+		$lookup_error = $lookup->get_wp_error();
+
+		if ( $lookup_error->has_errors() ) {
+			return ApiResponse::ERROR_NOT_FOUND === $lookup_error->get_error_code();
+		}
+
+		$bound_contact_id = UserMetaData::get_contact_id( $user->ID );
+		if ( '' !== $bound_contact_id ) {
+			return $bound_contact_id === $lookup->get_contact()->get_id();
+		}
+
+		return UserMetaData::has_synced( $user->ID );
 	}
 }
