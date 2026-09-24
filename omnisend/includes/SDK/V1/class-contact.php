@@ -379,6 +379,15 @@ class Contact {
 	}
 
 	/**
+	 * Gets contact id.
+	 *
+	 * @return string
+	 */
+	public function get_id(): string {
+		return (string) $this->id;
+	}
+
+	/**
 	 * Sets contact gender. It can be "m" or "f".
 	 *
 	 * @param $gender

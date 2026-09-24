@@ -10,6 +10,8 @@ function wp_test_reset_options(): void {
 	$GLOBALS['wp_test_transients'] = array();
 	$GLOBALS['wp_test_redirects']  = array();
 	$GLOBALS['wp_test_filters']    = array();
+	$GLOBALS['wp_test_users']      = array();
+	$GLOBALS['wp_test_user_meta']  = array();
 
 	$GLOBALS['wp_test_woocommerce_plugin_active']    = false;
 	$GLOBALS['wp_test_woocommerce_plugin_connected'] = false;
@@ -39,6 +41,50 @@ function delete_option( $option ) {
 
 function delete_metadata() {
 	return true;
+}
+
+if ( ! class_exists( 'WP_User' ) ) {
+	class WP_User {
+		public $ID;
+		public $user_email;
+
+		public function __construct( int $id = 0, string $email = '' ) {
+			$this->ID         = $id;
+			$this->user_email = $email;
+		}
+	}
+}
+
+function wp_test_add_user( WP_User $user ): void {
+	$GLOBALS['wp_test_users'][ $user->ID ] = $user;
+}
+
+function get_userdata( $user_id ) {
+	return $GLOBALS['wp_test_users'][ $user_id ] ?? false;
+}
+
+function get_user_meta( $user_id, $key = '', $single = false ) {
+	$meta = $GLOBALS['wp_test_user_meta'][ $user_id ] ?? array();
+
+	if ( '' === $key ) {
+		return $meta;
+	}
+
+	return array_key_exists( $key, $meta ) ? $meta[ $key ] : ( $single ? '' : array() );
+}
+
+function update_user_meta( $user_id, $key, $value ) {
+	$GLOBALS['wp_test_user_meta'][ $user_id ][ $key ] = $value;
+
+	return true;
+}
+
+function wp_clear_scheduled_hook( $hook ) {
+	return true;
+}
+
+function home_url() {
+	return 'https://example.com';
 }
 
 function current_user_can( $capability ) {
@@ -157,6 +203,10 @@ if ( ! defined( 'OMNISEND_CORE_OAUTH_ISSUER' ) ) {
 
 if ( ! defined( 'OMNISEND_CORE_OAUTH_CLIENT_NAME' ) ) {
 	define( 'OMNISEND_CORE_OAUTH_CLIENT_NAME', 'wordpress' );
+}
+
+if ( ! defined( 'OMNISEND_CORE_PLUGIN_NAME' ) ) {
+	define( 'OMNISEND_CORE_PLUGIN_NAME', 'Email Marketing by Omnisend' );
 }
 
 if ( ! defined( 'OMNISEND_CORE_PLUGIN_VERSION' ) ) {
