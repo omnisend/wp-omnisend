@@ -69,7 +69,6 @@ class Omnisend_Core_Bootstrap {
 		add_action( 'admin_notices', 'Omnisend_Core_Bootstrap::admin_notices' );
 		add_action( 'admin_menu', 'Omnisend_Core_Bootstrap::add_admin_menu' );
 		add_action( 'admin_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_admin_styles' );
-		add_action( 'wp_enqueue_scripts', 'Omnisend_Core_Bootstrap::load_omnisend_site_styles' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'Omnisend_Core_Bootstrap::add_links_in_plugin_settings' );
 
 		add_action( 'admin_init', 'Omnisend\Internal\Connection::handle_oauth_request' );
@@ -222,15 +221,6 @@ class Omnisend_Core_Bootstrap {
 		wp_enqueue_style(
 			'notice-styles.css',
 			plugin_dir_url( __FILE__ ) . 'styles/notice-styles.css',
-			array(),
-			OMNISEND_CORE_PLUGIN_VERSION,
-		);
-	}
-
-	public static function load_omnisend_site_styles(): void {
-		wp_enqueue_style(
-			'site-styles.css',
-			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css?' . time(),
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
