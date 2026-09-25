@@ -55,6 +55,11 @@ register_uninstall_hook( __FILE__, 'Omnisend_Core_Bootstrap::uninstall' );
 add_action( 'plugins_loaded', 'Omnisend_Core_Bootstrap::load' );
 
 class Omnisend_Core_Bootstrap {
+	// Hook suffixes of our two admin screens. Taken from the menu registration instead of rebuilt from the
+	// menu title, because WP sanitizes the title and that title carries the unread badge markup.
+	private static $settings_screen   = '';
+	private static $app_market_screen = '';
+
 	public static function load(): void {
 		self::load_react();
 		// Cron every minute only for short period of time (after connection) to sync WP users to Omnisend. After sync cron is disabled.
@@ -136,9 +141,9 @@ class Omnisend_Core_Bootstrap {
 		$omnisend_icon = plugin_dir_url( __FILE__ ) . 'assets/img/omnisend-logo.png';
 		$position      = 2;
 
-		add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
+		self::$settings_screen = add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $omnisend_icon, $position );
 		add_submenu_page( $menu_slug, $page_title, 'Home', $capability, $menu_slug, $function );
-		add_submenu_page(
+		self::$app_market_screen = add_submenu_page(
 			$menu_slug,
 			'Add-Ons',
 			'Add-Ons',
@@ -188,28 +193,35 @@ class Omnisend_Core_Bootstrap {
 		( ( ! Options::is_landing_page_visited() ) || ( $notification_state === NOTIFICATION_DELAYED && ( $current_time - $last_visit_time ) > Options::get_notification_delay_time() ) );
 	}
 
-	public static function load_omnisend_admin_styles(): void {
+	public static function load_omnisend_admin_styles( $hook_suffix ): void {
+		// Holds the admin menu icon rule, so it has to stay on every admin screen.
+		wp_enqueue_style(
+			'site-styles.css',
+			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css',
+			array(),
+			OMNISEND_CORE_PLUGIN_VERSION,
+		);
+
+		// The rest only styles our own pages. Loading it elsewhere leaks it into screens like the block editor.
+		if ( ! in_array( $hook_suffix, self::own_admin_screens(), true ) ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			'roboto.css',
-			plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css?' . time(),
+			plugin_dir_url( __FILE__ ) . 'assets/fonts/roboto/roboto.css',
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
 		wp_enqueue_style(
 			'styles.css',
-			plugin_dir_url( __FILE__ ) . 'styles/styles.css?' . time(),
-			array(),
-			OMNISEND_CORE_PLUGIN_VERSION,
-		);
-		wp_enqueue_style(
-			'site-styles.css',
-			plugin_dir_url( __FILE__ ) . 'styles/site-styles.css?' . time(),
+			plugin_dir_url( __FILE__ ) . 'styles/styles.css',
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
 		wp_enqueue_style(
 			'notice-styles.css',
-			plugin_dir_url( __FILE__ ) . 'styles/notice-styles.css?' . time(),
+			plugin_dir_url( __FILE__ ) . 'styles/notice-styles.css',
 			array(),
 			OMNISEND_CORE_PLUGIN_VERSION,
 		);
@@ -231,7 +243,7 @@ class Omnisend_Core_Bootstrap {
 		}
 
 		$screen = get_current_screen();
-		if ( $screen && ( $screen->id === 'toplevel_page_omnisend' || $screen->id === 'omnisend-email-marketing_page_omnisend-app-market' ) ) {
+		if ( $screen && in_array( $screen->id, self::own_admin_screens(), true ) ) {
 			echo '<style>[class*="notice"]:not([class*="components"], .omnisend-notice, .notice), .notice:not(.omnisend-notice) { display: none !important; }</style>';
 		}
 	}
@@ -268,7 +280,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/notices.asset.php';
-				if ( file_exists( $asset_file_page ) && ( 'toplevel_page_omnisend' === $suffix || self::normalize_menu_title_to_suffix() === $suffix ) ) {
+				if ( file_exists( $asset_file_page ) && in_array( $suffix, self::own_admin_screens(), true ) ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'notices-script',
@@ -287,7 +299,7 @@ class Omnisend_Core_Bootstrap {
 		add_action(
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
-				if ( 'toplevel_page_omnisend' !== $suffix ) {
+				if ( ! self::is_settings_screen( $suffix ) ) {
 					return;
 				}
 				wp_enqueue_script(
@@ -310,7 +322,7 @@ class Omnisend_Core_Bootstrap {
 				'admin_enqueue_scripts',
 				function ( $suffix ) {
 					$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/connected.asset.php';
-					if ( file_exists( $asset_file_page ) && 'toplevel_page_omnisend' === $suffix ) {
+					if ( file_exists( $asset_file_page ) && self::is_settings_screen( $suffix ) ) {
 						$assets = require_once $asset_file_page;
 						wp_enqueue_script(
 							'connected-script',
@@ -336,7 +348,7 @@ class Omnisend_Core_Bootstrap {
 			'admin_enqueue_scripts',
 			function ( $suffix ) {
 				$asset_file_page = plugin_dir_path( __FILE__ ) . 'build/appMarket.asset.php';
-				if ( file_exists( $asset_file_page ) && self::normalize_menu_title_to_suffix() === $suffix ) {
+				if ( file_exists( $asset_file_page ) && self::is_app_market_screen( $suffix ) ) {
 					$assets = require_once $asset_file_page;
 					wp_enqueue_script(
 						'omnisend-app-market-script',
@@ -353,9 +365,17 @@ class Omnisend_Core_Bootstrap {
 		);
 	}
 
-	// when menu title is changed, this function should be updated or checked as well.
-	private static function normalize_menu_title_to_suffix(): string {
-		return str_replace( ' ', '-', strtolower( OMNISEND_MENU_TITLE ) ) . '_page_omnisend-app-market';
+	// The screens our assets are for. Everything else, block editor included, stays free of them.
+	private static function own_admin_screens(): array {
+		return array_filter( array( self::$settings_screen, self::$app_market_screen ) );
+	}
+
+	private static function is_settings_screen( $hook_suffix ): bool {
+		return ! empty( self::$settings_screen ) && self::$settings_screen === $hook_suffix;
+	}
+
+	private static function is_app_market_screen( $hook_suffix ): bool {
+		return ! empty( self::$app_market_screen ) && self::$app_market_screen === $hook_suffix;
 	}
 
 	public static function is_omnisend_woocommerce_plugin_active(): bool {
