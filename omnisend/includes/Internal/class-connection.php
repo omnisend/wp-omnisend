@@ -115,7 +115,7 @@ class Connection {
 	 *
 	 * @param string $required_permission Permission the rejected request needed, when known.
 	 */
-	private static function get_connection_error_message( WP_Error $error, string $required_permission = '' ): string {
+	public static function get_connection_error_message( WP_Error $error, string $required_permission = '' ): string {
 		switch ( $error->get_error_code() ) {
 			case ApiResponse::ERROR_UNAUTHORIZED:
 				return 'Omnisend rejected the authorization of this site. Please try connecting the store again.';
@@ -368,9 +368,19 @@ class Connection {
 
 		Options::set_brand_id( $brand['brandID'] );
 		Options::set_store_connected();
+		self::reset_contact_sync();
 		self::schedule_contact_sync();
 
 		return '';
+	}
+
+	/**
+	 * A working connection is a chance to recover contacts the sync gave up on earlier and to
+	 * retire a sync error notice the connection just fixed.
+	 */
+	private static function reset_contact_sync(): void {
+		UserMetaData::clear_all_sync_errors();
+		Options::clear_sync_error_notice();
 	}
 
 	private static function finish_oauth_request( string $error_message ): void {
@@ -440,6 +450,7 @@ class Connection {
 		Options::set_api_key( $api_key );
 		Options::set_brand_id( $response['brandID'] );
 		Options::set_store_connected();
+		self::reset_contact_sync();
 	}
 
 	/**

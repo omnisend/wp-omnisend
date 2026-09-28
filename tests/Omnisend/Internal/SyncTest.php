@@ -126,13 +126,124 @@ final class SyncTest extends TestCase
         $this->assertSame(2, $this->request_count('POST'));
     }
 
-    public function test_lookup_failure_does_not_write(): void
+    public function test_lookup_failure_is_retryable(): void
     {
         WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, 'server error'));
 
         Sync::identify_user_by_id(self::USER_ID);
 
-        $this->assertSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertNotSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertSame(1, UserMetaData::get_sync_attempts(self::USER_ID));
+        $this->assertGreaterThan(time(), UserMetaData::get_next_sync_attempt(self::USER_ID));
         $this->assertSame(0, $this->request_count('POST'));
+    }
+
+    public function test_invalid_email_is_skipped_permanently(): void
+    {
+        wp_test_add_user(new WP_User(self::USER_ID, 'not-an-email'));
+
+        Sync::identify_user_by_id(self::USER_ID);
+
+        $this->assertSame('SKIPPED', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertSame(0, $this->request_count('GET'));
+    }
+
+    public function test_server_error_on_create_leaves_the_user_retryable_and_keeps_the_cron(): void
+    {
+        $this->queue_lookup_not_found();
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, 'server error'));
+
+        Sync::sync_contacts();
+
+        $this->assertNotSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertSame(1, UserMetaData::get_sync_attempts(self::USER_ID));
+        $this->assertGreaterThan(time(), UserMetaData::get_next_sync_attempt(self::USER_ID));
+        $this->assertEmpty($GLOBALS['wp_test_cron']['cleared']);
+    }
+
+    public function test_server_error_reschedules_the_cron_when_it_is_not_scheduled(): void
+    {
+        wp_test_set_next_scheduled(OMNISEND_CORE_CRON_SYNC_CONTACT, false);
+
+        $this->queue_lookup_not_found();
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, 'server error'));
+
+        Sync::sync_contacts();
+
+        $this->assertNotEmpty($GLOBALS['wp_test_cron']['scheduled']);
+    }
+
+    public function test_forbidden_create_shows_an_admin_notice_and_stays_retryable(): void
+    {
+        $this->queue_lookup_not_found();
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(403, '{"title":"Forbidden","detail":"Missing contacts.write scope."}'));
+
+        Sync::sync_contacts();
+
+        $this->assertStringContainsString('missing permissions (contacts.write)', Options::get_sync_error_notice());
+        $this->assertStringContainsString('connect again', Options::get_sync_error_notice());
+        $this->assertNotSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+    }
+
+    public function test_successful_sync_clears_the_admin_notice(): void
+    {
+        Options::set_sync_error_notice('Omnisend rejected this request because of missing permissions.');
+
+        $this->queue_lookup_not_found();
+        $this->queue_write(self::CONTACT_ID);
+
+        Sync::sync_contacts();
+
+        $this->assertSame('', Options::get_sync_error_notice());
+    }
+
+    public function test_retry_exhaustion_marks_the_user_as_error(): void
+    {
+        update_user_meta(self::USER_ID, UserMetaData::SYNC_ATTEMPTS, 4);
+
+        $this->queue_lookup_not_found();
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(500, 'server error'));
+
+        Sync::sync_contacts();
+
+        $this->assertSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertSame(0, UserMetaData::get_sync_attempts(self::USER_ID));
+        $this->assertSame(0, UserMetaData::get_next_sync_attempt(self::USER_ID));
+    }
+
+    public function test_user_awaiting_retry_is_not_attempted_and_does_not_clear_the_cron(): void
+    {
+        update_user_meta(self::USER_ID, UserMetaData::SYNC_ATTEMPTS, 1);
+        UserMetaData::set_next_sync_attempt(self::USER_ID, time() + 300);
+
+        WP_Http_Test_Stub::queue(WP_Http_Test_Stub::response(200, array('contacts' => array())));
+
+        Sync::sync_contacts();
+
+        $this->assertSame(0, $this->request_count('GET'));
+        $this->assertSame(0, $this->request_count('POST'));
+        $this->assertEmpty($GLOBALS['wp_test_cron']['cleared']);
+    }
+
+    public function test_sync_contacts_clears_the_cron_when_nothing_is_pending(): void
+    {
+        $this->queue_lookup_not_found();
+        $this->queue_write(self::CONTACT_ID);
+
+        Sync::sync_contacts();
+        Sync::sync_contacts();
+
+        $this->assertSame(array(OMNISEND_CORE_CRON_SYNC_CONTACT), $GLOBALS['wp_test_cron']['cleared']);
+    }
+
+    public function test_clear_all_sync_errors_returns_given_up_users_to_the_queue(): void
+    {
+        update_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, 'ERROR');
+        update_user_meta(self::USER_ID, UserMetaData::SYNC_ATTEMPTS, 5);
+
+        UserMetaData::clear_all_sync_errors();
+
+        $this->assertSame('', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertSame(0, UserMetaData::get_sync_attempts(self::USER_ID));
     }
 }

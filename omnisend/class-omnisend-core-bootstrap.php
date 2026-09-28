@@ -253,6 +253,11 @@ class Omnisend_Core_Bootstrap {
 			echo '<div class="notice notice-error omnisend-notice"><p>If you are using WooCommerce, we strongly recommend starting with the <a href="https://wordpress.org/plugins/omnisend-connect/" target="_blank"><strong>Omnisend for WooCommerce</strong></a> plugin. Install it and follow the instructions.</p></div>';
 		}
 
+		$sync_error_notice = Options::get_sync_error_notice();
+		if ( Options::is_connected() && '' !== $sync_error_notice ) {
+			echo '<div class="notice notice-error omnisend-notice"><p>' . esc_html( $sync_error_notice ) . '</p></div>';
+		}
+
 		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 			$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			if ( strpos( $request_uri, '/wp-admin/admin.php?page=omnisend' ) !== false && self::is_hostinger_plugin_active() ) {
