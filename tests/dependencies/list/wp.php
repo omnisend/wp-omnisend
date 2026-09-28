@@ -12,6 +12,11 @@ function wp_test_reset_options(): void {
 	$GLOBALS['wp_test_filters']    = array();
 	$GLOBALS['wp_test_users']      = array();
 	$GLOBALS['wp_test_user_meta']  = array();
+	$GLOBALS['wp_test_cron']       = array(
+		'next_scheduled' => array(),
+		'scheduled'      => array(),
+		'cleared'        => array(),
+	);
 
 	$GLOBALS['wp_test_woocommerce_plugin_active']    = false;
 	$GLOBALS['wp_test_woocommerce_plugin_connected'] = false;
@@ -39,7 +44,31 @@ function delete_option( $option ) {
 	return true;
 }
 
-function delete_metadata() {
+function delete_metadata( $meta_type, $object_id, $meta_key, $meta_value = '', $delete_all = false ) {
+	if ( ! $delete_all ) {
+		unset( $GLOBALS['wp_test_user_meta'][ $object_id ][ $meta_key ] );
+
+		return true;
+	}
+
+	foreach ( array_keys( $GLOBALS['wp_test_user_meta'] ) as $user_id ) {
+		if ( ! array_key_exists( $meta_key, $GLOBALS['wp_test_user_meta'][ $user_id ] ) ) {
+			continue;
+		}
+
+		if ( '' !== $meta_value && (string) $GLOBALS['wp_test_user_meta'][ $user_id ][ $meta_key ] !== (string) $meta_value ) {
+			continue;
+		}
+
+		unset( $GLOBALS['wp_test_user_meta'][ $user_id ][ $meta_key ] );
+	}
+
+	return true;
+}
+
+function delete_user_meta( $user_id, $meta_key ) {
+	unset( $GLOBALS['wp_test_user_meta'][ $user_id ][ $meta_key ] );
+
 	return true;
 }
 
@@ -57,6 +86,84 @@ if ( ! class_exists( 'WP_User' ) ) {
 
 function wp_test_add_user( WP_User $user ): void {
 	$GLOBALS['wp_test_users'][ $user->ID ] = $user;
+}
+
+/**
+ * Emulates the parts of WP_User_Query the sync uses: number and the meta_query clause types
+ * NOT EXISTS and <= NUMERIC, including nested OR groups.
+ */
+if ( ! class_exists( 'WP_User_Query' ) ) {
+	class WP_User_Query {
+		private $args;
+
+		public function __construct( $args = array() ) {
+			$this->args = $args;
+		}
+
+		public function get_results() {
+			$users = $GLOBALS['wp_test_users'];
+
+			if ( ! empty( $this->args['meta_query'] ) ) {
+				$users = array_filter(
+					$users,
+					function ( $user ) {
+						return $this->matches_meta_query( $user, $this->args['meta_query'] );
+					}
+				);
+			}
+
+			if ( isset( $this->args['number'] ) ) {
+				$users = array_slice( $users, 0, $this->args['number'], true );
+			}
+
+			return array_values( $users );
+		}
+
+		private function matches_meta_query( $user, $query ) {
+			$clauses = array_filter( $query, 'is_int', ARRAY_FILTER_USE_KEY );
+
+			if ( ! empty( $query['relation'] ) && 'OR' === strtoupper( $query['relation'] ) ) {
+				foreach ( $clauses as $clause ) {
+					if ( $this->matches_clause( $user, $clause ) ) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			foreach ( $clauses as $clause ) {
+				if ( ! $this->matches_clause( $user, $clause ) ) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private function matches_clause( $user, $clause ) {
+			if ( ! empty( $clause['relation'] ) ) {
+				return $this->matches_meta_query( $user, $clause );
+			}
+
+			$meta   = $GLOBALS['wp_test_user_meta'][ $user->ID ] ?? array();
+			$compare = strtoupper( $clause['compare'] ?? '' );
+
+			if ( 'NOT EXISTS' === $compare ) {
+				return ! array_key_exists( $clause['key'], $meta );
+			}
+
+			if ( ! array_key_exists( $clause['key'], $meta ) ) {
+				return false;
+			}
+
+			if ( '<=' === $compare ) {
+				return (float) $meta[ $clause['key'] ] <= (float) $clause['value'];
+			}
+
+			return true;
+		}
+	}
 }
 
 function get_userdata( $user_id ) {
@@ -80,7 +187,13 @@ function update_user_meta( $user_id, $key, $value ) {
 }
 
 function wp_clear_scheduled_hook( $hook ) {
+	$GLOBALS['wp_test_cron']['cleared'][] = $hook;
+
 	return true;
+}
+
+function wp_test_set_next_scheduled( $hook, $timestamp ) {
+	$GLOBALS['wp_test_cron']['next_scheduled'][ $hook ] = $timestamp;
 }
 
 function home_url() {
@@ -174,10 +287,18 @@ function rest_ensure_response( $response ) {
 }
 
 function wp_next_scheduled( $hook ) {
-	return time();
+	return array_key_exists( $hook, $GLOBALS['wp_test_cron']['next_scheduled'] )
+		? $GLOBALS['wp_test_cron']['next_scheduled'][ $hook ]
+		: time();
 }
 
 function wp_schedule_event( $timestamp, $recurrence, $hook ) {
+	$GLOBALS['wp_test_cron']['scheduled'][] = array(
+		'timestamp'  => $timestamp,
+		'recurrence' => $recurrence,
+		'hook'       => $hook,
+	);
+
 	return true;
 }
 

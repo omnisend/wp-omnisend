@@ -31,6 +31,7 @@ class Options {
 	private const OPTION_OAUTH_ACCESS_TOKEN              = 'omni_send_core_oauth_access_token';
 	private const OPTION_OAUTH_REFRESH_TOKEN             = 'omni_send_core_oauth_refresh_token';
 	private const OPTION_OAUTH_TOKEN_EXPIRES_AT          = 'omni_send_core_oauth_token_expires_at';
+	private const OPTION_SYNC_ERROR_NOTICE               = 'omni_send_core_sync_error_notice';
 
 	public static function get_api_key(): string {
 		$api_key = get_option( self::OPTION_API_KEY );
@@ -182,6 +183,23 @@ class Options {
 		return boolval( get_option( self::OPTION_LANDING_PAGE_VISITED ) );
 	}
 
+	/**
+	 * A sync failure the administrator can act on, shown until a contact sync succeeds again.
+	 */
+	public static function set_sync_error_notice( string $message ): bool {
+		return update_option( self::OPTION_SYNC_ERROR_NOTICE, $message );
+	}
+
+	public static function get_sync_error_notice(): string {
+		$notice = get_option( self::OPTION_SYNC_ERROR_NOTICE );
+
+		return is_string( $notice ) ? $notice : '';
+	}
+
+	public static function clear_sync_error_notice(): bool {
+		return delete_option( self::OPTION_SYNC_ERROR_NOTICE );
+	}
+
 	public static function disconnect(): void {
 		delete_option( self::OPTION_API_KEY );
 		delete_option( self::OPTION_AUTH_MODE );
@@ -193,7 +211,10 @@ class Options {
 		delete_option( self::OPTION_LANDING_PAGE_VISITED );
 		delete_option( self::OPTION_LANDING_PAGE_VISIT_LAST_TIME );
 		delete_option( self::OPTION_LANDING_PAGE_NOTIFICATION_STATE );
+		delete_option( self::OPTION_SYNC_ERROR_NOTICE );
 		delete_metadata( 'user', '0', UserMetaData::LAST_SYNC, '', true );
+		delete_metadata( 'user', '0', UserMetaData::SYNC_ATTEMPTS, '', true );
+		delete_metadata( 'user', '0', UserMetaData::NEXT_SYNC_ATTEMPT, '', true );
 	}
 
 	public static function delete_all(): void {
