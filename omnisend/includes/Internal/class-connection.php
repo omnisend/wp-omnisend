@@ -87,13 +87,6 @@ class Connection {
 	}
 
 	/**
-	 * @return array|WP_Error Brand data or an error describing the transport, status or body failure.
-	 */
-	private static function get_account_data( $api_key ) {
-		return self::get_brand_data( ApiRequest::api_key_authorization( $api_key ) );
-	}
-
-	/**
 	 * @param string $authorization Authorization header value of the credential the store is connected with.
 	 *
 	 * @return array|WP_Error Brand data or an error describing the transport, status or body failure.
@@ -416,30 +409,6 @@ class Connection {
 		if ( ! wp_next_scheduled( OMNISEND_CORE_CRON_SYNC_CONTACT ) && ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_connected() ) {
 			wp_schedule_event( time(), OMNISEND_CORE_CRON_SCHEDULE_EVERY_MINUTE, OMNISEND_CORE_CRON_SYNC_CONTACT );
 		}
-	}
-
-	public static function connect_with_omnisend_for_woo_plugin(): void {
-		if ( Options::is_connected() ) {
-			return; // Already connected.
-		}
-
-		if ( ! Omnisend_Core_Bootstrap::is_omnisend_woocommerce_plugin_active() ) {
-			return;
-		}
-
-		$api_key = get_option( OMNISEND_CORE_WOOCOMMERCE_PLUGIN_API_KEY_OPTION );
-		if ( ! $api_key ) {
-			return;
-		}
-
-		$response = self::get_account_data( $api_key );
-		if ( is_wp_error( $response ) || empty( $response['brandID'] ) ) {
-			return;
-		}
-
-		Options::set_api_key( $api_key );
-		Options::set_brand_id( $response['brandID'] );
-		Options::set_store_connected();
 	}
 
 	/**
