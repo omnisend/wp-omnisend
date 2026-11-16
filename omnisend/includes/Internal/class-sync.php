@@ -32,6 +32,23 @@ class Sync {
 	}
 
 	/**
+	 * A user synced before the contact binding existed may adopt the contact under their email only while
+	 * that email stays the same, so an email change drops the legacy sync mark.
+	 *
+	 * @param int            $user_id
+	 * @param \WP_User|mixed $old_user_data
+	 * @return void
+	 */
+	public static function identify_user_on_profile_update( $user_id, $old_user_data = null ): void {
+		$user = get_userdata( $user_id );
+		if ( $user && $old_user_data instanceof \WP_User && strtolower( $old_user_data->user_email ) !== strtolower( $user->user_email ) && '' === UserMetaData::get_contact_id( $user_id ) ) {
+			UserMetaData::clear_sync( $user_id );
+		}
+
+		self::identify_user_by_id( $user_id );
+	}
+
+	/**
 	 * @param int $limit number of users to sync
 	 */
 	public static function sync_contacts( int $limit = 100 ): void {

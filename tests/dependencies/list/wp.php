@@ -79,6 +79,12 @@ function update_user_meta( $user_id, $key, $value ) {
 	return true;
 }
 
+function delete_user_meta( $user_id, $key ) {
+	unset( $GLOBALS['wp_test_user_meta'][ $user_id ][ $key ] );
+
+	return true;
+}
+
 function wp_clear_scheduled_hook( $hook ) {
 	return true;
 }

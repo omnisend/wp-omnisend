@@ -135,4 +135,50 @@ final class SyncTest extends TestCase
         $this->assertSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
         $this->assertSame(0, $this->request_count('POST'));
     }
+
+    public function test_previously_synced_user_cannot_adopt_existing_contact_after_email_change(): void
+    {
+        update_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, gmdate(DATE_ATOM));
+
+        $this->queue_lookup_found('victim-contact');
+
+        Sync::identify_user_on_profile_update(self::USER_ID, new WP_User(self::USER_ID, 'old@example.com'));
+
+        $this->assertSame('ERROR', get_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, true));
+        $this->assertSame('', UserMetaData::get_contact_id(self::USER_ID));
+        $this->assertSame(0, $this->request_count('POST'));
+
+        $this->queue_lookup_found('victim-contact');
+
+        Sync::identify_user_by_id(self::USER_ID);
+
+        $this->assertSame('', UserMetaData::get_contact_id(self::USER_ID));
+        $this->assertSame(0, $this->request_count('POST'));
+    }
+
+    public function test_previously_synced_user_email_change_to_new_address_binds_new_contact(): void
+    {
+        update_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, gmdate(DATE_ATOM));
+
+        $this->queue_lookup_not_found();
+        $this->queue_write('new-contact');
+
+        Sync::identify_user_on_profile_update(self::USER_ID, new WP_User(self::USER_ID, 'old@example.com'));
+
+        $this->assertSame('new-contact', UserMetaData::get_contact_id(self::USER_ID));
+        $this->assertSame(2, $this->request_count('POST'));
+    }
+
+    public function test_previously_synced_user_profile_update_without_email_change_adopts_contact(): void
+    {
+        update_user_meta(self::USER_ID, UserMetaData::LAST_SYNC, gmdate(DATE_ATOM));
+
+        $this->queue_lookup_found('legacy-contact');
+        $this->queue_write('legacy-contact');
+
+        Sync::identify_user_on_profile_update(self::USER_ID, new WP_User(self::USER_ID, self::EMAIL));
+
+        $this->assertSame('legacy-contact', UserMetaData::get_contact_id(self::USER_ID));
+        $this->assertSame(2, $this->request_count('POST'));
+    }
 }

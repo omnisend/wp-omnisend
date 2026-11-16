@@ -30,6 +30,10 @@ class UserMetaData {
 		return is_string( $last_sync ) && '' !== $last_sync && 'ERROR' !== $last_sync && 'SKIPPED' !== $last_sync;
 	}
 
+	public static function clear_sync( $user_id ) {
+		delete_user_meta( $user_id, self::LAST_SYNC );
+	}
+
 	public static function mark_sync_error( $user_id ) {
 		update_user_meta( $user_id, self::LAST_SYNC, 'ERROR' );
 	}

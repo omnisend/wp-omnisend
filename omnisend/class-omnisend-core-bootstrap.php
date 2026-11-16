@@ -4,7 +4,7 @@
  *
  * Plugin Name: Newsletters, Email Marketing, SMS and Popups by Omnisend
  * Description: Omnisend main plugin that enables integration with Omnisend.
- * Version: 1.9.1
+ * Version: 1.9.2
  * Requires PHP: 7.4
  * Author: Omnisend
  * Author URI: https://www.omnisend.com
@@ -24,7 +24,7 @@ use Omnisend\Internal\Connection;
 
 defined( 'ABSPATH' ) || die( 'no direct access' );
 
-const OMNISEND_CORE_PLUGIN_VERSION = '1.9.1';
+const OMNISEND_CORE_PLUGIN_VERSION = '1.9.2';
 const OMNISEND_CORE_SETTINGS_PAGE  = 'omnisend';
 const OMNISEND_CORE_PLUGIN_NAME    = 'Email Marketing by Omnisend';
 const OMNISEND_MENU_TITLE          = 'Omnisend Email Marketing';
@@ -84,7 +84,7 @@ class Omnisend_Core_Bootstrap {
 				10,
 				2
 			);
-			add_action( 'profile_update', 'Omnisend\Internal\Sync::identify_user_by_id' );
+			add_action( 'profile_update', 'Omnisend\Internal\Sync::identify_user_on_profile_update', 10, 2 );
 
 			add_action( OMNISEND_CORE_CRON_SYNC_CONTACT, 'Omnisend\Internal\Sync::sync_contacts' );
 		}
