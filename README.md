@@ -1,3 +1,4 @@
+# testas
 # Omnisend Core Plugin
 
 [Omnisend](https://wordpress.org/plugins/omnisend/) is WordPress plugin that enables to use [Omnisend marketing automation tool](https://www.omnisend.com/) features
