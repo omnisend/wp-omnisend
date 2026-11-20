@@ -203,7 +203,7 @@ To release a new version of the plugin, you need to:
 
 1. Run action `Update Plugin Version` - this will create PR with version upgrade in all necessary places.
 2. Get PR approved and merge it. Action `Create GH Release` will create the tag and GitHub release automatically on merge.
-3. Run action `Release plugin manually` from the new tag (select it in "Use workflow from") to publish to WordPress.org.
+3. Run action `Release plugin` from the new tag (select it in "Use workflow from") to publish to WordPress.org.
 
 **WordPress.org asset size limits:** assets in `.wordpress-org/` are silently ignored by WordPress.org if oversized — icons (`icon-256x256.*`, `icon-128x128.*`, `icon.svg`) must be **under 1 MB**, banners under 4 MB, screenshots under 10 MB. An oversized icon results in the auto-generated "geopattern" placeholder being shown instead. Accepted icon formats: png, jpg, gif or svg.
 
