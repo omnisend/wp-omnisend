@@ -197,6 +197,20 @@ Run test locally:
 ./vendor/bin/phpunit tests/Omnisend/
 ```
 
+### Integration tests
+
+`tests/Integration` runs the plugin inside a real WordPress (the readme's `Tested up to` version) with MySQL. Omnisend API calls are answered by `HttpStub`; any request without a queued response fails the test.
+
+Tools needed: php with `mysqli`, composer, git, docker.
+
+```shell
+composer test:integration
+```
+
+This starts a `mysql:8.0` container on port 33306 (`DB_IMAGE`, `DB_PORT` override), installs WordPress into `.wordpress-develop/` (`WP_VERSION` overrides the version) and runs PHPUnit; extra arguments go to PHPUnit, e.g. `composer test:integration -- --filter PluginLoadTest`.
+
+In CI the tests run only manually: Actions → Integration Tests → Run workflow on the branch, or `gh workflow run integration.yml --ref <branch>`.
+
 ## Plugin release
 
 To release a new version of the plugin, you need to:

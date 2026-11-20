@@ -1,0 +1,63 @@
+name: Integration Tests
+run-name: Integration Tests 🔀 ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      wp-version:
+        description: 'WordPress version (e.g. 7.0). Empty = "Tested up to" from omnisend/readme.txt'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  PHPUnit:
+    name: Integration (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['7.4', '8.4']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_tests
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mysqli
+          coverage: none
+
+      - name: Install WordPress test suite
+        run: tests/Integration/bin/install-wp.sh
+        env:
+          WP_VERSION: ${{ inputs.wp-version }}
+          DB_NAME: wordpress_tests
+          DB_USER: root
+          DB_PASSWORD: root
+          DB_HOST: 127.0.0.1:3306
+
+      - name: Install dependencies
+        run: composer install --working-dir=tests/Integration --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: tests/Integration/vendor/bin/phpunit -c tests/Integration/phpunit.xml.dist
