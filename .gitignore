@@ -26,3 +26,8 @@ composer.phar
 
 omnisend/node_modules/
 /node_modules
+
+# WordPress integration tests
+/.wordpress-develop/
+/tests/Integration/vendor/
+/tests/Integration/.phpunit.result.cache

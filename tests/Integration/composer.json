@@ -1,0 +1,14 @@
+{
+    "name": "omnisend/wp-omnisend-integration-tests",
+    "description": "WordPress integration tests for the Omnisend Core plugin",
+    "license": "proprietary",
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "yoast/phpunit-polyfills": "^1.1"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.0"
+        }
+    }
+}
