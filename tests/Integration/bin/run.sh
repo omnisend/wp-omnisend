@@ -7,9 +7,13 @@ container="omnisend-wp-integration-db"
 port="${DB_PORT:-33306}"
 image="${DB_IMAGE:-mysql:8.0}"
 
-if ! docker ps --format '{{.Names}}' | grep -qx "$container"; then
+config="$image:$port"
+running_config="$(docker inspect -f '{{if .State.Running}}{{index .Config.Labels "omnisend.config"}}{{end}}' "$container" 2>/dev/null || true)"
+
+if [ "$running_config" != "$config" ]; then
 	docker rm -f "$container" >/dev/null 2>&1 || true
-	docker run -d --name "$container" -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wordpress_tests \
+	docker run -d --name "$container" --label "omnisend.config=$config" \
+		-e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wordpress_tests \
 		-p "127.0.0.1:$port:3306" "$image" >/dev/null
 fi
 
